@@ -1,0 +1,47 @@
+flowchart TB
+    A[Today<br/>Planning Pulse] --> B[Foreground decision]
+    A --> C[Agent work in progress]
+    A --> D[This week]
+
+    E[Vision] --> F[Vision Readback]
+    F --> G[Confirmed priorities]
+    F --> H[Palette direction]
+    F --> I[Delegation preferences]
+
+    J[Places] --> K[Curated place selection]
+    K --> L[Place detail]
+    L --> M[Evidence and reality check]
+    L --> N[Request tour]
+    N --> O[Tour coordination]
+    O --> P[Tour brief and outcome]
+
+    Q[Plan] --> R[Decision Room]
+    Q --> S[Timeline]
+    Q --> T[Budget scenarios]
+    Q --> U[Documents and commitments]
+
+    V[Guests] --> W[Guest readiness]
+    V --> X[Website Studio]
+    V --> Y[Invites and communication]
+
+    Z[More] --> AA[Preferences and privacy]
+    Z --> AB[Connections]
+    Z --> AC[Activity and support]
+
+    B --> R
+    H --> K
+    I --> N
+    P --> R
+    R --> S
+    T --> R
+    U --> R
+    X --> Y
+
+    classDef primary fill:#F3F5FF,stroke:#5965C5,stroke-width:2px,color:#111;
+    classDef decision fill:#FFF8E7,stroke:#A06B00,stroke-width:2px,color:#281500;
+    classDef supporting fill:#E8F6EE,stroke:#2D8C62,stroke-width:2px,color:#102A1D;
+    classDef detail fill:#FDEFF1,stroke:#B8485B,stroke-width:2px,color:#30040A;
+    class A,E,J,Q,V,Z primary;
+    class B,F,K,R,W,AA decision;
+    class C,D,G,H,I,M,N,O,P,S,T,U,X,Y,AB,AC supporting;
+    class L detail;

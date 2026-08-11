@@ -1,0 +1,28 @@
+flowchart TB
+    A[VowOS is about to act] --> B{Money, or something<br/>that cannot be undone?}
+    B -->|Yes| C[Always comes back to you both.<br/>No setting reaches this branch.]
+    B -->|No| D{Does it leave VowOS<br/>or touch a third party?}
+
+    D -->|No| E[Acts and reports.<br/>Reversible, stays inside your plan.]
+    D -->|Yes| F{Your delegation level}
+
+    F -->|Propose only| G[Drafts it and holds it<br/>for your review]
+    F -->|Act and report| G
+    F -->|Act with standing approval| H{Covered by a scope<br/>you explicitly granted?}
+
+    H -->|Yes| I[Acts, then tells you,<br/>naming the scope it used]
+    H -->|No| G
+
+    G --> J[You see the exact recipients<br/>and the exact message first]
+    J --> K[Quiet receipt]
+    I --> K
+    E --> K
+
+    classDef start fill:#F3F5FF,stroke:#5965C5,stroke-width:2px,color:#111;
+    classDef decision fill:#FFF8E7,stroke:#A06B00,stroke-width:2px,color:#281500;
+    classDef supporting fill:#E8F6EE,stroke:#2D8C62,stroke-width:2px,color:#102A1D;
+    classDef guard fill:#FDEFF1,stroke:#B8485B,stroke-width:2px,color:#30040A;
+    class A start;
+    class B,D,F,H decision;
+    class E,G,I,J,K supporting;
+    class C guard;

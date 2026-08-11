@@ -1,0 +1,93 @@
+/*
+ * VowOS design tokens.
+ *
+ * GENERATED FILE - DO NOT EDIT.
+ * Source of truth: design-system/tokens.json
+ * Regenerate with: npm run tokens
+ * Token set version: 1.0.0
+ */
+
+:root {
+  /* Color */
+  --vow-color-porcelain: #FCFBF8;
+  --vow-color-paper: #F5F1EA;
+  --vow-color-ink: #1D1C1A;
+  --vow-color-ink-inverse: #FCFBF8;
+  --vow-color-ash: #6D6A66;
+  --vow-color-moss: #345A4A;
+  --vow-color-terracotta: #A95842;
+  --vow-color-terracotta-deep: #8E4635;
+  --vow-color-rose-clay: #DAB5A6;
+  --vow-color-mist-blue: #DDE7EC;
+  --vow-color-soft-gold: #D6B56F;
+  --vow-color-alert: #B53F3A;
+  --vow-color-hairline: #E7E1D6;
+  --vow-color-hairline-strong: #D5CCBC;
+  --vow-color-overlay: #1D1C1AA3;
+  --vow-color-focus: #1D1C1A;
+
+  /* Spacing scale */
+  --vow-space-1: 4px;
+  --vow-space-2: 8px;
+  --vow-space-3: 12px;
+  --vow-space-4: 16px;
+  --vow-space-5: 24px;
+  --vow-space-6: 32px;
+  --vow-space-7: 48px;
+  --vow-space-8: 64px;
+  --vow-space-9: 96px;
+
+  /* Corner radius */
+  --vow-radius-sm: 6px;
+  --vow-radius-input: 12px;
+  --vow-radius-button: 13px;
+  --vow-radius-media: 18px;
+  --vow-radius-card: 22px;
+  --vow-radius-surface: 24px;
+  --vow-radius-sheet: 28px;
+
+  /* Type families */
+  --vow-font-display: "Newsreader", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --vow-font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Type scale */
+  --vow-font-size-display: clamp(34px, 4.4vw, 54px);
+  --vow-font-size-display-small: clamp(28px, 3vw, 38px);
+  --vow-font-size-decision: clamp(22px, 2.2vw, 30px);
+  --vow-font-size-section-title: 19px;
+  --vow-font-size-body: 17px;
+  --vow-font-size-body-small: 15px;
+  --vow-font-size-meta: 13.5px;
+  --vow-font-size-label: 12.5px;
+
+  /* Line height */
+  --vow-line-height-display: 1.08;
+  --vow-line-height-title: 1.22;
+  --vow-line-height-body: 1.55;
+  --vow-line-height-meta: 1.45;
+
+  /* Letter spacing */
+  --vow-letter-spacing-display: -0.016em;
+  --vow-letter-spacing-title: -0.01em;
+  --vow-letter-spacing-label: 0.008em;
+
+  /* Motion */
+  --vow-motion-fast: 160ms;
+  --vow-motion-base: 180ms;
+  --vow-motion-slow: 240ms;
+  --vow-motion-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Elevation */
+  --vow-shadow-soft: 0 1px 2px rgba(29,28,26,0.035), 0 14px 34px -20px rgba(29,28,26,0.22);
+  --vow-shadow-lift: 0 2px 6px rgba(29,28,26,0.05), 0 22px 48px -24px rgba(29,28,26,0.30);
+
+  /* Layout */
+  --vow-layout-rail-width: 264px;
+  --vow-layout-content-width: 860px;
+  --vow-layout-wide-width: 1180px;
+  --vow-layout-max-width: 1280px;
+  --vow-layout-touch-target: 44px;
+
+  /* Derived: reduced-motion safe duration, overridden in app.css */
+  --vow-motion-scale: 1;
+}

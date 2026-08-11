@@ -1,0 +1,24 @@
+flowchart LR
+    A[Planning Pulse<br/>One important thing] --> B[Decision preview<br/>Recommendation and deadline]
+    B --> C[Decision Room<br/>Two real choices]
+    C --> D[Why it fits<br/>Vision, cost, practicality]
+    C --> E[Evidence<br/>Verified facts and unknowns]
+    C --> F[What happens next<br/>Clear action impact]
+    D --> G{Ready to decide?}
+    E --> G
+    F --> G
+    G -->|Not yet| H[Save question or ask VowOS]
+    H --> I[Agent follows up or researches]
+    I --> C
+    G -->|Yes| J[Specific approval]
+    J --> K[Quiet receipt<br/>What VowOS will do next]
+    K --> L[Planning Pulse updates]
+
+    classDef start fill:#F3F5FF,stroke:#5965C5,stroke-width:2px,color:#111;
+    classDef evidence fill:#E8F6EE,stroke:#2D8C62,stroke-width:2px,color:#102A1D;
+    classDef decision fill:#FFF8E7,stroke:#A06B00,stroke-width:2px,color:#281500;
+    classDef outcome fill:#FDEFF1,stroke:#B8485B,stroke-width:2px,color:#30040A;
+    class A,B,C start;
+    class D,E,F,H,I evidence;
+    class G,J decision;
+    class K,L outcome;

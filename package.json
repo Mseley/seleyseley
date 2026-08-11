@@ -1,0 +1,17 @@
+{
+  "name": "vowos-design-program",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "VowOS design program: tokens as code, a governed design system, and a working prototype of the six priority artifacts.",
+  "scripts": {
+    "tokens": "node design-system/build.mjs",
+    "check": "node design-system/build.mjs --check",
+    "bundle": "node scripts/bundle.mjs",
+    "build": "node design-system/build.mjs && node scripts/bundle.mjs",
+    "serve": "node scripts/serve.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

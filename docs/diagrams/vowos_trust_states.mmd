@@ -1,0 +1,30 @@
+flowchart LR
+    A[A fact arrives] --> B{Who stated it?}
+    B -->|The place, a vendor,<br/>or an official document| C[Confirmed<br/>with a timestamp]
+    B -->|A third party| D[Reported]
+    B -->|Nobody. The agent<br/>derived it from a pattern| E[Inferred]
+    B -->|Nobody, and we know it| F[Unknown]
+    Z[No state declared] -->|Never silently omitted| F
+
+    C --> G{Past its freshness<br/>window for its category?}
+    G -->|No| H["Verified by source on date"]
+    G -->|Yes, downgrade one level| D
+
+    D --> I["According to source,<br/>not yet confirmed"]
+    E --> J["Our estimate based on basis"]
+    F --> K["We have not confirmed this yet"]
+
+    H --> L[May appear in a<br/>decision surface]
+    I --> L
+    J --> L
+    K --> L
+    K --> M[Never renders a figure.<br/>A figure implies a source.]
+
+    classDef start fill:#F3F5FF,stroke:#5965C5,stroke-width:2px,color:#111;
+    classDef decision fill:#FFF8E7,stroke:#A06B00,stroke-width:2px,color:#281500;
+    classDef state fill:#E8F6EE,stroke:#2D8C62,stroke-width:2px,color:#102A1D;
+    classDef outcome fill:#FDEFF1,stroke:#B8485B,stroke-width:2px,color:#30040A;
+    class A,Z start;
+    class B,G decision;
+    class C,D,E,F state;
+    class H,I,J,K,L,M outcome;

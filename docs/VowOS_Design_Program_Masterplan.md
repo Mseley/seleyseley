@@ -1,0 +1,322 @@
+# VowOS Design Program Masterplan
+## From a strong visual direction to a system that holds
+
+**Status:** Masterplan, version 2.0
+**Supersedes:** Masterplan v1.0
+**Builds on:** Project VowOS UI and Experience Plan, v1.1
+**Purpose:** v1.0 audited the UI Plan and named six gaps. This version closes four of them in working code, specifies the remaining two as process, and records what building the thing taught us that no amount of specification would have.
+
+---
+
+## 0. How to read this document
+
+The UI Plan is the *what*. v1.0 of this masterplan was the *how it stays true*. This version is the *how it stays true, and here is the part that now runs*.
+
+Three kinds of statement appear here, and they are labelled, because a plan that does not distinguish them is how teams end up believing a specification is a system:
+
+| Marker | Meaning |
+|---|---|
+| **Built** | Exists as running code in this repository. A reader can execute it. |
+| **Specified** | Precisely defined here, not yet built. Someone still has to do it. |
+| **Deferred** | Deliberately not decided yet, with the reason and the trigger for deciding. |
+
+Nothing here contradicts the UI Plan. Where this document adds a rule, it cites the UI Plan section it extends.
+
+---
+
+## 1. What changed since v1.0
+
+v1.0's audit rated six dimensions as **Gap**. Their status now:
+
+| v1.0 gap | Status | Where it lives |
+|---|---|---|
+| Agent behavior and autonomy | **Built** | `prototype/js/model.js`, delegation model. Three levels, four grantable scopes, a closed registry of nine actions, live evaluation. Section 4 below. |
+| Engineering handoff and tokenization | **Built** | `design-system/tokens.json` plus `build.mjs`. Single source, generated CSS, drift check, contrast gate. Section 5 below. |
+| Trust data model (rated *solid but incomplete*) | **Built** | `prototype/js/model.js`, four states plus automatic staleness downgrade. Section 3 below. |
+| Research and validation | **Specified** | Section 7. Unchanged in substance from v1.0, because no research has run. |
+| Success metrics | **Specified** | Section 10. |
+| Governance and change control | **Built in part** | The token pipeline enforces the mechanical half. The human half, Section 11, is still process. |
+| Risk awareness | **Specified**, updated | Section 12, with two risks retired and two added from the build. |
+
+**The honest headline:** the load-bearing frameworks are real, the design system is real, and the six priority artifacts exist at high fidelity. Everything involving *other people* (research participants, metrics from real couples, a named accessibility owner) is still specification, because it cannot be built, only staffed.
+
+---
+
+## 2. Design principles
+
+The UI Plan's six principles (Section 2) hold unchanged. v1.0 added two. Building the system earned a third.
+
+### 2.7 Every trust claim has a machine-checkable source
+
+"Verified by the venue on June 8" is a promise, not a caption. If a fact shown as verified cannot be traced to a timestamped source in the data model, it must not use verified language. **Built:** `V.trust.resolve()` is the only path to an evidence line, and `V.trust.displayValue()` refuses to print a figure for an Unknown, because a figure implies a source.
+
+### 2.8 The agent's autonomy is disclosed, not just its output
+
+Users should never have to infer what VowOS may do on its own by watching what it did last time. **Built:** every delegation decision returns a plain-language reason, and that reason is rendered next to the action *before* it is taken, not after.
+
+### 2.9 A rule is executable or it is decoration
+
+This one is new, and it comes from the build. The UI Plan bans rose clay, mist blue, and soft gold as text colors. That ban survived exactly as long as someone remembered it. It is now three assertions in the contrast audit that are *required to fail*, so the ban breaks the build if a value is ever adjusted to make it passable.
+
+The general form: when a rule can be expressed as a check, expressing it as prose instead is a decision to let it rot. Not every rule can be checked. Those that can, must be.
+
+---
+
+## 3. Trust and evidence data model  **Built**
+
+Every fact the product surfaces resolves to exactly one of four states, and only these four, so the evidence vocabulary in UI Plan 11.3 stays honest at scale.
+
+| State | Definition | How it reads | Example in the prototype |
+|---|---|---|---|
+| **Confirmed** | Sourced directly from the venue, vendor, or an official document, with a timestamp | "Verified by The Orchard House on August 4." | Site fee of $34,200 |
+| **Reported** | Stated by a third party but not confirmed by the primary source | "According to a Hudson Valley venue directory, not yet confirmed." | A 22 percent service charge |
+| **Inferred** | Derived by the agent from a pattern, not stated by anyone | "Our estimate based on three comparable Hudson venues." | Maison 98's service charge |
+| **Unknown** | Actively not established, and the agent knows it | "We have not confirmed this yet. I asked on August 9 and expect an answer this week." | Whether outside catering is allowed |
+
+**Design rule, enforced in code:** a fact with no resolved state does not silently vanish and does not quietly render as a value. It resolves to Unknown and writes a console warning naming itself. An omission reads as confidence the product does not have.
+
+### 3.1 Staleness
+
+Every Confirmed fact carries an expected freshness window by category. Past that window it downgrades one level, toward Reported, without waiting for a user to notice a discrepancy.
+
+| Category | Window | Reasoning |
+|---|---:|---|
+| Availability | 14 days | A date can be taken by another couple any week |
+| Pricing | 90 days | Rate sheets move seasonally |
+| Policy | 180 days | Curfews and rules change slowly |
+| Capacity and capability | 365 days | Buildings rarely change size |
+| Contract | 365 days | Signed terms are stable until renegotiated |
+
+The prototype ships one deliberately stale fact so the mechanism is visible rather than theoretical: The Orchard House confirmed your date on July 20, which is 22 days before the prototype's fixed present, against a 14 day window. It renders as *"Confirmed by The Orchard House on July 20. Availability facts age after 14 days, so we will re-check before you commit."* No screen author wrote that sentence.
+
+### 3.2 What this model does not do yet  **Deferred**
+
+It does not model **contested** facts, where two sources disagree, nor **superseded** facts, where a Confirmed value is replaced by a newer Confirmed value and the history matters for a dispute. The prototype's correction scenario (a wrong service charge taken from a directory) is currently handled as narrative copy rather than as a state transition. Trigger for deciding: the first time a real vendor disputes a figure the product displayed.
+
+---
+
+## 4. Agent behavior and permission model  **Built**
+
+The UI Plan's agent-language table (11.3) shows the agent sending inquiries, following up, and proposing tour times. None of that is safe without an explicit permission model, because the calm tone of 11.3 describes an agent that overstepped exactly as well as one that did not.
+
+### 4.1 Delegation levels
+
+| Level | What the agent may do without asking again | What still requires explicit approval |
+|---|---|---|
+| **Propose only** | Draft a message, a shortlist, or a plan and hold it for review | Everything that leaves the product or touches a third party |
+| **Act with standing approval** | Act within a scope the couple has explicitly pre-approved | Anything outside that stated scope, any financial commitment |
+| **Act and report** | Fully reversible, zero-cost, zero-external-party actions only | Never extends to money, contracts, or communication with vendors or guests |
+
+### 4.2 Scopes
+
+Under "Act with standing approval," the couple grants named permissions, each stated in plain language before the agent acts on it:
+
+- Follow up once if a place has not replied in five days
+- Propose tour times to places you have saved
+- Ask a place for a fact we are missing, like a fee or a curfew
+- Send a first inquiry to a place you have not saved yet *(off by default)*
+
+### 4.3 The line that does not move
+
+**Money and irreversible commitments never resolve to allowed, at any level, under any scope.** This is a hard branch at the top of `evaluate()`, before level and scope are consulted, so it cannot be reached around by a future scope. In the product this reads as: *"Anything involving money or a commitment always comes back to you both, whatever your settings say."*
+
+### 4.4 The closed action registry
+
+Nine actions are declared. An action that is not declared cannot be performed. This is the structural answer to autonomy creep: a new capability requires a new registry entry, which is a visible diff, rather than accumulating as one reasonable-looking feature at a time.
+
+The Design system page in the prototype renders this registry evaluated live against the current settings, so the documentation of the permission model cannot describe a model the product does not have.
+
+### 4.5 The agent must be able to say it was wrong
+
+UI Plan 11.3's "gentle correction" covers misunderstanding *before* acting. This covers having already acted on wrong information, which for a product executing real communications is a when, not an if. The pattern states three things in order, following 11.5's error-state structure:
+
+1. **What happened.** "On August 6 I told you Maison 98 charges an 18 percent service fee. I took that from a directory listing, not from them."
+2. **What it affected.** "I have taken the figure out of your budget comparison."
+3. **What is being done, and the bound on the damage.** "I asked Maison 98 to confirm the real one. Nothing was sent to anyone and no money was committed based on the wrong number."
+
+The third clause is the one teams forget, and it is the one that determines whether the user's trust survives.
+
+---
+
+## 5. Design system governance and tokenization  **Built**
+
+| Layer | Owner | Format | Change process |
+|---|---|---|---|
+| Design tokens | Design systems lead | `design-system/tokens.json`, consumed by the build | Any change requires a documented reason and passes the contrast gate. `npm run check` fails on drift. |
+| Components | Shared design and engineering pair | `prototype/js/components.js`, each carrying its 11.2 design rule as a comment | A new component requires its design rule *before* build |
+| Copy and agent language | Content design lead | Rendered from one place per pattern | Any new situation requires the "avoid" column, not just the preferred language, so the pattern is falsifiable |
+
+**The rule that prevents drift:** nothing in UI Plan sections 3, 11, or 14 exists in two places with two values. `prototype/styles/tokens.css` is generated and carries a do-not-edit header. `app.css` uses no raw hex, spacing number, or duration.
+
+### 5.1 Standing findings from the contrast audit
+
+The audit is not decoration. It found something on the first run.
+
+**CF-01 — Terracotta is a fill, not a text color.** Terracotta measures 4.88:1 on porcelain and **4.48:1 on paper**, which is below the 4.5:1 AA minimum for body text. Since paper is the background of every decision surface, terracotta body copy on a decision surface would have failed AA. It is therefore cleared only as a button fill, a left rule, and large-text emphasis at 24px and above. Small text needing a warm accent uses ink or moss (6.89:1 on paper).
+
+This is precisely the class of error that ships when a palette is specified in prose and implemented by eye.
+
+**CF-02 — Porcelain and paper are close by design, so layering never relies on fill alone.** The two surfaces differ by 1.09:1. UI Plan 3.1 flagged the risk that they collapse on a low-quality panel in daylight. The resolution: **every paper surface carries a hairline border in addition to its fill.** Removing that border is a system change, not a visual preference. The same reasoning drove painting the desktop rail column on the shell rather than on the sticky rail element, so the column reads as continuous down a long page.
+
+---
+
+## 6. Content design system  **Specified**
+
+| Component | Content |
+|---|---|
+| Voice principles | Direct, dated, concrete, first person for the agent, never apologetic beyond what is warranted, never performing enthusiasm |
+| Terminology glossary | One approved term per concept. Always "hold," never "reservation" and "hold" interchangeably, so the product does not accumulate synonyms that quietly imply different commitment levels. The prototype already holds this line: a time is **proposed**, **held**, or **confirmed**, and those three words are never traded for each other. |
+| Number style | Small numbers are spelled out in agent sentences ("five inquiries," "three days from now"), figures are used for money and counts in tables. Implemented as `V.numberWord()` so the rule is applied rather than remembered. |
+| Sentence assembly | Formatted values that already end in a period, such as "5:30 p.m.", never take a second one. This sounds trivial and it produced a real defect during the build. |
+| Edge-case taxonomy | **Specified, not built.** Guest-provided content unsafe to publish; a vendor unresponsive past the follow-up window; a couple asking for something outside any delegation level; a Confirmed fact later found false. |
+| Localization notes | Which phrases are idiomatic English that will need rewriting, not translating. Flagged now because it is cheap now. |
+
+---
+
+## 7. Research and validation program  **Specified**
+
+The UI Plan 17.1 acceptance-test methods are the *instruments*. This is the *program*.
+
+| Phase | Timing | Method | What it validates |
+|---|---|---|---|
+| Generative | Before the priority artifacts are finalized | Contextual interviews with couples currently planning, both partners separately and together | Whether "calm agent" is the felt need, or the team's taste |
+| Evaluative, round one | Once Planning Pulse and Vision Readback exist | The 17.1 protocols, five to eight participants per test | Whether the five-second and "feels understood" claims hold under real use |
+| Evaluative, round two | Once Decision Room and Tour coordination exist | Moderated sessions recruiting couples who disagree on at least one real decision | Whether the disagreement handling de-escalates rather than performing neutrality |
+| Ongoing | Post-launch, quarterly | A rotating sample including at least one same-sex couple, one couple with family-contributor involvement, one couple planning within a tradition outside the design team's background, and one professional planner | Whether the inclusion claims are true in practice, not just in intent |
+
+**Recruiting rule:** every evaluative round includes at least one household where both partners are interviewed. The product's central differentiator, shared and non-surveilling planning, cannot be validated by interviewing one partner and assuming the other's experience.
+
+**A caution the prototype makes concrete.** The Decision Room is currently built on one disagreement scenario, written by the same people who designed the response to it. That is a demonstration, not evidence. Round two exists to find out whether real couples experience the held-open decision as respectful or as the product refusing to help.
+
+---
+
+## 8. Accessibility as a process  **Specified**, with a built floor
+
+UI Plan section 13's checklist stays. It needs a cadence and an owner to hold at scale.
+
+| Element | Specification |
+|---|---|
+| Owner | One named accessibility lead with authority to block a release, not just flag issues |
+| Cadence | Automated contrast and semantic checks on every build; a full manual screen-reader and keyboard pass before each priority artifact ships |
+| Blocking bar | Any regression against the Section 13 table blocks release. New features are not exempt because they are new. |
+| Real-user testing | At minimum one screen-reader user and one keyboard-only user in every evaluative round, not a separate accessibility track that runs later and less often |
+
+**What the build already enforces**, so the process starts above zero rather than at it:
+
+- Contrast is a build gate, not a review item. 21 pairs, measured, blocking.
+- Every state is carried by icon and wording as well as color.
+- Focus is visible, and it *survives a re-render*: the app records the focused control before rendering and restores it after, which is what makes the keyboard claim real rather than aspirational.
+- `prefers-reduced-motion` removes every transition. `prefers-contrast: more` strengthens borders and lifts metadata to full ink.
+- The skip link targets main, which takes programmatic focus on every navigation without painting an outline around the whole page.
+- Touch targets are 44px minimum, enforced by a token rather than per component.
+
+---
+
+## 9. Engineering handoff  **Built**
+
+| Step | Deliverable | Status |
+|---|---|---|
+| 1. Tokens as code | `tokens.json` is the literal source the frontend consumes. No manual re-entry of hex values or spacing numbers. | Built |
+| 2. Components with usage docs | Each component carries its design rule as a comment where it is implemented, not in a separate document engineers may not open. | Built |
+| 3. Copy from one source | Evidence sentences are written in exactly one function. A screen cannot compose its own. | Built for evidence; **specified** for the wider glossary |
+| 4. Visual QA gate | Side-by-side design-versus-build review against UI Plan section 15 before ship. | Specified |
+| 5. Figma parity | The token file is designed to be consumed by Figma as well as the codebase. That side does not exist yet. | **Deferred** until there is a Figma file worth binding |
+
+---
+
+## 10. Success metrics and guardrails  **Specified**
+
+| Metric type | Example | Why it matters here specifically |
+|---|---|---|
+| North star | Share of foreground decisions resolved within one week of surfacing | Tests whether "one meaningful action per moment" reduces time-to-decision, not just time-to-scroll |
+| Trust guardrail | Rate of Confirmed facts that later downgrade or are found wrong | If this climbs, "trust is visible" is eroding even while the UI still looks calm |
+| Calm guardrail | Support contacts citing confusion about agent actions | A rise means the delegation model is felt as opaque regardless of how the UI reads in design review |
+| Equity guardrail | Decision-approval split between partners in shared households | Tests "the relationship is shared" quantitatively |
+| **Anti-metric** | Do not optimize screen time, session count, or daily opens | A calm-agent product that couples open *less* because they no longer worry is working as intended. Treating reduced engagement as failure would contradict the product's own thesis. |
+
+---
+
+## 11. Governance model
+
+| Question | Answer |
+|---|---|
+| Who approves a new color, component, or agent-language pattern? | Design systems lead and content design lead jointly. Never a single-discipline unilateral change. |
+| Who approves a new agent capability? | Product lead and design lead jointly, with the action registry (Section 4.4) updated in the same change. Never a silent capability expansion. |
+| How does this document stay current? | The UI Plan and this masterplan are versioned together. Any UI Plan change affecting a Section 3 to 8 framework requires a corresponding update in the same release. |
+| What triggers a full review against UI Plan section 15? | Any priority artifact, any new workspace, and any change to the trust or delegation model. |
+| What does the build enforce without a human? | Token drift, contrast, and the ban on the three fill-only colors as text. |
+
+---
+
+## 12. Risk register
+
+**Retired since v1.0:**
+
+- *Trust UI outruns the trust data model.* The four-state model now ships before the evidence component, and the evidence component cannot be used without it.
+- *Design system forks under deadline pressure.* The manual step where drift starts has been removed; `npm run check` catches it.
+
+**Standing:**
+
+| Risk | Why it matters | Mitigation |
+|---|---|---|
+| Agent autonomy creep | Each expansion feels reasonable; the cumulative effect is an agent acting far beyond what any single approval covered | Closed action registry, joint sign-off, and the hard financial branch that no scope can reach around |
+| Calm aesthetic mistaken for calm product | A quiet UI can hide a confusing or overstepping agent as easily as it can express a well-run one | The calm and trust guardrail metrics, which are the check against this exact failure mode |
+| Inclusion claims untested against real diversity | A design team's default assumptions are invisible to that same team | The Section 7 recruiting rule as a standing requirement of every round |
+
+**New, from the build:**
+
+| Risk | Why it matters | Mitigation |
+|---|---|---|
+| The demonstration is mistaken for evidence | Every hard case in the prototype was authored by the same people who designed the response. It proves the system *can* express these situations, not that couples experience them well. | Section 7 round two exists for exactly this. Until it runs, no claim about how the Decision Room *feels* is supported. |
+| Generated imagery becomes a permanent crutch | The abstract compositions are the honest choice with no licensed photography, and they look intentional enough to be kept for the wrong reason | They carry a visible credit line. Real venue photography with rights and provenance replaces them the moment it exists. |
+
+---
+
+## 13. Phased roadmap
+
+| Phase | Focus | Status |
+|---|---|---|
+| **Foundation** | Trust data model and delegation levels as working systems before any priority artifact goes to high fidelity. Token pipeline. Generative research. | Frameworks and pipeline **done**. Generative research **not started**, and it is now the critical path. |
+| **Prove the system** | Build and evaluatively test the six priority artifacts in order. Accessibility cadence. Guardrail metrics dashboard. | Artifacts **built**. Testing, cadence, and dashboard **not started**. |
+| **Scale with governance** | Remaining workspaces under the governance model. Quarterly diverse-sample research. First full risk-register review against production data. | Not started. |
+
+**The sequencing risk worth naming:** the plan called for generative research *before* the priority artifacts were finalized, and the artifacts now exist without it. That was the right call for a prototype whose job is to make the system legible and testable, and it is the wrong call to carry forward. These six screens should be treated as a well-formed hypothesis, not as a validated design. The first evaluative round should be prepared to invalidate parts of them.
+
+---
+
+## 14. Master checklist
+
+| Question | Required answer | Status |
+|---|---|---|
+| Can every "Confirmed" fact trace to a timestamped source? | Yes, via the Section 3 model, no exceptions for launch pressure | **Yes**, enforced in code |
+| Can a user state, in their own words, what VowOS may do without asking? | Yes, tested via research, not assumed from UI copy | **Not yet.** The model is built and disclosed; nobody has tested comprehension. |
+| Does a token change happen in exactly one place? | Yes | **Yes**, enforced by `npm run check` |
+| Has this quarter's research sample included a couple outside the team's own cultural or relationship default? | Yes | **No.** No research has run. |
+| Is any success metric implicitly rewarding more screen time or more opens? | No | **Yes, satisfied.** The anti-metric is explicit and no metric contradicts it. |
+| Does every new component or agent-language pattern have a named owner and a change process? | Yes | **Partly.** The process exists; the roles are unfilled. |
+| If the agent acted on wrong information, does the product have a designed way to say so? | Yes | **Yes**, Section 4.5, built and visible on the Planning Pulse |
+
+---
+
+## 15. What the prototype deliberately does not do
+
+Stated plainly so that nobody mistakes the boundary of the demonstration for the boundary of the design.
+
+| Not done | Why | What would change it |
+|---|---|---|
+| No backend, no real venue data, no messages actually sent | The frameworks under test are the trust model, the permission model, and the visual system. None require a network. | Integration work, which does not affect any decision recorded here |
+| Place imagery is generated abstract composition | UI Plan 14 bans generic stock couples, and there is no licensed venue photography available. Drawn composition is the third permitted option and is labelled as such wherever it could be mistaken for a photograph. | Real imagery with rights and provenance |
+| The display serif falls back to Iowan Old Style or Georgia | Newsreader is not bundled, and the page makes no external requests by design | Self-hosting Newsreader as a subset woff2, which is a production requirement, not an optional polish |
+| No dark mode | The UI Plan commits to a single warm daylight look and never mentions a dark variant. Inventing one would be a design decision made by an implementer rather than by the plan. | An explicit product decision, at which point the token file already has the structure to carry a second theme |
+| Right-to-left and CJK are untested | UI Plan 13 correctly flags that generous negative space and an editorial serif are defaults to validate per language, not universal constants | Localization work, which should happen before the type system is declared global |
+| One fictional couple, one region, five places | A consistent, realistic scenario is what makes a calm interface falsifiable. A second scenario would not test anything the first does not. | A stress scenario: 300 guests, two countries, a contested fact. Worth building before scaling the IA. |
+
+---
+
+## 16. Final direction
+
+VowOS should feel like a beautiful private planning room, not a wedding website, a marketplace, or a productivity tool. Quiet enough that a user feels relief on arrival, warm enough to feel personal, precise enough to be trusted with meaningful work.
+
+The strongest differentiator was never going to be a gradient, an illustration style, or an agent avatar. It is that the calm is *earned*: the interface is quiet because the system underneath has actually resolved what it knows, what it is guessing, and what it is allowed to do without asking. A quiet interface over an unresolved system is just a confident-looking one.
+
+That is the thing this repository exists to keep true.

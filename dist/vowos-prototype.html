@@ -1,0 +1,4108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="color-scheme" content="light"/>
+<title>VowOS</title>
+<meta name="description" content="A working prototype of the VowOS wedding planning agent: calm enough to trust, warm enough to love."/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F5F1EA'/%3E%3Cpath d='M8 10.5l8 12 8-12' fill='none' stroke='%23A95842' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
+</head>
+<body>
+<div id="app"></div>
+<style>
+/* styles/tokens.css */
+/*
+ * VowOS design tokens.
+ *
+ * GENERATED FILE - DO NOT EDIT.
+ * Source of truth: design-system/tokens.json
+ * Regenerate with: npm run tokens
+ * Token set version: 1.0.0
+ */
+
+:root {
+  /* Color */
+  --vow-color-porcelain: #FCFBF8;
+  --vow-color-paper: #F5F1EA;
+  --vow-color-ink: #1D1C1A;
+  --vow-color-ink-inverse: #FCFBF8;
+  --vow-color-ash: #6D6A66;
+  --vow-color-moss: #345A4A;
+  --vow-color-terracotta: #A95842;
+  --vow-color-terracotta-deep: #8E4635;
+  --vow-color-rose-clay: #DAB5A6;
+  --vow-color-mist-blue: #DDE7EC;
+  --vow-color-soft-gold: #D6B56F;
+  --vow-color-alert: #B53F3A;
+  --vow-color-hairline: #E7E1D6;
+  --vow-color-hairline-strong: #D5CCBC;
+  --vow-color-overlay: #1D1C1AA3;
+  --vow-color-focus: #1D1C1A;
+
+  /* Spacing scale */
+  --vow-space-1: 4px;
+  --vow-space-2: 8px;
+  --vow-space-3: 12px;
+  --vow-space-4: 16px;
+  --vow-space-5: 24px;
+  --vow-space-6: 32px;
+  --vow-space-7: 48px;
+  --vow-space-8: 64px;
+  --vow-space-9: 96px;
+
+  /* Corner radius */
+  --vow-radius-sm: 6px;
+  --vow-radius-input: 12px;
+  --vow-radius-button: 13px;
+  --vow-radius-media: 18px;
+  --vow-radius-card: 22px;
+  --vow-radius-surface: 24px;
+  --vow-radius-sheet: 28px;
+
+  /* Type families */
+  --vow-font-display: "Newsreader", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --vow-font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Type scale */
+  --vow-font-size-display: clamp(34px, 4.4vw, 54px);
+  --vow-font-size-display-small: clamp(28px, 3vw, 38px);
+  --vow-font-size-decision: clamp(22px, 2.2vw, 30px);
+  --vow-font-size-section-title: 19px;
+  --vow-font-size-body: 17px;
+  --vow-font-size-body-small: 15px;
+  --vow-font-size-meta: 13.5px;
+  --vow-font-size-label: 12.5px;
+
+  /* Line height */
+  --vow-line-height-display: 1.08;
+  --vow-line-height-title: 1.22;
+  --vow-line-height-body: 1.55;
+  --vow-line-height-meta: 1.45;
+
+  /* Letter spacing */
+  --vow-letter-spacing-display: -0.016em;
+  --vow-letter-spacing-title: -0.01em;
+  --vow-letter-spacing-label: 0.008em;
+
+  /* Motion */
+  --vow-motion-fast: 160ms;
+  --vow-motion-base: 180ms;
+  --vow-motion-slow: 240ms;
+  --vow-motion-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Elevation */
+  --vow-shadow-soft: 0 1px 2px rgba(29,28,26,0.035), 0 14px 34px -20px rgba(29,28,26,0.22);
+  --vow-shadow-lift: 0 2px 6px rgba(29,28,26,0.05), 0 22px 48px -24px rgba(29,28,26,0.30);
+
+  /* Layout */
+  --vow-layout-rail-width: 264px;
+  --vow-layout-content-width: 860px;
+  --vow-layout-wide-width: 1180px;
+  --vow-layout-max-width: 1280px;
+  --vow-layout-touch-target: 44px;
+
+  /* Derived: reduced-motion safe duration, overridden in app.css */
+  --vow-motion-scale: 1;
+}
+
+/* styles/app.css */
+/*
+ * VowOS application styles.
+ *
+ * Every value here resolves to a token from design-system/tokens.json via
+ * tokens.css. No raw hex values, spacing numbers, or durations are permitted in
+ * this file except where a value is a genuine one-off geometry (a viewBox, an
+ * aspect ratio, an optical nudge) that is not a system decision.
+ *
+ * Organised as: reset, type, shell, primitives, the eleven components from
+ * UI Plan 11.2, screen compositions, responsive, accessibility.
+ */
+
+/* ------------------------------------------------------------------ reset */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--vow-color-porcelain);
+  color: var(--vow-color-ink);
+  font-family: var(--vow-font-ui);
+  font-size: var(--vow-font-size-body);
+  line-height: var(--vow-line-height-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis-weight: none;
+}
+
+img, svg { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+h1, h2, h3, h4, p, figure, ul, ol { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; }
+
+/* ------------------------------------------------------------------- type */
+
+.vow-display {
+  font-family: var(--vow-font-display);
+  font-size: var(--vow-font-size-display);
+  line-height: var(--vow-line-height-display);
+  letter-spacing: var(--vow-letter-spacing-display);
+  font-weight: 400;
+  text-wrap: balance;
+}
+
+.vow-display--sm {
+  font-size: var(--vow-font-size-display-small);
+}
+
+.vow-title {
+  font-size: var(--vow-font-size-decision);
+  line-height: var(--vow-line-height-title);
+  letter-spacing: var(--vow-letter-spacing-title);
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+.vow-section-title {
+  font-size: var(--vow-font-size-section-title);
+  line-height: var(--vow-line-height-title);
+  letter-spacing: var(--vow-letter-spacing-title);
+  font-weight: 600;
+}
+
+.vow-label {
+  font-size: var(--vow-font-size-label);
+  letter-spacing: var(--vow-letter-spacing-label);
+  font-weight: 600;
+  color: var(--vow-color-ash);
+}
+
+.vow-meta {
+  font-size: var(--vow-font-size-meta);
+  line-height: var(--vow-line-height-meta);
+  color: var(--vow-color-ash);
+}
+
+.vow-lede {
+  font-size: var(--vow-font-size-body);
+  color: var(--vow-color-ash);
+  max-width: 62ch;
+}
+
+.vow-body { max-width: 68ch; }
+.vow-ink { color: var(--vow-color-ink); }
+.vow-quiet { color: var(--vow-color-ash); }
+
+/* ------------------------------------------------------------------ shell */
+
+.vow-shell {
+  display: grid;
+  grid-template-columns: var(--vow-layout-rail-width) minmax(0, 1fr);
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* The rail is sticky and one viewport tall, so on a long page its column
+     would otherwise stop mid-scroll. Painting the column on the shell keeps
+     the surface reading as one continuous rail. */
+  background:
+    linear-gradient(to right,
+      var(--vow-color-paper) 0 calc(var(--vow-layout-rail-width) - 1px),
+      var(--vow-color-hairline) calc(var(--vow-layout-rail-width) - 1px) var(--vow-layout-rail-width),
+      var(--vow-color-porcelain) var(--vow-layout-rail-width));
+}
+
+.vow-rail {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vow-space-6);
+  padding: var(--vow-space-6) var(--vow-space-4) var(--vow-space-5);
+  background: var(--vow-color-paper);
+  border-right: 1px solid var(--vow-color-hairline);
+  overflow-y: auto;
+}
+
+.vow-brand {
+  padding: 0 var(--vow-space-3);
+}
+
+.vow-brand__mark {
+  font-family: var(--vow-font-display);
+  font-size: 23px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.vow-brand__event {
+  margin-top: var(--vow-space-2);
+  font-size: var(--vow-font-size-meta);
+  color: var(--vow-color-ash);
+}
+
+.vow-nav { display: flex; flex-direction: column; gap: 2px; }
+
+.vow-nav__item {
+  display: flex;
+  align-items: center;
+  gap: var(--vow-space-3);
+  padding: 10px var(--vow-space-3);
+  min-height: var(--vow-layout-touch-target);
+  border-radius: var(--vow-radius-input);
+  text-decoration: none;
+  font-size: var(--vow-font-size-body-small);
+  font-weight: 500;
+  color: var(--vow-color-ink);
+  transition: background var(--vow-motion-fast) var(--vow-motion-ease);
+}
+
+.vow-nav__item:hover { background: rgba(29, 28, 26, 0.045); }
+
+.vow-nav__item[aria-current='page'] {
+  background: rgba(29, 28, 26, 0.075);
+  font-weight: 600;
+}
+
+.vow-nav__item svg { width: 19px; height: 19px; flex: none; opacity: 0.75; }
+.vow-nav__item[aria-current='page'] svg { opacity: 1; }
+
+.vow-rail__foot {
+  margin-top: auto;
+  padding: var(--vow-space-4) var(--vow-space-3) 0;
+  border-top: 1px solid var(--vow-color-hairline);
+}
+
+.vow-canvas {
+  padding: var(--vow-space-8) var(--vow-space-7) var(--vow-space-9);
+  max-width: var(--vow-layout-max-width);
+}
+
+.vow-col { width: 100%; max-width: var(--vow-layout-content-width); }
+.vow-col--wide { max-width: var(--vow-layout-wide-width); }
+
+.vow-stack { display: flex; flex-direction: column; }
+.vow-stack--2 { gap: var(--vow-space-2); }
+.vow-stack--3 { gap: var(--vow-space-3); }
+.vow-stack--4 { gap: var(--vow-space-4); }
+.vow-stack--5 { gap: var(--vow-space-5); }
+.vow-stack--6 { gap: var(--vow-space-6); }
+.vow-stack--7 { gap: var(--vow-space-7); }
+.vow-stack--8 { gap: var(--vow-space-8); }
+
+.vow-row {
+  display: flex;
+  align-items: center;
+  gap: var(--vow-space-3);
+  flex-wrap: wrap;
+}
+
+.vow-row--between { justify-content: space-between; }
+.vow-row--baseline { align-items: baseline; }
+
+.vow-pagehead { margin-bottom: var(--vow-space-7); }
+.vow-pagehead .vow-display { margin-top: var(--vow-space-3); }
+.vow-pagehead .vow-lede { margin-top: var(--vow-space-4); }
+
+/* Section separation without hard rules everywhere. Applies to every section,
+   not only to sibling pairs, because a section often follows a decision
+   surface rather than another section. */
+.vow-section { margin-top: var(--vow-space-8); }
+.vow-section:first-child { margin-top: 0; }
+.vow-section__head { margin-bottom: var(--vow-space-4); }
+
+/* The skip-link target takes programmatic focus on every navigation so screen
+   reader and keyboard users land in the content. It must not paint an outline
+   around the whole page while it holds that focus. */
+.vow-canvas:focus,
+.vow-canvas:focus-visible { outline: none; }
+
+.vow-rule {
+  height: 1px;
+  background: var(--vow-color-hairline);
+  border: 0;
+  margin: 0;
+}
+
+/* ------------------------------------------------------- 11.2 / buttons */
+
+.vow-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--vow-space-2);
+  min-height: var(--vow-layout-touch-target);
+  padding: var(--vow-space-3) var(--vow-space-5);
+  border: 1px solid transparent;
+  border-radius: var(--vow-radius-button);
+  font-size: var(--vow-font-size-body-small);
+  font-weight: 600;
+  letter-spacing: var(--vow-letter-spacing-title);
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition:
+    background var(--vow-motion-base) var(--vow-motion-ease),
+    border-color var(--vow-motion-base) var(--vow-motion-ease),
+    transform var(--vow-motion-base) var(--vow-motion-ease);
+}
+
+.vow-btn:active { transform: translateY(1px); }
+
+.vow-btn--primary {
+  background: var(--vow-color-terracotta);
+  color: var(--vow-color-ink-inverse);
+}
+.vow-btn--primary:hover { background: var(--vow-color-terracotta-deep); }
+
+.vow-btn--secondary {
+  background: transparent;
+  border-color: var(--vow-color-hairline-strong);
+  color: var(--vow-color-ink);
+}
+.vow-btn--secondary:hover { background: rgba(29, 28, 26, 0.04); }
+
+/* A selected toggle reads through its border, its label, and a check, not
+   through the primary accent. Terracotta stays reserved for the one primary
+   action in a view, so a column of switches cannot dilute it. */
+.vow-btn--secondary[aria-pressed='true'] {
+  border-color: var(--vow-color-ink);
+  background: rgba(29, 28, 26, 0.06);
+}
+
+/* Quiet action: never looks like a hidden link (11.2). */
+.vow-btn--quiet {
+  background: none;
+  border: none;
+  padding: var(--vow-space-2) var(--vow-space-1);
+  color: var(--vow-color-ink);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--vow-color-hairline-strong);
+  text-underline-offset: 4px;
+}
+.vow-btn--quiet:hover { text-decoration-color: var(--vow-color-ink); }
+
+.vow-btn[disabled] { opacity: 0.42; cursor: not-allowed; }
+.vow-btn[disabled]:active { transform: none; }
+
+.vow-btn--full { width: 100%; }
+
+/* An irreversible or outward-facing action names its consequence next to the
+   button rather than borrowing a second accent color. See UI Plan 11.2. */
+.vow-consequence {
+  font-size: var(--vow-font-size-meta);
+  color: var(--vow-color-ash);
+  max-width: 52ch;
+}
+
+/* ------------------------------------------------- 11.2 / decision surface */
+
+.vow-surface {
+  background: var(--vow-color-paper);
+  border: 1px solid var(--vow-color-hairline);
+  border-radius: var(--vow-radius-surface);
+  padding: var(--vow-space-6);
+  box-shadow: var(--vow-shadow-soft);
+}
+
+.vow-surface--airy { padding: var(--vow-space-7); }
+
+.vow-surface--plain {
+  background: var(--vow-color-porcelain);
+  box-shadow: none;
+}
+
+.vow-panel {
+  background: var(--vow-color-porcelain);
+  border: 1px solid var(--vow-color-hairline);
+  border-radius: var(--vow-radius-card);
+  padding: var(--vow-space-5);
+}
+
+/* -------------------------------------------------- 11.2 / evidence line */
+
+.vow-evidence {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--vow-space-2);
+  font-size: var(--vow-font-size-meta);
+  line-height: var(--vow-line-height-meta);
+  color: var(--vow-color-ash);
+}
+
+.vow-evidence__icon {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin-top: 2px;
+}
+
+/* State is carried by icon and words as well as color (UI Plan 13). */
+.vow-evidence[data-state='confirmed'] .vow-evidence__icon { color: var(--vow-color-moss); }
+.vow-evidence[data-state='reported'] .vow-evidence__icon { color: var(--vow-color-ash); }
+.vow-evidence[data-state='inferred'] .vow-evidence__icon { color: var(--vow-color-ash); }
+.vow-evidence[data-state='unknown'] .vow-evidence__icon { color: var(--vow-color-ash); }
+.vow-evidence[data-state='confirmed'] { color: var(--vow-color-ash); }
+
+.vow-evidence__value { color: var(--vow-color-ink); font-weight: 500; }
+
+.vow-evidence-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vow-space-3);
+}
+
+/* Expands in place rather than opening a modal (11.4). */
+.vow-drawer__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vow-space-2);
+  background: none;
+  border: none;
+  padding: var(--vow-space-2) 0;
+  font-size: var(--vow-font-size-meta);
+  font-weight: 600;
+  color: var(--vow-color-ink);
+  cursor: pointer;
+}
+
+.vow-drawer__chevron {
+  width: 13px;
+  height: 13px;
+  transition: transform var(--vow-motion-fast) var(--vow-motion-ease);
+}
+
+.vow-drawer[data-open='true'] .vow-drawer__chevron { transform: rotate(90deg); }
+
+.vow-drawer__body {
+  display: none;
+  padding-top: var(--vow-space-3);
+  animation: vow-reveal var(--vow-motion-fast) var(--vow-motion-ease);
+}
+
+.vow-drawer[data-open='true'] .vow-drawer__body { display: block; }
+
+@keyframes vow-reveal {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ------------------------------------------------------ 11.2 / agent note */
+
+.vow-agent-note {
+  border-left: 2px solid var(--vow-color-moss);
+  padding-left: var(--vow-space-4);
+  font-size: var(--vow-font-size-body-small);
+  color: var(--vow-color-ink);
+  max-width: 64ch;
+}
+
+.vow-agent-note--action { border-left-color: var(--vow-color-terracotta); }
+.vow-agent-note--correction { border-left-color: var(--vow-color-alert); }
+
+/* ---------------------------------------------------- 11.2 / partner note */
+
+.vow-partner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--vow-space-3);
+}
+
+.vow-partner__initials {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: var(--vow-font-size-label);
+  font-weight: 600;
+  color: var(--vow-color-ink);
+  background: var(--vow-color-rose-clay);
+}
+
+.vow-partner__initials[data-person='b'] { background: var(--vow-color-mist-blue); }
+
+.vow-partner__body { font-size: var(--vow-font-size-body-small); }
+
+/* ---------------------------------------------------------- 11.2 / chips */
+
+.vow-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vow-space-1);
+  padding: 4px var(--vow-space-2);
+  border-radius: var(--vow-radius-sm);
+  background: rgba(29, 28, 26, 0.05);
+  font-size: var(--vow-font-size-label);
+  font-weight: 600;
+  color: var(--vow-color-ink);
+}
+
+.vow-chip--source {
+  background: transparent;
+  border: 1px solid var(--vow-color-hairline-strong);
+  color: var(--vow-color-ash);
+  font-weight: 500;
+}
+
+/* Status is text, not a colored pill (UI Plan 9.1). */
+.vow-status {
+  font-size: var(--vow-font-size-meta);
+  font-weight: 600;
+  color: var(--vow-color-ash);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vow-status svg { width: 14px; height: 14px; }
+.vow-status[data-tone='ready'] { color: var(--vow-color-moss); }
+.vow-status[data-tone='risk'] { color: var(--vow-color-alert); }
+
+/* ----------------------------------------------------- 11.2 / place card */
+
+.vow-place {
+  display: grid;
+  grid-template-columns: 316px minmax(0, 1fr);
+  gap: var(--vow-space-5);
+  padding: var(--vow-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--vow-radius-surface);
+  text-align: left;
+  background: none;
+  width: 100%;
+  cursor: pointer;
+  transition:
+    background var(--vow-motion-base) var(--vow-motion-ease),
+    border-color var(--vow-motion-base) var(--vow-motion-ease),
+    opacity var(--vow-motion-base) var(--vow-motion-ease);
+}
+
+.vow-place:hover {
+  background: var(--vow-color-paper);
+  border-color: var(--vow-color-hairline);
+}
+
+.vow-place[data-status='ruled-out'] { opacity: 0.5; }
+
+.vow-media {
+  border-radius: var(--vow-radius-media);
+  overflow: hidden;
+  background: var(--vow-color-paper);
+  aspect-ratio: 4 / 3;
+}
+
+.vow-media svg { width: 100%; height: 100%; }
+/* The compositions are drawn on a 4:3 canvas and cropped with slice, so a very
+   wide frame zooms them past the point where the layering reads. 3:2 is the
+   widest crop that keeps the foreground intact. */
+.vow-media--wide { aspect-ratio: 3 / 2; }
+.vow-media--tall { aspect-ratio: 3 / 4; }
+
+.vow-place__body { display: flex; flex-direction: column; gap: var(--vow-space-3); }
+.vow-place__name { font-size: 21px; font-weight: 600; letter-spacing: var(--vow-letter-spacing-title); }
+.vow-place__reason { font-size: var(--vow-font-size-body-small); max-width: 54ch; }
+
+/* The reality check is muted but never hidden below the fold (9.1). */
+.vow-reality {
+  display: flex;
+  gap: var(--vow-space-2);
+  font-size: var(--vow-font-size-meta);
+  color: var(--vow-color-ash);
+  max-width: 54ch;
+}
+
+.vow-reality svg { width: 15px; height: 15px; flex: none; margin-top: 2px; }
+
+/* --------------------------------------------------- 11.2 / timeline row */
+
+.vow-timeline { display: flex; flex-direction: column; }
+
+.vow-timeline__row {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: var(--vow-space-4);
+  padding: var(--vow-space-4) 0;
+  border-top: 1px solid var(--vow-color-hairline);
+  align-items: start;
+}
+
+.vow-timeline__row:last-child { border-bottom: 1px solid var(--vow-color-hairline); }
+.vow-timeline__date { font-size: var(--vow-font-size-meta); color: var(--vow-color-ash); font-weight: 500; }
+.vow-timeline__row[data-done='true'] .vow-timeline__text { color: var(--vow-color-ash); }
+
+/* --------------------------------------------------------- 11.2 / inputs */
+
+.vow-field { display: flex; flex-direction: column; gap: var(--vow-space-2); }
+
+.vow-field__label { font-size: var(--vow-font-size-body-small); font-weight: 600; }
+.vow-field__help { font-size: var(--vow-font-size-meta); color: var(--vow-color-ash); }
+
+.vow-input {
+  width: 100%;
+  min-height: var(--vow-layout-touch-target);
+  padding: var(--vow-space-3) var(--vow-space-4);
+  background: var(--vow-color-porcelain);
+  border: 1px solid var(--vow-color-hairline-strong);
+  border-radius: var(--vow-radius-input);
+  font-size: var(--vow-font-size-body);
+}
+
+textarea.vow-input { min-height: 120px; resize: vertical; line-height: var(--vow-line-height-body); }
+
+/* Editable readback text keeps its position and shows what changed (11.4). */
+.vow-editable {
+  border: 1px solid transparent;
+  border-radius: var(--vow-radius-input);
+  padding: var(--vow-space-3);
+  margin: calc(var(--vow-space-3) * -1);
+  transition: background var(--vow-motion-fast) var(--vow-motion-ease);
+  cursor: text;
+}
+
+.vow-editable:hover { background: rgba(29, 28, 26, 0.03); }
+.vow-editable:focus { background: var(--vow-color-porcelain); border-color: var(--vow-color-hairline-strong); }
+
+/* --------------------------------------------------- 11.2 / sheet + toast */
+
+.vow-scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--vow-color-overlay);
+  z-index: 40;
+  animation: vow-fade var(--vow-motion-slow) var(--vow-motion-ease);
+  display: grid;
+  place-items: center;
+  padding: var(--vow-space-5);
+}
+
+@keyframes vow-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.vow-dialog {
+  width: min(600px, 100%);
+  max-height: 86vh;
+  overflow-y: auto;
+  background: var(--vow-color-porcelain);
+  border: 1px solid var(--vow-color-hairline);
+  border-radius: var(--vow-radius-surface);
+  padding: var(--vow-space-6);
+  box-shadow: var(--vow-shadow-lift);
+  animation: vow-rise var(--vow-motion-slow) var(--vow-motion-ease);
+}
+
+@keyframes vow-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.vow-toast {
+  position: fixed;
+  right: var(--vow-space-6);
+  bottom: var(--vow-space-6);
+  z-index: 50;
+  max-width: 380px;
+  padding: var(--vow-space-4) var(--vow-space-5);
+  background: var(--vow-color-ink);
+  color: var(--vow-color-ink-inverse);
+  border-radius: var(--vow-radius-input);
+  font-size: var(--vow-font-size-body-small);
+  box-shadow: var(--vow-shadow-lift);
+  animation: vow-rise var(--vow-motion-base) var(--vow-motion-ease);
+}
+
+/* ------------------------------------------------------------- receipts */
+
+.vow-receipt {
+  background: var(--vow-color-paper);
+  border: 1px solid var(--vow-color-hairline);
+  border-radius: var(--vow-radius-surface);
+  padding: var(--vow-space-6);
+}
+
+.vow-receipt__line {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: var(--vow-space-4);
+  padding: var(--vow-space-3) 0;
+  border-top: 1px solid var(--vow-color-hairline);
+  font-size: var(--vow-font-size-body-small);
+}
+
+.vow-receipt__line:first-of-type { border-top: 0; }
+.vow-receipt__key { color: var(--vow-color-ash); font-size: var(--vow-font-size-meta); }
+
+/* ------------------------------------------------------- vision readback */
+
+/* Two-column desktop: a single full-height composition beside the structured
+   readback, with generous breathing room (UI Plan 8.1). */
+.vow-readback {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
+  gap: var(--vow-space-7);
+  align-items: start;
+}
+
+.vow-sticky { position: sticky; top: var(--vow-space-7); }
+
+@media (max-width: 1023px) {
+  .vow-readback { grid-template-columns: minmax(0, 1fr); gap: var(--vow-space-6); }
+  .vow-sticky { position: static; }
+  .vow-media--tall { aspect-ratio: 16 / 10; }
+}
+
+/* --------------------------------------------------------- decision room */
+
+.vow-compare {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: var(--vow-space-6);
+}
+
+.vow-compare__label,
+.vow-compare__cell {
+  padding: var(--vow-space-5) 0;
+  border-top: 1px solid var(--vow-color-hairline);
+}
+
+.vow-compare__label {
+  font-size: var(--vow-font-size-meta);
+  font-weight: 600;
+  color: var(--vow-color-ash);
+}
+
+.vow-compare__cell { font-size: var(--vow-font-size-body-small); }
+.vow-compare__head { padding-bottom: var(--vow-space-5); border-top: 0; }
+
+/* Both columns fit side by side here, so the switcher has nothing to do. */
+.vow-compare-switch { display: none; }
+
+.vow-compare__amount {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: var(--vow-letter-spacing-title);
+}
+
+.vow-tension {
+  display: flex;
+  gap: var(--vow-space-2);
+  margin-top: var(--vow-space-3);
+  color: var(--vow-color-ash);
+  font-size: var(--vow-font-size-meta);
+}
+
+.vow-tension svg { width: 15px; height: 15px; flex: none; margin-top: 2px; }
+
+/* Both partner positions, side by side, with no winning state (9.3). */
+.vow-positions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--vow-space-5);
+}
+
+/* --------------------------------------------------------- tour selection */
+
+.vow-tour {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: var(--vow-space-6);
+}
+
+.vow-daterail { display: flex; flex-direction: column; gap: var(--vow-space-2); }
+
+.vow-dateopt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--vow-space-3) var(--vow-space-4);
+  background: none;
+  border: 1px solid var(--vow-color-hairline);
+  border-radius: var(--vow-radius-input);
+  text-align: left;
+  cursor: pointer;
+  min-height: var(--vow-layout-touch-target);
+  transition: border-color var(--vow-motion-fast) var(--vow-motion-ease),
+              background var(--vow-motion-fast) var(--vow-motion-ease);
+}
+
+.vow-dateopt[aria-pressed='true'] {
+  border-color: var(--vow-color-ink);
+  background: var(--vow-color-paper);
+}
+
+.vow-dateopt__day { font-size: var(--vow-font-size-body-small); font-weight: 600; }
+.vow-dateopt__note { font-size: var(--vow-font-size-label); color: var(--vow-color-ash); }
+
+.vow-times { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: var(--vow-space-3); }
+
+.vow-timeopt {
+  padding: var(--vow-space-4);
+  background: none;
+  border: 1px solid var(--vow-color-hairline);
+  border-radius: var(--vow-radius-input);
+  text-align: left;
+  cursor: pointer;
+  min-height: var(--vow-layout-touch-target);
+  transition: border-color var(--vow-motion-fast) var(--vow-motion-ease),
+              background var(--vow-motion-fast) var(--vow-motion-ease);
+}
+
+.vow-timeopt:hover { background: var(--vow-color-paper); }
+
+.vow-timeopt[aria-pressed='true'] {
+  border-color: var(--vow-color-ink);
+  background: var(--vow-color-paper);
+}
+
+.vow-timeopt__time { font-size: var(--vow-font-size-body); font-weight: 600; }
+.vow-timeopt__meta { font-size: var(--vow-font-size-label); color: var(--vow-color-ash); margin-top: 2px; }
+
+/* ---------------------------------------------------------------- budget */
+
+.vow-meter {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(29, 28, 26, 0.07);
+  overflow: hidden;
+  display: flex;
+}
+
+.vow-meter__seg { height: 100%; }
+.vow-meter__seg[data-kind='committed'] { background: var(--vow-color-moss); }
+.vow-meter__seg[data-kind='projected'] { background: var(--vow-color-rose-clay); }
+.vow-meter__seg[data-kind='unknown'] { background: var(--vow-color-hairline-strong); }
+
+.vow-legend { display: flex; flex-wrap: wrap; gap: var(--vow-space-4); font-size: var(--vow-font-size-meta); color: var(--vow-color-ash); }
+.vow-legend__dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+/* ----------------------------------------------------------- guests view */
+
+.vow-cluster {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(212px, 1fr));
+  gap: var(--vow-space-4);
+}
+
+.vow-cluster__count { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; }
+
+/* ---------------------------------------------------------- palette grid */
+
+.vow-palettes { display: grid; grid-template-columns: repeat(auto-fit, minmax(238px, 1fr)); gap: var(--vow-space-5); }
+
+.vow-palette {
+  padding: var(--vow-space-4);
+  border: 1px solid var(--vow-color-hairline);
+  border-radius: var(--vow-radius-card);
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--vow-motion-fast) var(--vow-motion-ease),
+              transform var(--vow-motion-fast) var(--vow-motion-ease);
+}
+
+.vow-palette:hover { transform: translateY(-2px); }
+.vow-palette[aria-pressed='true'] { border-color: var(--vow-color-ink); background: var(--vow-color-paper); }
+
+.vow-swatches { display: flex; gap: 6px; margin-bottom: var(--vow-space-3); }
+.vow-swatch { height: 54px; flex: 1; border-radius: 9px; }
+
+/* --------------------------------------------------------- website studio */
+
+.vow-studio { display: grid; grid-template-columns: 268px minmax(0, 1fr); gap: var(--vow-space-6); align-items: start; }
+
+.vow-preview {
+  border: 1px solid var(--vow-color-hairline);
+  border-radius: var(--vow-radius-surface);
+  overflow: hidden;
+  background: var(--vow-site-canvas, var(--vow-color-porcelain));
+  box-shadow: var(--vow-shadow-soft);
+}
+
+.vow-preview__chrome {
+  display: flex;
+  align-items: center;
+  gap: var(--vow-space-2);
+  padding: var(--vow-space-3) var(--vow-space-4);
+  background: var(--vow-color-paper);
+  border-bottom: 1px solid var(--vow-color-hairline);
+  font-size: var(--vow-font-size-label);
+  color: var(--vow-color-ash);
+}
+
+.vow-site { padding: var(--vow-space-8) var(--vow-space-7); color: var(--vow-site-ink, var(--vow-color-ink)); }
+.vow-site__title { font-family: var(--vow-site-display, var(--vow-font-display)); font-size: 46px; line-height: 1.06; letter-spacing: -0.02em; }
+.vow-site__rule { width: 56px; height: 2px; background: var(--vow-site-accent, var(--vow-color-terracotta)); margin: var(--vow-space-5) 0; }
+.vow-site__section { margin-top: var(--vow-space-6); }
+.vow-site__eyebrow { font-size: var(--vow-font-size-label); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--vow-site-accent-ink, var(--vow-color-ash)); }
+
+/* ---------------------------------------------------- design system page */
+
+.vow-spec {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: var(--vow-space-4);
+}
+
+.vow-spec__tile { border: 1px solid var(--vow-color-hairline); border-radius: var(--vow-radius-card); overflow: hidden; }
+.vow-spec__chip { height: 74px; }
+.vow-spec__meta { padding: var(--vow-space-3) var(--vow-space-4); }
+.vow-spec__name { font-size: var(--vow-font-size-body-small); font-weight: 600; }
+.vow-spec__val { font-size: var(--vow-font-size-label); color: var(--vow-color-ash); font-variant-numeric: tabular-nums; }
+
+.vow-table { width: 100%; border-collapse: collapse; font-size: var(--vow-font-size-body-small); }
+.vow-table th, .vow-table td { text-align: left; padding: var(--vow-space-3) var(--vow-space-4) var(--vow-space-3) 0; border-top: 1px solid var(--vow-color-hairline); vertical-align: top; }
+.vow-table th { font-size: var(--vow-font-size-meta); color: var(--vow-color-ash); font-weight: 600; }
+.vow-scroll-x { overflow-x: auto; }
+
+/* --------------------------------------------------------- mobile nav */
+
+.vow-tabbar { display: none; }
+
+.vow-mobilehead { display: none; }
+
+/* ------------------------------------------------------------ responsive */
+
+@media (max-width: 1439px) {
+  .vow-canvas { padding: var(--vow-space-7) var(--vow-space-6) var(--vow-space-9); }
+}
+
+@media (max-width: 1120px) {
+  .vow-compare { grid-template-columns: 130px minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--vow-space-5); }
+  .vow-studio { grid-template-columns: 236px minmax(0, 1fr); }
+}
+
+@media (max-width: 1023px) {
+  .vow-shell { grid-template-columns: minmax(0, 1fr); background: var(--vow-color-porcelain); }
+
+  .vow-rail { display: none; }
+
+  .vow-mobilehead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--vow-space-4);
+    padding: var(--vow-space-4) var(--vow-space-5);
+    background: var(--vow-color-paper);
+    border-bottom: 1px solid var(--vow-color-hairline);
+  }
+
+  .vow-canvas {
+    padding: var(--vow-space-6) var(--vow-space-5) calc(var(--vow-space-9) + 56px);
+  }
+
+  .vow-tabbar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    background: var(--vow-color-paper);
+    border-top: 1px solid var(--vow-color-hairline);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .vow-tabbar__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 56px;
+    padding: var(--vow-space-2);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--vow-color-ash);
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .vow-tabbar__item svg { width: 20px; height: 20px; }
+  .vow-tabbar__item[aria-current='page'] { color: var(--vow-color-ink); font-weight: 600; }
+
+  /* One place at a time with a persistent switcher, rather than two unlabelled
+     answers stacked under a single row label (UI Plan 9.3). */
+  .vow-compare { grid-template-columns: minmax(0, 1fr); }
+  .vow-compare__label {
+    padding-bottom: 0;
+    border-top: 1px solid var(--vow-color-hairline);
+    padding-top: var(--vow-space-5);
+  }
+  .vow-compare__cell { border-top: 0; padding: var(--vow-space-3) 0 var(--vow-space-5); }
+  .vow-compare__head { padding-top: var(--vow-space-5); padding-bottom: var(--vow-space-4); }
+  .vow-compare[data-focus='a'] .vow-compare__cell--b,
+  .vow-compare[data-focus='b'] .vow-compare__cell--a { display: none; }
+
+  .vow-compare-switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--vow-space-2);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: var(--vow-space-3) 0;
+    background: var(--vow-color-porcelain);
+  }
+  .vow-compare-switch .vow-btn { flex: 1; min-width: 40%; }
+
+  .vow-place { grid-template-columns: minmax(0, 1fr); gap: var(--vow-space-4); }
+  .vow-tour { grid-template-columns: minmax(0, 1fr); }
+  .vow-daterail { flex-direction: row; overflow-x: auto; padding-bottom: var(--vow-space-2); }
+  .vow-dateopt { min-width: 150px; }
+  .vow-studio { grid-template-columns: minmax(0, 1fr); }
+
+  /* Bottom sheet rather than a centered dialog on small screens (11.2). */
+  .vow-scrim { align-items: end; padding: 0; }
+  .vow-dialog {
+    width: 100%;
+    max-height: 88dvh;
+    border-radius: var(--vow-radius-sheet) var(--vow-radius-sheet) 0 0;
+    padding: var(--vow-space-5) var(--vow-space-5) var(--vow-space-7);
+  }
+
+  .vow-toast { right: var(--vow-space-4); left: var(--vow-space-4); bottom: calc(56px + var(--vow-space-4)); max-width: none; }
+}
+
+@media (max-width: 389px) {
+  .vow-canvas { padding-left: var(--vow-space-4); padding-right: var(--vow-space-4); }
+  .vow-surface, .vow-receipt { padding: var(--vow-space-5) var(--vow-space-4); }
+  .vow-row--actions { flex-direction: column; align-items: stretch; }
+  .vow-row--actions .vow-btn { width: 100%; }
+  .vow-timeline__row { grid-template-columns: minmax(0, 1fr); gap: var(--vow-space-2); }
+  .vow-receipt__line { grid-template-columns: minmax(0, 1fr); gap: var(--vow-space-1); }
+}
+
+/* --------------------------------------------------------- accessibility */
+
+/* Persistent, visible focus that survives while focus remains (WCAG 2.2). */
+:where(a, button, input, select, textarea, [tabindex], [contenteditable]):focus-visible {
+  outline: 2px solid var(--vow-color-focus);
+  outline-offset: 3px;
+  border-radius: var(--vow-radius-sm);
+}
+
+.vow-skip {
+  position: absolute;
+  left: var(--vow-space-4);
+  top: calc(var(--vow-space-4) * -6);
+  z-index: 60;
+  padding: var(--vow-space-3) var(--vow-space-4);
+  background: var(--vow-color-ink);
+  color: var(--vow-color-ink-inverse);
+  border-radius: var(--vow-radius-button);
+  text-decoration: none;
+  font-size: var(--vow-font-size-body-small);
+  font-weight: 600;
+  transition: top var(--vow-motion-base) var(--vow-motion-ease);
+}
+
+.vow-skip:focus { top: var(--vow-space-4); }
+
+.vow-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Nothing depends on movement to convey outcome (UI Plan 13). */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .vow-btn:active { transform: none; }
+  .vow-palette:hover { transform: none; }
+}
+
+@media (prefers-contrast: more) {
+  .vow-surface, .vow-panel, .vow-preview { border-color: var(--vow-color-ash); }
+  .vow-meta, .vow-evidence, .vow-label { color: var(--vow-color-ink); }
+}
+
+@media print {
+  .vow-rail, .vow-tabbar, .vow-mobilehead, .vow-toast { display: none !important; }
+  .vow-shell { grid-template-columns: minmax(0, 1fr); }
+}
+
+</style>
+<script>
+/* js/util.js */
+/* VowOS prototype — utilities, formatting, and the icon set.
+ *
+ * Plain scripts on a single global namespace rather than ES modules, so the
+ * prototype runs from file:// with no build step and bundles by concatenation.
+ */
+window.VowOS = window.VowOS || {};
+
+(function (V) {
+  'use strict';
+
+  /* The prototype is deterministic: every relative date, countdown, and
+     staleness calculation resolves against this fixed present. */
+  V.NOW = new Date(2026, 7, 11, 18, 30, 0);
+
+  /* ------------------------------------------------------------- strings */
+
+  const ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+  V.esc = function (value) {
+    if (value === null || value === undefined) return '';
+    return String(value).replace(/[&<>"']/g, (c) => ESCAPES[c]);
+  };
+
+  /* Tagged template that escapes interpolations by default. Pass V.raw(x) to
+     opt out for already-trusted markup. */
+  V.html = function (strings, ...values) {
+    return strings.reduce((out, str, i) => {
+      if (i === 0) return str;
+      const value = values[i - 1];
+      let rendered;
+      if (value && value.__raw) rendered = value.value;
+      else if (Array.isArray(value)) rendered = value.map((v) => (v && v.__raw ? v.value : V.esc(v))).join('');
+      else if (value === null || value === undefined || value === false) rendered = '';
+      else rendered = V.esc(value);
+      return out + rendered + str;
+    }, '');
+  };
+
+  V.raw = function (value) {
+    return { __raw: true, value: value === null || value === undefined ? '' : String(value) };
+  };
+
+  /* --------------------------------------------------------------- dates */
+
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+    'August', 'September', 'October', 'November', 'December'];
+  const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  /* Date-only strings are parsed as local, not UTC, so a date never renders as
+     the previous day west of Greenwich. */
+  V.parseDate = function (value) {
+    if (value instanceof Date) return value;
+    const [datePart, timePart] = String(value).split('T');
+    const [y, m, d] = datePart.split('-').map(Number);
+    if (!timePart) return new Date(y, m - 1, d);
+    const [hh, mm] = timePart.split(':').map(Number);
+    return new Date(y, m - 1, d, hh || 0, mm || 0);
+  };
+
+  V.fmtDate = function (value, style) {
+    const d = V.parseDate(value);
+    const month = MONTHS[d.getMonth()];
+    switch (style) {
+      case 'long':     return `${month} ${d.getDate()}, ${d.getFullYear()}`;
+      case 'weekday':  return `${DAYS[d.getDay()]}, ${month} ${d.getDate()}`;
+      case 'weekdayShort': return `${DAYS[d.getDay()].slice(0, 3)} ${month.slice(0, 3)} ${d.getDate()}`;
+      case 'dayMonth': return `${month} ${d.getDate()}`;
+      case 'short':    return `${month.slice(0, 3)} ${d.getDate()}`;
+      default:         return `${month} ${d.getDate()}, ${d.getFullYear()}`;
+    }
+  };
+
+  V.fmtTime = function (value) {
+    const d = V.parseDate(value);
+    let h = d.getHours();
+    const m = d.getMinutes();
+    const suffix = h >= 12 ? 'p.m.' : 'a.m.';
+    h = h % 12 || 12;
+    return m === 0 ? `${h} ${suffix}` : `${h}:${String(m).padStart(2, '0')} ${suffix}`;
+  };
+
+  V.daysBetween = function (from, to) {
+    const a = V.parseDate(from);
+    const b = V.parseDate(to);
+    const startA = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+    const startB = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+    return Math.round((startB - startA) / 86400000);
+  };
+
+  /* Dates in agent language, per UI Plan 11.3: real dates, not vague time
+     words. "Today" and "yesterday" are the only relative terms allowed. */
+  V.relativeDate = function (value) {
+    const delta = V.daysBetween(V.NOW, value);
+    if (delta === 0) return 'today';
+    if (delta === -1) return 'yesterday';
+    if (delta === 1) return 'tomorrow';
+    return V.fmtDate(value, Math.abs(delta) > 300 ? 'long' : 'dayMonth');
+  };
+
+  /* --------------------------------------------------------------- money */
+
+  V.fmtMoney = function (amount, opts) {
+    const options = opts || {};
+    const rounded = Math.round(Number(amount));
+    const body = Math.abs(rounded).toLocaleString('en-US');
+    const sign = rounded < 0 ? '-' : options.signed ? '+' : '';
+    return `${sign}$${body}`;
+  };
+
+  /* --------------------------------------------------------------- icons */
+
+  const P = (d, extra) =>
+    `<path d="${d}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"${extra || ''}/>`;
+  const C = (cx, cy, r) =>
+    `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="currentColor" stroke-width="1.6"/>`;
+  const DOT = (cx, cy, r) => `<circle cx="${cx}" cy="${cy}" r="${r || 1.15}" fill="currentColor"/>`;
+
+  const ICONS = {
+    today:    P('M4 18.5h16') + P('M7.6 14.6a4.4 4.4 0 018.8 0') + P('M12 4v2.6') + P('M5.4 7.4l1.8 1.8') + P('M18.6 7.4l-1.8 1.8'),
+    vision:   P('M12 3.6a8.4 8.4 0 000 16.8c1.5 0 2-1.1 1.4-2-.6-1 .1-2.1 1.3-2.1h1.6a4 4 0 003.7-4c0-4.8-3.7-8.7-8-8.7z') + DOT(8.6, 10.4, 1.15) + DOT(11.4, 7.9, 1.15) + DOT(15.2, 9.6, 1.15),
+    places:   P('M12 21c0 0 6.6-6 6.6-10.8A6.6 6.6 0 0012 3.6a6.6 6.6 0 00-6.6 6.6C5.4 15 12 21 12 21z') + C(12, 10.1, 2.4),
+    plan:     P('M5 6.4h14a1 1 0 011 1v11.2a1 1 0 01-1 1H5a1 1 0 01-1-1V7.4a1 1 0 011-1z') + P('M8 4v4') + P('M16 4v4') + P('M4 11h16') + DOT(8.6, 14.6) + DOT(12, 14.6) + DOT(8.6, 17.4),
+    guests:   C(9.2, 8.6, 3.1) + P('M3.6 19.4a5.9 5.9 0 0111.2 0') + P('M16.2 6a3.1 3.1 0 010 5.6') + P('M17.6 14.4a5.9 5.9 0 012.8 5'),
+    more:     DOT(6, 12, 1.5) + DOT(12, 12, 1.5) + DOT(18, 12, 1.5),
+    system:   P('M4 8h10') + P('M18 8h2') + P('M4 16h4') + P('M12 16h8') + C(16, 8, 2.2) + C(10, 16, 2.2),
+
+    check:    P('M4.6 12.6l4.8 4.8L19.4 7.2'),
+    clock:    C(12, 12, 8.4) + P('M12 7.2v5.2l3.4 2'),
+    doc:      P('M6.4 3.8h6.8l4.4 4.4v11.9a.5.5 0 01-.5.5H6.4a.5.5 0 01-.5-.5V4.3a.5.5 0 01.5-.5z') + P('M13.2 3.8v4.4h4.4'),
+    approx:   C(12, 12, 8.4) + P('M8 13.2c1.1-2.2 2.5-2.2 4 0s2.9 2.2 4 0'),
+    unknown:  C(12, 12, 8.4) + P('M9.6 9.5a2.5 2.5 0 014.9.7c0 1.7-2.4 2.1-2.4 3.7') + DOT(12, 16.4, 1.2),
+    avoid:    C(12, 12, 8.4) + P('M8.4 12h7.2'),
+    alert:    P('M12 4.4l8.6 14.5a.6.6 0 01-.5.9H3.9a.6.6 0 01-.5-.9L12 4.4z') + P('M12 10v3.8') + DOT(12, 16.8, 1.2),
+    chevron:  P('M9.5 5.5l6.5 6.5-6.5 6.5'),
+    arrow:    P('M4.5 12h14') + P('M12.8 6.2l5.8 5.8-5.8 5.8'),
+    hold:     P('M8 6.5h2.4v11H8z') + P('M13.6 6.5H16v11h-2.4z'),
+    send:     P('M20 4L3.8 10.6l6.3 2.6 2.6 6.3L20 4z') + P('M10.1 13.2L20 4'),
+    person:   C(12, 8.4, 3.2) + P('M5.6 19.6a6.6 6.6 0 0112.8 0'),
+    money:    C(12, 12, 8.4) + P('M12 7.6v8.8') + P('M14.4 9.8a2.6 2.6 0 00-2.4-1.3c-1.5 0-2.6.8-2.6 2s1 1.7 2.6 2 2.7.8 2.7 2-1.1 2-2.7 2a2.7 2.7 0 01-2.5-1.4'),
+    pin:      P('M12 21c0 0 6.6-6 6.6-10.8A6.6 6.6 0 0012 3.6a6.6 6.6 0 00-6.6 6.6C5.4 15 12 21 12 21z') + C(12, 10.1, 2.4),
+    edit:     P('M16.4 4.6l3 3L9.8 17.2l-3.9.9.9-3.9 9.6-9.6z') + P('M14.6 6.4l3 3'),
+  };
+
+  V.icon = function (name, opts) {
+    const options = opts || {};
+    const body = ICONS[name];
+    if (!body) return '';
+    const cls = options.className ? ` class="${V.esc(options.className)}"` : '';
+    const size = options.size ? ` width="${options.size}" height="${options.size}"` : '';
+    /* Icons are always paired with text, so they are decorative to assistive
+       technology. UI Plan 13: never state by icon alone. */
+    return `<svg viewBox="0 0 24 24"${size}${cls} aria-hidden="true" focusable="false">${body}</svg>`;
+  };
+
+  /* --------------------------------------------------------------- misc */
+
+  V.pluralize = function (count, singular, plural) {
+    return `${count} ${count === 1 ? singular : plural || singular + 's'}`;
+  };
+
+  /* Spelled-out small numbers read better in agent sentences than digits. */
+  const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  V.numberWord = function (n) {
+    return n >= 0 && n <= 10 ? WORDS[n] : String(n);
+  };
+
+  V.capitalize = function (text) {
+    const s = String(text);
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  };
+
+  V.byId = function (list, id) {
+    return list.find((item) => item.id === id) || null;
+  };
+})(window.VowOS);
+
+/* js/imagery.js */
+/* VowOS prototype — generative place compositions.
+ *
+ * UI Plan section 14 permits three kinds of image: rights-cleared venue
+ * photography, couple-supplied visuals used in scope, or "abstract editorial
+ * composition that does not pretend to be their wedding". A prototype has no
+ * licensed venue photography, and generic stock couples are explicitly banned,
+ * so every image here is the third kind: a drawn composition, labelled as one.
+ *
+ * This is not a placeholder standing in for photography. It is the honest
+ * option, and it demonstrates the imagery rule rather than violating it.
+ */
+(function (V) {
+  'use strict';
+
+  let uid = 0;
+  const nextId = () => `vow-g${++uid}`;
+
+  function frame(inner, defs, label) {
+    const grain = nextId();
+    return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${V.esc(label)}">
+      <defs>${defs}
+        <filter id="${grain}" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
+          <feColorMatrix type="saturate" values="0" in="n"/>
+        </filter>
+      </defs>
+      ${inner}
+      <rect width="400" height="300" filter="url(#${grain})" opacity="0.05" style="mix-blend-mode:multiply"/>
+    </svg>`;
+  }
+
+  const linear = (id, from, to, vertical) =>
+    `<linearGradient id="${id}" x1="0" y1="0" x2="${vertical ? 0 : 1}" y2="${vertical ? 1 : 0}">
+      <stop offset="0" stop-color="${from}"/><stop offset="1" stop-color="${to}"/>
+    </linearGradient>`;
+
+  const radial = (id, color, opacity) =>
+    `<radialGradient id="${id}">
+      <stop offset="0" stop-color="${color}" stop-opacity="${opacity}"/>
+      <stop offset="1" stop-color="${color}" stop-opacity="0"/>
+    </radialGradient>`;
+
+  /* ------------------------------------------------------------- scenes */
+
+  /* An orchard on a slope, low sun. */
+  function orchard() {
+    const sky = nextId(); const sun = nextId();
+    const defs = linear(sky, '#F7ECD8', '#FDF8EF', true) + radial(sun, '#D6B56F', 0.42);
+
+    const tree = (x, y, rx, ry, fill) =>
+      `<rect x="${x - 2}" y="${y - 4}" width="4" height="14" fill="#7A6650"/>
+       <ellipse cx="${x}" cy="${y - ry + 2}" rx="${rx}" ry="${ry}" fill="${fill}"/>`;
+
+    const rowBack = [40, 96, 152, 208, 264, 320, 376]
+      .map((x) => tree(x, 202, 15, 19, '#7E9578')).join('');
+    const rowFront = [16, 88, 160, 232, 304, 376]
+      .map((x) => tree(x, 250, 21, 26, '#68805F')).join('');
+
+    return frame(`
+      <rect width="400" height="300" fill="url(#${sky})"/>
+      <circle cx="300" cy="72" r="96" fill="url(#${sun})"/>
+      <path d="M0 172C60 156 118 166 180 156S300 144 400 158V300H0Z" fill="#CBD1BC"/>
+      <g>
+        <rect x="46" y="158" width="72" height="34" fill="#EFE6D6"/>
+        <path d="M36 160L82 132L128 160Z" fill="#B58C72"/>
+        <rect x="70" y="170" width="12" height="22" fill="#C6B49C"/>
+        <rect x="94" y="168" width="10" height="10" fill="#C6B49C"/>
+      </g>
+      <path d="M0 192C80 182 160 194 250 186S360 180 400 188V300H0Z" fill="#B7C2A4"/>
+      ${rowBack}
+      <path d="M0 228Q200 214 400 232V300H0Z" fill="#A3B08D"/>
+      ${rowFront}
+      <path d="M0 276Q200 264 400 280V300H0Z" fill="#94A37E"/>
+    `, defs, 'Illustrative composition: an orchard on a slope at low sun');
+  }
+
+  /* A tall-windowed room, daylight pooling on the floor. */
+  function arch() {
+    const glass = nextId(); const wall = nextId();
+    const defs = linear(glass, '#FDF6E6', '#E9DCC2', true) + linear(wall, '#EDE4D5', '#E3D8C6', true);
+
+    const window_ = (cx) => `
+      <path d="M${cx - 34} 216V96a34 34 0 0168 0v120Z" fill="url(#${glass})" stroke="#7C7263" stroke-width="2"/>
+      <path d="M${cx} 62v154M${cx - 34} 140h68" stroke="#7C7263" stroke-width="1.6" fill="none"/>`;
+
+    const pool = (cx) =>
+      `<path d="M${cx - 34} 216h68l30 62h-128Z" fill="#F8EED8" opacity="0.85"/>`;
+
+    return frame(`
+      <rect width="400" height="300" fill="url(#${wall})"/>
+      <rect y="216" width="400" height="84" fill="#D3C4AE"/>
+      ${[100, 200, 300].map(pool).join('')}
+      ${[100, 200, 300].map(window_).join('')}
+      <rect y="212" width="400" height="5" fill="#BEAF98"/>
+      <g>
+        <rect x="150" y="238" width="100" height="5" rx="2.5" fill="#7A6A56"/>
+        <rect x="160" y="243" width="5" height="28" fill="#7A6A56"/>
+        <rect x="235" y="243" width="5" height="28" fill="#7A6A56"/>
+      </g>
+      <rect x="30" y="246" width="26" height="30" rx="4" fill="#8C7B63"/>
+      <ellipse cx="43" cy="238" rx="19" ry="15" fill="#6E8570"/>
+    `, defs, 'Illustrative composition: a tall-windowed room with daylight on the floor');
+  }
+
+  /* A barn against an open field. */
+  function barn() {
+    const sky = nextId();
+    const defs = linear(sky, '#E4EDF0', '#FBF7F0', true);
+
+    return frame(`
+      <rect width="400" height="300" fill="url(#${sky})"/>
+      <path d="M0 176q26-16 52-4t54-2 52 6 56-10 58 4 68-2v122H0Z" fill="#63795F"/>
+      <path d="M0 190C90 180 150 192 240 184s120-6 160 2V300H0Z" fill="#C3CCA9"/>
+      <g>
+        <path d="M104 134L200 86l96 48Z" fill="#8E4635"/>
+        <rect x="122" y="132" width="156" height="66" fill="#B0674F"/>
+        <rect x="182" y="150" width="36" height="48" fill="#6E4033"/>
+        <path d="M182 150h36M200 150v48" stroke="#8E4635" stroke-width="2"/>
+        <rect x="140" y="146" width="18" height="16" fill="#E7DCC7"/>
+        <rect x="242" y="146" width="18" height="16" fill="#E7DCC7"/>
+        <path d="M188 108l12-8 12 8v14h-24Z" fill="#E7DCC7"/>
+      </g>
+      <path d="M0 228q200-14 400 6V300H0Z" fill="#AFBB95"/>
+      <g stroke="#9A8B72" stroke-width="2.4" fill="none">
+        <path d="M0 224h400M0 236h400"/>
+        <path d="M40 214v34M120 216v32M200 218v32M280 216v32M360 214v34"/>
+      </g>
+      <path d="M0 268q200-10 400 8V300H0Z" fill="#9DAA83"/>
+    `, defs, 'Illustrative composition: a barn against an open field');
+  }
+
+  /* An interior with a long table and window light. */
+  function rooms() {
+    const light = nextId(); const wall = nextId();
+    const defs = linear(light, '#FDF7E8', '#EFE1C4', true) + linear(wall, '#F1E9DC', '#E6DCCB', true);
+
+    return frame(`
+      <rect width="400" height="300" fill="url(#${wall})"/>
+      <rect x="236" y="38" width="118" height="160" rx="4" fill="url(#${light})" stroke="#8A7F6E" stroke-width="2.4"/>
+      <path d="M295 38v160M236 118h118" stroke="#8A7F6E" stroke-width="1.6"/>
+      <path d="M236 198h118l52 84H150Z" fill="#F8EFD9" opacity="0.8"/>
+      <rect y="206" width="400" height="94" fill="#C9B79F"/>
+      <path d="M0 232h400M0 262h400" stroke="#BBA88E" stroke-width="1.6"/>
+      <rect y="200" width="400" height="7" fill="#B09C81"/>
+      <g>
+        <ellipse cx="150" cy="228" rx="96" ry="17" fill="#8E7B63"/>
+        <rect x="60" y="228" width="180" height="8" fill="#7C6A53"/>
+        <rect x="78" y="236" width="6" height="30" fill="#7C6A53"/>
+        <rect x="216" y="236" width="6" height="30" fill="#7C6A53"/>
+      </g>
+      <g fill="#6F6252">
+        <rect x="42" y="204" width="24" height="4" rx="2"/><rect x="52" y="208" width="4" height="22"/>
+        <rect x="236" y="204" width="24" height="4" rx="2"/><rect x="246" y="208" width="4" height="22"/>
+      </g>
+      <g>
+        <path d="M150 0v46" stroke="#8A7F6E" stroke-width="1.6"/>
+        <path d="M128 46h44l-10 20h-24Z" fill="#D6B56F"/>
+      </g>
+    `, defs, 'Illustrative composition: an interior with a long table and window light');
+  }
+
+  /* Open farmland in bands. */
+  function farm() {
+    const sky = nextId();
+    const defs = linear(sky, '#EDF2F1', '#FCFAF4', true);
+
+    return frame(`
+      <rect width="400" height="300" fill="url(#${sky})"/>
+      <path d="M0 168q60-12 132-6t128-8 140 2v144H0Z" fill="#5C7255"/>
+      <path d="M0 182q100-14 200 0t200 4v114H0Z" fill="#C8D0AE"/>
+      <path d="M0 206q110 12 200-4t200 6v92H0Z" fill="#B3BF96"/>
+      <path d="M0 238q120-18 200 2t200-6v66H0Z" fill="#C4CDA6"/>
+      <path d="M0 266q130 14 200-6t200 8v32H0Z" fill="#A5B387"/>
+      <g fill="#4E6449">
+        <ellipse cx="336" cy="160" rx="30" ry="24"/>
+        <ellipse cx="366" cy="166" rx="22" ry="18"/>
+        <ellipse cx="308" cy="168" rx="20" ry="16"/>
+      </g>
+      <g>
+        <rect x="44" y="146" width="46" height="24" fill="#E4D9C6"/>
+        <path d="M38 148L67 130L96 148Z" fill="#A9917A"/>
+      </g>
+      <path d="M0 190h400" stroke="#8FA07A" stroke-width="1.4" opacity="0.6"/>
+    `, defs, 'Illustrative composition: open farmland in bands');
+  }
+
+  /* A courtyard under a pergola. */
+  function courtyard() {
+    const wall = nextId();
+    const defs = linear(wall, '#F0E7D8', '#E5DAC7', true);
+
+    const beams = [];
+    for (let x = -40; x < 420; x += 44) {
+      beams.push(`<path d="M${x} 0l30 118h-16L${x - 16} 0Z" fill="#1D1C1A" opacity="0.07"/>`);
+    }
+
+    return frame(`
+      <rect width="400" height="300" fill="url(#${wall})"/>
+      ${beams.join('')}
+      <rect y="206" width="400" height="94" fill="#D8CBB8"/>
+      <path d="M0 206h400" stroke="#C0B199" stroke-width="2.4"/>
+      <path d="M60 206l40 94M160 206l40 94M260 206l40 94M360 206l40 94" stroke="#1D1C1A" stroke-width="16" opacity="0.05"/>
+      <g>
+        <rect x="28" y="214" width="52" height="46" rx="6" fill="#A9917A"/>
+        <ellipse cx="54" cy="204" rx="34" ry="26" fill="#6E8570"/>
+        <ellipse cx="32" cy="212" rx="18" ry="14" fill="#7E9578"/>
+      </g>
+      <g>
+        <rect x="318" y="222" width="44" height="38" rx="6" fill="#A9917A"/>
+        <ellipse cx="340" cy="214" rx="28" ry="22" fill="#68805F"/>
+      </g>
+      <rect x="150" y="150" width="100" height="56" rx="4" fill="#E9DFCC" stroke="#B9A98F" stroke-width="2"/>
+      <path d="M200 150v56M150 178h100" stroke="#B9A98F" stroke-width="1.6"/>
+    `, defs, 'Illustrative composition: a courtyard under a pergola');
+  }
+
+  /* An abstract wash built from an accepted palette. */
+  function paletteScene(colors) {
+    const sky = nextId();
+    const list = colors && colors.length ? colors : ['#DAB5A6', '#345A4A', '#D6B56F', '#F5F1EA'];
+    const defs = linear(sky, list[3] || '#F5F1EA', '#FCFBF8', true);
+    return frame(`
+      <rect width="400" height="300" fill="url(#${sky})"/>
+      <path d="M0 300V150a200 150 0 01400 0v150Z" fill="${list[0]}" opacity="0.85"/>
+      <circle cx="286" cy="104" r="58" fill="${list[2]}" opacity="0.75"/>
+      <path d="M0 300V214a130 86 0 01260 0v86Z" fill="${list[1]}" opacity="0.9"/>
+      <rect x="42" y="188" width="76" height="112" rx="38" fill="${list[3] || '#F5F1EA'}" opacity="0.55"/>
+    `, defs, 'Abstract composition generated from the accepted palette');
+  }
+
+  /* Empty states: minimal paper and architecture, never a stock couple. */
+  function abstract() {
+    const wash = nextId();
+    const defs = linear(wash, '#F5F1EA', '#FCFBF8', true);
+    return frame(`
+      <rect width="400" height="300" fill="url(#${wash})"/>
+      <path d="M120 300V126a80 80 0 01160 0v174Z" fill="#E7E1D6"/>
+      <path d="M162 300V140a38 38 0 0176 0v160Z" fill="#F5F1EA"/>
+      <path d="M0 262h400" stroke="#E7E1D6" stroke-width="2"/>
+    `, defs, 'Abstract editorial composition');
+  }
+
+  const SCENES = { orchard, arch, barn, rooms, farm, courtyard };
+
+  V.imagery = {
+    scene: function (name, colors) {
+      if (name === 'palette') return paletteScene(colors);
+      const fn = SCENES[name];
+      return fn ? fn() : abstract();
+    },
+    palette: paletteScene,
+    abstract: abstract,
+    /* Every composition carries this line wherever it could be mistaken for a
+       photograph of the real place. */
+    credit: 'Illustrative composition, not a photograph of the place.',
+  };
+})(window.VowOS);
+
+/* js/model.js */
+/* VowOS prototype — trust data model and agent permission model.
+ *
+ * Masterplan sections 3 and 5. The roadmap requires both of these to work as
+ * systems before any priority artifact goes to high fidelity, because the UI
+ * patterns they support ("Verified by the venue on June 8", "I have sent the
+ * five venue inquiries you approved") are promises the data layer has to keep.
+ *
+ * Nothing in the screens is allowed to invent an evidence line. Every one is
+ * rendered from a fact resolved through V.trust.resolve().
+ */
+(function (V) {
+  'use strict';
+
+  /* ============================================================== TRUST == */
+
+  const STATES = {
+    confirmed: {
+      id: 'confirmed',
+      name: 'Confirmed',
+      icon: 'check',
+      definition: 'Sourced directly from the venue, vendor, or an official document, with a timestamp.',
+    },
+    reported: {
+      id: 'reported',
+      name: 'Reported',
+      icon: 'doc',
+      definition: 'Stated by a third party but not confirmed by the primary source.',
+    },
+    inferred: {
+      id: 'inferred',
+      name: 'Inferred',
+      icon: 'approx',
+      definition: 'Derived by the agent from a pattern, not stated by anyone.',
+    },
+    unknown: {
+      id: 'unknown',
+      name: 'Unknown',
+      icon: 'unknown',
+      definition: 'Actively not established, and the agent knows it.',
+    },
+  };
+
+  /* Expected freshness window in days, by category. A Confirmed fact that ages
+     past its window downgrades one level, toward Reported, without waiting for
+     a user to notice a discrepancy. Masterplan section 3. */
+  const FRESHNESS = {
+    availability: 14,
+    pricing: 90,
+    policy: 180,
+    capability: 365,
+    contract: 365,
+  };
+
+  const CATEGORY_NOUN = {
+    availability: 'Availability',
+    pricing: 'Pricing',
+    policy: 'Policy',
+    capability: 'Capacity and capability',
+    contract: 'Contract',
+  };
+
+  /* A fact with no resolved state cannot ship in a decision-relevant surface.
+     Rather than trusting reviewers to catch it, an unstated state resolves to
+     Unknown and reports itself, because a silent omission reads as confidence
+     the product does not have. */
+  function normalize(fact) {
+    if (!fact) return null;
+    if (!fact.state || !STATES[fact.state]) {
+      if (typeof console !== 'undefined' && console.warn) {
+        console.warn(
+          `[VowOS trust] Fact "${fact.id || fact.label}" has no resolved state. ` +
+          'Rendering as Unknown per Masterplan section 3.'
+        );
+      }
+      return Object.assign({}, fact, { state: 'unknown', value: fact.value || null });
+    }
+    return fact;
+  }
+
+  /* Resolves a stored fact into what the UI is allowed to say about it today. */
+  function resolve(rawFact, now) {
+    const fact = normalize(rawFact);
+    if (!fact) return null;
+
+    const today = now || V.NOW;
+    let state = fact.state;
+    let downgraded = false;
+    let ageDays = null;
+    const window = FRESHNESS[fact.category];
+
+    if (fact.asOf) {
+      ageDays = V.daysBetween(fact.asOf, today);
+      if (state === 'confirmed' && window && ageDays > window) {
+        state = 'reported';
+        downgraded = true;
+      }
+    }
+
+    return Object.assign({}, fact, {
+      state,
+      originalState: fact.state,
+      downgraded,
+      ageDays,
+      window: window || null,
+      meta: STATES[state],
+      line: describe(fact, state, downgraded, window),
+    });
+  }
+
+  /* The human wording for each state. This is the only place evidence
+     sentences are written, so the vocabulary cannot drift screen to screen. */
+  function describe(fact, state, downgraded, window) {
+    const source = fact.source || 'an unnamed source';
+
+    if (downgraded) {
+      const noun = CATEGORY_NOUN[fact.category] || 'These';
+      return `Confirmed by ${source} on ${V.fmtDate(fact.asOf, 'dayMonth')}. ` +
+        `${noun} facts age after ${window} days, so we will re-check before you commit.`;
+    }
+
+    switch (state) {
+      case 'confirmed':
+        return `Verified by ${source} on ${V.fmtDate(fact.asOf, 'dayMonth')}.`;
+      case 'reported':
+        return `According to ${source}, not yet confirmed.`;
+      case 'inferred':
+        return fact.basis
+          ? `Our estimate based on ${fact.basis}.`
+          : 'Our estimate, not stated by the venue.';
+      case 'unknown':
+      default:
+        return fact.pending
+          ? `We have not confirmed this yet. ${fact.pending}`
+          : 'We have not confirmed this yet.';
+    }
+  }
+
+  /* A fact's value is only shown as a number when the state supports it.
+     Unknown never renders a figure, because a figure implies a source. */
+  function displayValue(resolved) {
+    if (!resolved) return '—';
+    if (resolved.state === 'unknown') return 'Not confirmed';
+    if (resolved.value === null || resolved.value === undefined) return 'Not confirmed';
+    if (resolved.state === 'inferred' && typeof resolved.value === 'number') {
+      return `About ${V.fmtMoney(resolved.value)}`;
+    }
+    return typeof resolved.value === 'number' ? V.fmtMoney(resolved.value) : String(resolved.value);
+  }
+
+  V.trust = {
+    STATES,
+    FRESHNESS,
+    resolve,
+    displayValue,
+    resolveAll: function (facts, now) {
+      return (facts || []).map((f) => resolve(f, now)).filter(Boolean);
+    },
+    /* Used by the budget: totals must declare what they exclude. A total built
+       over any Unknown is never presented as a total. */
+    summarize: function (facts, now) {
+      const resolved = V.trust.resolveAll(facts, now);
+      return {
+        facts: resolved,
+        confirmed: resolved.filter((f) => f.state === 'confirmed').length,
+        unknown: resolved.filter((f) => f.state === 'unknown'),
+        inferred: resolved.filter((f) => f.state === 'inferred'),
+        stale: resolved.filter((f) => f.downgraded),
+        complete: resolved.every((f) => f.state === 'confirmed'),
+      };
+    },
+  };
+
+  /* ========================================================= DELEGATION == */
+
+  const LEVELS = [
+    {
+      id: 'propose',
+      name: 'Propose only',
+      summary: 'VowOS drafts everything and holds it for you.',
+      detail: 'Messages, shortlists, and plans are prepared and wait for your review. Nothing leaves VowOS without you.',
+    },
+    {
+      id: 'standing',
+      name: 'Act with standing approval',
+      summary: 'VowOS acts inside the specific permissions you have given, and asks about everything else.',
+      detail: 'You name the situations. VowOS acts in those and reports back. Anything outside them waits for you.',
+    },
+    {
+      id: 'report',
+      name: 'Act and report',
+      summary: 'For reversible housekeeping only. Never money, contracts, or messages.',
+      detail: 'Reordering your plan, filing documents, and tidying your own workspace. This level never extends to a third party.',
+    },
+  ];
+
+  /* The scopes a couple can grant under "Act with standing approval". Each is
+     stated in plain language before the agent acts on it, never discovered
+     afterward. Principle 2.8. */
+  const SCOPES = [
+    {
+      id: 'follow-up-once',
+      label: 'Follow up once if a place has not replied in five days',
+      granted: true,
+    },
+    {
+      id: 'propose-tour-times',
+      label: 'Propose tour times to places you have saved',
+      granted: true,
+    },
+    {
+      id: 'request-missing-facts',
+      label: 'Ask a place for a fact we are missing, like a fee or a curfew',
+      granted: true,
+    },
+    {
+      id: 'send-inquiry-packs',
+      label: 'Send a first inquiry to a place you have not saved yet',
+      granted: false,
+    },
+  ];
+
+  /* Every action the prototype can take is declared here. An action that is
+     not declared cannot be performed, which is what stops autonomy from
+     creeping one reasonable-looking feature at a time. */
+  const ACTIONS = {
+    'request-tour': {
+      label: 'Ask a place for a tour time',
+      external: true, financial: false, reversible: true, scope: 'propose-tour-times',
+    },
+    'follow-up': {
+      label: 'Follow up on an unanswered message',
+      external: true, financial: false, reversible: true, scope: 'follow-up-once',
+    },
+    'ask-question': {
+      label: 'Ask a place to confirm a missing fact',
+      external: true, financial: false, reversible: true, scope: 'request-missing-facts',
+    },
+    'send-inquiry-pack': {
+      label: 'Send an inquiry pack to new places',
+      external: true, financial: false, reversible: false, scope: 'send-inquiry-packs',
+    },
+    'hold-date': {
+      label: 'Place a hold on a date',
+      external: true, financial: true, reversible: false, scope: null,
+    },
+    'approve-venue': {
+      label: 'Commit to a place',
+      external: true, financial: true, reversible: false, scope: null,
+    },
+    'publish-website': {
+      label: 'Publish a change to the guest website',
+      external: true, financial: false, reversible: true, scope: null,
+    },
+    'reorder-plan': {
+      label: 'Reorder the plan timeline',
+      external: false, financial: false, reversible: true, scope: null,
+    },
+    'save-place': {
+      label: 'Save or rule out a place',
+      external: false, financial: false, reversible: true, scope: null,
+    },
+  };
+
+  function evaluate(actionId, settings) {
+    const action = ACTIONS[actionId];
+    if (!action) {
+      return {
+        allowed: false,
+        requiresApproval: true,
+        reason: 'This is not a capability VowOS has been given.',
+        action: null,
+      };
+    }
+
+    const level = (settings && settings.level) || 'standing';
+    const granted = (settings && settings.scopes) || [];
+
+    /* Money and irreversible commitments never resolve to allowed, at any
+       level. This is the line the permission model does not move. */
+    if (action.financial) {
+      return {
+        allowed: false, requiresApproval: true, action,
+        reason: 'Anything involving money or a commitment always comes back to you both, whatever your settings say.',
+      };
+    }
+
+    if (action.external) {
+      if (level === 'propose') {
+        return {
+          allowed: false, requiresApproval: true, action,
+          reason: 'You have VowOS set to propose only, so anything that leaves VowOS waits for your review.',
+        };
+      }
+      if (level === 'report') {
+        return {
+          allowed: false, requiresApproval: true, action,
+          reason: 'Act and report never covers contacting anyone. This waits for your approval.',
+        };
+      }
+      const scope = SCOPES.find((s) => s.id === action.scope);
+      if (scope && granted.indexOf(action.scope) !== -1) {
+        return {
+          allowed: true, requiresApproval: false, action, scope,
+          reason: `Covered by a standing approval you gave: “${scope.label}.”`,
+        };
+      }
+      if (!action.reversible) {
+        return {
+          allowed: false, requiresApproval: true, action,
+          reason: 'This one cannot be taken back once it is sent, so it waits for your approval.',
+        };
+      }
+      return {
+        allowed: false, requiresApproval: true, action,
+        reason: 'This sits outside the standing approvals you have given, so it waits for you.',
+      };
+    }
+
+    return {
+      allowed: true, requiresApproval: false, action,
+      reason: 'This is reversible and stays inside your own plan, so VowOS does it and tells you.',
+    };
+  }
+
+  V.delegation = {
+    LEVELS,
+    SCOPES,
+    ACTIONS,
+    evaluate,
+    levelById: (id) => LEVELS.find((l) => l.id === id) || LEVELS[1],
+    /* One condensed sentence for the visibility table (UI Plan section 10),
+       expanded only where a user is about to authorize something. */
+    summarize: function (settings) {
+      const level = V.delegation.levelById(settings.level);
+      const count = (settings.scopes || []).length;
+      if (settings.level !== 'standing') return level.summary;
+      return `VowOS acts on ${V.numberWord(count)} specific permissions you have given, and asks about everything else.`;
+    },
+  };
+})(window.VowOS);
+
+/* js/data.js */
+/* VowOS prototype — the fictional wedding.
+ *
+ * UI Plan section 17 requires realistic copy and a consistent couple and venue
+ * set, not lorem ipsum or placeholder dashboard data, because a calm interface
+ * is easy to fake with empty content and hard to earn with real content.
+ *
+ * Every fact carries a trust state and, where relevant, a source and a date.
+ * Facts are deliberately uneven: some confirmed, one stale, one wrong and
+ * corrected, several genuinely unknown. That unevenness is the point.
+ */
+(function (V) {
+  'use strict';
+
+  const couple = {
+    title: 'Maya and Alex',
+    partners: [
+      { id: 'maya', name: 'Maya', initials: 'M', slot: 'a' },
+      { id: 'alex', name: 'Alex', initials: 'A', slot: 'b' },
+    ],
+  };
+
+  const wedding = {
+    date: '2027-06-12',
+    dateFlexible: 'Saturday is fixed. Sunday, June 13 is open to discussion.',
+    region: 'Hudson Valley, New York',
+    guests: 110,
+    guestRange: '105 to 118',
+    budgetComfort: 85000,
+    origin: 'Rhinecliff station',
+  };
+
+  /* ---------------------------------------------------------- the places */
+
+  const places = [
+    {
+      id: 'orchard-house',
+      name: 'The Orchard House',
+      location: 'Rhinebeck, New York',
+      travel: '18 minutes from Rhinecliff station',
+      scene: 'orchard',
+      status: 'saved',
+      whyItFits: [
+        'The dinner is served at one long table under the trees, which is the closest thing we have found to the evening you described.',
+        'Music can run until 1 a.m., which is the latest curfew of anywhere in your range.',
+      ],
+      realityCheck: 'It is the most expensive place on your list, and the service charge is not confirmed yet.',
+      facts: [
+        { id: 'oh-fee', label: 'Site fee', value: 34200, state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'pricing' },
+        { id: 'oh-cap', label: 'Seated capacity', value: '140 seated', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
+        { id: 'oh-curfew', label: 'Music curfew', value: '1:00 a.m.', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'policy' },
+        { id: 'oh-date', label: 'Your date', value: 'Saturday, June 12, 2027 is open', state: 'confirmed', source: 'The Orchard House', asOf: '2026-07-20', category: 'availability' },
+        { id: 'oh-rain', label: 'Rain plan', value: 'The restored barn seats all 140', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
+        { id: 'oh-access', label: 'Accessibility', value: 'Step-free ceremony lawn, one accessible restroom', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
+        { id: 'oh-service', label: 'Service charge', value: '22 percent', state: 'reported', source: 'a Hudson Valley venue directory', category: 'pricing' },
+        { id: 'oh-catering', label: 'Outside catering', value: null, state: 'unknown', category: 'policy', pending: 'I asked on August 9 and expect an answer this week.' },
+      ],
+      hold: { until: '2026-08-14T17:00', what: 'Saturday, June 12, 2027' },
+    },
+    {
+      id: 'maison-98',
+      name: 'Maison 98',
+      location: 'Hudson, New York',
+      travel: '9 minutes on foot from Hudson station',
+      scene: 'arch',
+      status: 'saved',
+      whyItFits: [
+        'A former warehouse with twelve-foot arched windows, so the room is still full of light at 7 p.m. in June.',
+        'It keeps about 7,400 dollars more of your budget available for food and music.',
+      ],
+      realityCheck: 'If it rains, the ceremony moves inside and the room seats 96. You are planning for 110.',
+      facts: [
+        { id: 'm98-fee', label: 'Site fee', value: 26800, state: 'confirmed', source: 'the proposal Maison 98 sent', asOf: '2026-08-07', category: 'pricing' },
+        { id: 'm98-cap', label: 'Seated capacity', value: '120 seated', state: 'confirmed', source: 'the proposal Maison 98 sent', asOf: '2026-08-07', category: 'capability' },
+        { id: 'm98-curfew', label: 'Music curfew', value: '11:00 p.m.', state: 'confirmed', source: 'the proposal Maison 98 sent', asOf: '2026-08-07', category: 'policy' },
+        { id: 'm98-date', label: 'Your date', value: 'Saturday, June 12, 2027 is open', state: 'confirmed', source: 'Maison 98', asOf: '2026-08-07', category: 'availability' },
+        { id: 'm98-rain', label: 'Rain plan', value: 'Ceremony moves indoors and the room seats 96', state: 'confirmed', source: 'the proposal Maison 98 sent', asOf: '2026-08-07', category: 'capability' },
+        { id: 'm98-access', label: 'Accessibility', value: 'Step-free throughout, elevator to the mezzanine', state: 'confirmed', source: 'the proposal Maison 98 sent', asOf: '2026-08-07', category: 'capability' },
+        { id: 'm98-service', label: 'Service charge', value: 5900, state: 'inferred', basis: 'three comparable Hudson venues', category: 'pricing' },
+        { id: 'm98-noise', label: 'Street noise after 10 p.m.', value: 'Two reviews mention traffic noise near the loading door', state: 'reported', source: 'guest reviews from 2025', category: 'capability' },
+      ],
+      hold: null,
+    },
+    {
+      id: 'fielding-barn',
+      name: 'Fielding Barn',
+      location: 'Germantown, New York',
+      travel: '24 minutes from Rhinecliff station',
+      scene: 'barn',
+      status: 'contacted',
+      whyItFits: [
+        'The barn is one room, so the dinner and the dancing do not have to be separated.',
+        'It is the only place on your list that includes tables, chairs, and linen in the site fee.',
+      ],
+      realityCheck: 'They have not replied since August 6. I follow up on Thursday, August 13.',
+      facts: [
+        { id: 'fb-fee', label: 'Site fee', value: 22500, state: 'reported', source: 'their 2026 rate sheet', category: 'pricing' },
+        { id: 'fb-cap', label: 'Seated capacity', value: '130 seated', state: 'reported', source: 'their website', category: 'capability' },
+        { id: 'fb-date', label: 'Your date', value: null, state: 'unknown', category: 'availability', pending: 'I asked on August 6 and have not heard back.' },
+        { id: 'fb-curfew', label: 'Music curfew', value: null, state: 'unknown', category: 'policy', pending: 'This is on the list for the follow-up.' },
+      ],
+      hold: null,
+    },
+    {
+      id: 'rosendale-rooms',
+      name: 'The Rosendale Rooms',
+      location: 'Kingston, New York',
+      travel: '31 minutes from Rhinecliff station',
+      scene: 'rooms',
+      status: 'suggested',
+      whyItFits: [
+        'Three connected rooms rather than one hall, which suits a dinner that spreads out as the evening goes.',
+        'Twenty-two rooms upstairs, so your families could stay where the dinner is.',
+      ],
+      realityCheck: 'The largest room seats 88, so 110 guests would eat across two rooms.',
+      facts: [
+        { id: 'rr-fee', label: 'Site fee', value: 24000, state: 'reported', source: 'their published 2027 rates', category: 'pricing' },
+        { id: 'rr-cap', label: 'Largest room', value: '88 seated', state: 'confirmed', source: 'The Rosendale Rooms', asOf: '2026-08-09', category: 'capability' },
+        { id: 'rr-rooms', label: 'Guest rooms', value: '22 rooms on site', state: 'confirmed', source: 'The Rosendale Rooms', asOf: '2026-08-09', category: 'capability' },
+        { id: 'rr-date', label: 'Your date', value: 'Saturday, June 12, 2027 is open', state: 'confirmed', source: 'The Rosendale Rooms', asOf: '2026-08-09', category: 'availability' },
+      ],
+      hold: null,
+    },
+    {
+      id: 'ashgrove-farm',
+      name: 'Ashgrove Farm',
+      location: 'Millbrook, New York',
+      travel: '38 minutes from Rhinecliff station',
+      scene: 'farm',
+      status: 'contacted',
+      whyItFits: [
+        'The dinner field looks west, so the light you described lands right at the start of dinner.',
+        'They cap events at 120, so your wedding would be the only thing happening there that weekend.',
+      ],
+      realityCheck: 'It is the furthest from the station, and there is no rain plan for more than 60 people.',
+      facts: [
+        { id: 'af-fee', label: 'Site fee', value: null, state: 'unknown', category: 'pricing', pending: 'Their 2027 rates are not published. I asked on August 8.' },
+        { id: 'af-cap', label: 'Event cap', value: '120 guests', state: 'reported', source: 'their website', category: 'capability' },
+        { id: 'af-rain', label: 'Rain plan', value: 'Covered pavilion seats 60', state: 'reported', source: 'their website', category: 'capability' },
+      ],
+      hold: null,
+    },
+  ];
+
+  /* ------------------------------------------------------------- vision */
+
+  const vision = {
+    feeling:
+      'A long dinner party in a room that already feels like evening. You want people eating for hours, one loud toast, and no part of the day that feels like a performance.',
+    priorities: [
+      'One long seated dinner, not a buffet',
+      'A room that holds 110 without feeling like a hall',
+      'Music late enough that it matters',
+      'Somewhere our families can walk back to where they are sleeping',
+      'Good light in the early evening',
+    ],
+    avoiding: [
+      'Anything that reads as a ballroom',
+      'A receiving line',
+      'A ceremony longer than twenty minutes',
+      'Rented uplighting',
+    ],
+    practical: [
+      { label: 'Date', value: 'Saturday, June 12, 2027', certainty: 'fixed' },
+      { label: 'Where', value: 'Hudson Valley, New York', certainty: 'fixed' },
+      { label: 'Guests', value: '110, somewhere between 105 and 118', certainty: 'flexible' },
+      { label: 'Budget comfort', value: '$85,000', certainty: 'flexible' },
+    ],
+    questions: [
+      'Is Saturday fixed, or would the Sunday work if it opened up a better room?',
+      'Do you want the ceremony and the dinner in the same room?',
+      'Besides you both, who is walking in the ceremony?',
+    ],
+    palettes: [
+      {
+        id: 'late-orchard',
+        name: 'Late orchard',
+        note: 'Warm and low, closest to the evening light you described.',
+        colors: ['#DAB5A6', '#345A4A', '#D6B56F', '#F5F1EA'],
+        accepted: true,
+      },
+      {
+        id: 'hudson-stone',
+        name: 'Hudson stone',
+        note: 'Cooler and quieter. Better if the dinner moves indoors.',
+        colors: ['#C9CFC6', '#4A5A63', '#B9A88C', '#F1EEE8'],
+        accepted: false,
+      },
+      {
+        id: 'long-table',
+        name: 'Long table',
+        note: 'The most saturated of the three. Reads as autumn more than June.',
+        colors: ['#E4C7B4', '#7C4A38', '#CBBFA6', '#F7F2E9'],
+        accepted: false,
+      },
+    ],
+  };
+
+  /* ------------------------------------------------------- agent activity */
+
+  const agentWork = [
+    {
+      id: 'w1', icon: 'check', tone: 'done',
+      text: 'I sent the five inquiries you approved on August 8. Three places have replied.',
+    },
+    {
+      id: 'w2', icon: 'clock', tone: 'waiting',
+      text: 'Fielding Barn and Ashgrove Farm have not answered. I follow up on Thursday, August 13.',
+    },
+    {
+      id: 'w3', icon: 'clock', tone: 'waiting',
+      text: 'I asked The Orchard House whether you can bring in outside catering. I expect an answer this week.',
+    },
+  ];
+
+  /* Masterplan 5.2: the agent already acted on something that turned out to be
+     wrong, and has to say so plainly. What happened, what it affected, what is
+     being done about it. */
+  const correction = {
+    id: 'c1',
+    title: 'I was wrong about one number.',
+    body:
+      'On August 6 I told you Maison 98 charges an 18 percent service fee. I took that from a directory listing, not from them. ' +
+      'Their proposal arrived on August 7 and does not state a service charge at all. ' +
+      'I have taken the figure out of your budget comparison and asked Maison 98 to confirm the real one. ' +
+      'Nothing was sent to anyone and no money was committed based on the wrong number.',
+  };
+
+  const thisWeek = [
+    { date: '2026-08-12', text: 'Your tour brief for The Orchard House is ready for you both.' },
+    { date: '2026-08-13', text: 'I follow up with Fielding Barn and Ashgrove Farm.' },
+    { date: '2026-08-14', text: 'The Orchard House hold on June 12 ends at 5 p.m.', risk: true },
+    { date: '2026-08-18', text: 'Tour at The Orchard House, 5:30 p.m. Confirmed.' },
+  ];
+
+  const recent = [
+    { date: '2026-08-08', text: 'Five inquiries sent to the places you saved.' },
+    { date: '2026-08-05', text: 'You both confirmed the vision readback.' },
+    { date: '2026-08-02', text: 'Budget comfort set at $85,000.' },
+  ];
+
+  /* ----------------------------------------------------------- decision */
+
+  const decision = {
+    id: 'where',
+    title: 'Where you are getting married',
+    recommendation:
+      'If the late music matters more than the money, The Orchard House. If the money matters more, Maison 98. Both fit the evening you described, so this is not a question I should answer for you.',
+    deadline: '2026-08-14T17:00',
+    deadlineNote: 'The Orchard House is holding Saturday, June 12 until Friday at 5 p.m. Letting the hold go does not rule the place out, it just means the date opens to other couples.',
+    options: ['orchard-house', 'maison-98'],
+    positions: [
+      { partner: 'maya', prefers: 'orchard-house', note: 'The long table under the trees is the thing I keep coming back to. I would rather find the money elsewhere.' },
+      { partner: 'alex', prefers: 'maison-98', note: 'I do not want to spend 7,400 dollars on a curfew. But I want to see the barn before I argue about it.' },
+    ],
+    openQuestion: 'You are not agreeing yet, and nothing needs to move until you do. The tour on Tuesday answers Alex\'s question. I can also ask The Orchard House to extend the hold past Friday.',
+  };
+
+  /* --------------------------------------------------------------- tour */
+
+  const tours = [
+    {
+      id: 't-orchard', placeId: 'orchard-house', status: 'confirmed',
+      confirmedFor: '2026-08-18T17:30',
+      reason: 'To see the barn, which is the rain plan for all 140 guests.',
+    },
+    {
+      id: 't-maison', placeId: 'maison-98', status: 'proposing',
+      reason: 'To see the room at the hour your dinner would start.',
+      windows: [
+        { id: 'w1', date: '2026-08-20', time: '2026-08-20T17:00', note: 'Same light as your dinner' },
+        { id: 'w2', date: '2026-08-20', time: '2026-08-20T18:30', note: 'Later, closer to sunset' },
+        { id: 'w3', date: '2026-08-22', time: '2026-08-22T11:00', note: 'Morning, room will be empty' },
+        { id: 'w4', date: '2026-08-22', time: '2026-08-22T16:00', note: 'A setup is running until 3 p.m.' },
+      ],
+    },
+  ];
+
+  /* --------------------------------------------------------------- plan */
+
+  const budget = {
+    comfort: 85000,
+    committed: [
+      { label: 'Photographer retainer', amount: 6800, state: 'confirmed', source: 'the signed agreement', asOf: '2026-07-28', category: 'contract' },
+    ],
+    projected: [
+      { label: 'Food and drink', amount: 28600, state: 'inferred', basis: '110 guests at Hudson Valley rates', category: 'pricing' },
+      { label: 'Photography, remaining', amount: 4200, state: 'confirmed', source: 'the signed agreement', asOf: '2026-07-28', category: 'contract' },
+      { label: 'Flowers and the room', amount: 7400, state: 'inferred', basis: 'what you said you wanted on the tables', category: 'pricing' },
+      { label: 'Music', amount: 5000, state: 'inferred', basis: 'a four-piece band and a DJ after midnight', category: 'pricing' },
+    ],
+    /* Committed 6,800 plus projected 45,200 is 52,000. With The Orchard House
+       that reaches 86,200, which is 1,200 over the stated comfort, and with
+       Maison 98 it reaches 78,800. The 7,400 difference between the two site
+       fees is the figure quoted on the Planning Pulse and in the place card. */
+    scenarios: [
+      { placeId: 'orchard-house', siteFee: 34200, note: 'This is the one that puts you over, and only just. The service charge we have not confirmed could make it worse.' },
+      { placeId: 'maison-98', siteFee: 26800, note: 'This leaves room for the service charge neither place has confirmed.' },
+    ],
+  };
+
+  const timeline = [
+    { date: '2026-08-12', text: 'Tour brief for The Orchard House goes to you both.', state: 'next' },
+    { date: '2026-08-14', text: 'The Orchard House hold on June 12 ends at 5 p.m.', state: 'risk' },
+    { date: '2026-08-18', text: 'Tour at The Orchard House, 5:30 p.m.', state: 'confirmed' },
+    { date: '2026-08-20', text: 'Tour at Maison 98. Waiting on them to confirm a time.', state: 'proposed' },
+    { date: '2026-09-01', text: 'Decide where you are getting married.', state: 'next' },
+    { date: '2026-09-15', text: 'I bring you a photographer shortlist. You have one already, so this is a second opinion only.', state: 'later' },
+    { date: '2026-10-03', text: 'Save the dates go out. This needs the place decided first.', state: 'blocked', blockedBy: 'Where you are getting married' },
+  ];
+
+  const documents = [
+    { id: 'd1', name: 'Maison 98 proposal', kind: 'Proposal', date: '2026-08-07', source: 'Maison 98' },
+    { id: 'd2', name: 'The Orchard House rate sheet, 2027', kind: 'Rates', date: '2026-08-04', source: 'The Orchard House' },
+    { id: 'd3', name: 'Photographer agreement, signed', kind: 'Contract', date: '2026-07-28', source: 'you both' },
+  ];
+
+  /* ------------------------------------------------------------- guests */
+
+  const guests = {
+    expected: 110,
+    households: 62,
+    clusters: [
+      { id: 'g1', label: 'Ready', count: 38, note: 'Name, address, and any meal detail we need.' },
+      { id: 'g2', label: 'Address missing', count: 18, note: 'Save the dates cannot go out to these households.' },
+      { id: 'g3', label: 'Travelling', count: 41, note: 'Coming from outside the Hudson Valley. Twelve have asked about rooms.' },
+      { id: 'g4', label: 'Needs a detail from you', count: 6, note: 'Accessibility or meal information we should not guess at.' },
+    ],
+    note: 'Nobody has been invited yet. These are the households you have listed so far.',
+  };
+
+  const website = {
+    published: false,
+    sections: [
+      { id: 's1', name: 'Welcome', ready: true },
+      { id: 's2', name: 'The day', ready: true },
+      { id: 's3', name: 'Travel and where to stay', ready: false, blocked: 'This needs the place decided.' },
+      { id: 's4', name: 'Questions people ask', ready: true },
+    ],
+  };
+
+  V.data = {
+    couple, wedding, places, vision, agentWork, correction, thisWeek, recent,
+    decision, tours, budget, timeline, documents, guests, website,
+  };
+})(window.VowOS);
+
+/* js/components.js */
+/* VowOS prototype — the component language from UI Plan 11.2.
+ *
+ * Each component here corresponds to a row in that table and carries its design
+ * rule as a comment, so the rule travels with the implementation rather than
+ * living in a document an engineer may never open (Masterplan section 9, step 2).
+ */
+(function (V) {
+  'use strict';
+
+  const html = V.html;
+  const raw = V.raw;
+  const esc = V.esc;
+
+  const ui = {};
+
+  /* Primary button: one per visible decision area. Terracotta fill, inverse
+     text. A high-commitment action names its consequence in a line beside the
+     button rather than borrowing a second accent color (11.2). */
+  ui.button = function (label, opts) {
+    const o = opts || {};
+    const variant = o.variant || 'secondary';
+    const attrs = [
+      `class="vow-btn vow-btn--${variant}${o.full ? ' vow-btn--full' : ''}"`,
+      `data-act="${esc(o.act || 'noop')}"`,
+      o.value ? `data-value="${esc(o.value)}"` : '',
+      o.disabled ? 'disabled' : '',
+      o.ariaLabel ? `aria-label="${esc(o.ariaLabel)}"` : '',
+      o.pressed !== undefined ? `aria-pressed="${o.pressed}"` : '',
+    ].filter(Boolean).join(' ');
+    const icon = o.icon ? V.icon(o.icon, { size: 17 }) : '';
+    return `<button type="button" ${attrs}>${esc(label)}${icon}</button>`;
+  };
+
+  /* Evidence line: source, freshness, and certainty. Small text plus a
+     restrained icon, never a technicolor badge. State is carried by icon and
+     wording as well as color, so it survives without color (UI Plan 13). */
+  ui.evidence = function (fact) {
+    const r = fact && fact.meta ? fact : V.trust.resolve(fact);
+    if (!r) return '';
+    return html`<p class="vow-evidence" data-state="${r.state}">
+      ${raw(V.icon(r.meta.icon, { className: 'vow-evidence__icon' }))}
+      <span><span class="vow-sr">${r.meta.name}. </span>${r.line}</span>
+    </p>`;
+  };
+
+  /* A labelled fact with its value and its evidence. The value renders through
+     V.trust.displayValue so an Unknown can never print a figure. */
+  ui.factRow = function (fact) {
+    const r = fact && fact.meta ? fact : V.trust.resolve(fact);
+    if (!r) return '';
+    return html`<div class="vow-stack vow-stack--2">
+      <div class="vow-row vow-row--between">
+        <span style="font-size:var(--vow-font-size-body-small);font-weight:600">${r.label}</span>
+        <span style="font-size:var(--vow-font-size-body-small)">${V.trust.displayValue(r)}</span>
+      </div>
+      ${raw(ui.evidence(r))}
+    </div>`;
+  };
+
+  /* Reveals expand in place rather than opening a modal, preserving reading
+     position (11.4). */
+  ui.drawer = function (id, label, body, open) {
+    return html`<div class="vow-drawer" data-drawer="${id}" data-open="${open ? 'true' : 'false'}">
+      <button type="button" class="vow-drawer__toggle" data-act="toggle-drawer" data-value="${id}"
+              aria-expanded="${open ? 'true' : 'false'}">
+        ${raw(V.icon('chevron', { className: 'vow-drawer__chevron' }))}${label}
+      </button>
+      <div class="vow-drawer__body">${raw(body)}</div>
+    </div>`;
+  };
+
+  /* Agent note: left rule, short first-person sentence, no chat bubble. */
+  ui.agentNote = function (text, variant) {
+    return html`<p class="vow-agent-note${variant ? ' vow-agent-note--' + variant : ''}">${text}</p>`;
+  };
+
+  /* Partner note: initials, a concise direct quote or status, no implication
+     that either partner is ahead (2.6, 9.3). */
+  ui.partnerNote = function (partnerId, body, opts) {
+    const o = opts || {};
+    const person = V.byId(V.data.couple.partners, partnerId);
+    if (!person) return '';
+    return html`<div class="vow-partner">
+      <span class="vow-partner__initials" data-person="${person.slot}" aria-hidden="true">${person.initials}</span>
+      <div class="vow-partner__body">
+        <strong>${person.name}</strong>${o.suffix ? raw(` <span class="vow-quiet">${esc(o.suffix)}</span>`) : ''}
+        <div style="margin-top:4px">${raw(body)}</div>
+      </div>
+    </div>`;
+  };
+
+  /* Status: text and icon, never a colored pill (9.1). */
+  ui.status = function (text, opts) {
+    const o = opts || {};
+    return html`<span class="vow-status" data-tone="${o.tone || 'neutral'}">
+      ${raw(o.icon ? V.icon(o.icon) : '')}${text}
+    </span>`;
+  };
+
+  /* The reality check: one tradeoff or unknown, muted but never concealed
+     below the fold (9.1). */
+  ui.reality = function (text) {
+    return html`<p class="vow-reality">${raw(V.icon('alert'))}<span>${text}</span></p>`;
+  };
+
+  const STATUS_WORDS = {
+    suggested: 'Suggested',
+    saved: 'Saved',
+    contacted: 'Contacted',
+    'tour-proposed': 'Tour proposed',
+    toured: 'Toured',
+    'ruled-out': 'Ruled out',
+  };
+
+  /* Place card: one hero composition, one reason, one reality check, one
+     action based on current state (11.2). */
+  ui.placeCard = function (place, opts) {
+    const o = opts || {};
+    const status = STATUS_WORDS[place.status] || 'Suggested';
+    const dateFact = place.facts.find((f) => f.category === 'availability');
+    const resolved = dateFact ? V.trust.resolve(dateFact) : null;
+
+    return html`<article class="vow-place" data-status="${place.status}">
+      <div class="vow-media">${raw(V.imagery.scene(place.scene))}</div>
+      <div class="vow-place__body">
+        <div>
+          <h3 class="vow-place__name">${place.name}</h3>
+          <p class="vow-meta">${place.location}. ${place.travel}.</p>
+        </div>
+        <p class="vow-place__reason">${place.whyItFits[0]}</p>
+        ${raw(ui.reality(place.realityCheck))}
+        ${raw(resolved ? ui.evidence(resolved) : '')}
+        <div class="vow-row" style="margin-top:var(--vow-space-2)">
+          ${raw(ui.button(o.primaryLabel || 'Open', { variant: 'secondary', act: 'open-place', value: place.id }))}
+          <span class="vow-status">${status}</span>
+        </div>
+      </div>
+    </article>`;
+  };
+
+  /* Timeline row: date left, sentence right, status by text and icon, never by
+     color alone (11.2). */
+  const TIMELINE_WORDS = {
+    confirmed: { word: 'Confirmed', icon: 'check', tone: 'ready' },
+    proposed: { word: 'Proposed, not confirmed', icon: 'clock', tone: 'neutral' },
+    next: { word: 'Next', icon: 'arrow', tone: 'neutral' },
+    later: { word: 'Later', icon: 'clock', tone: 'neutral' },
+    risk: { word: 'Ends soon', icon: 'alert', tone: 'risk' },
+    blocked: { word: 'Waiting on a decision', icon: 'hold', tone: 'neutral' },
+    done: { word: 'Done', icon: 'check', tone: 'ready' },
+  };
+
+  ui.timelineRow = function (item) {
+    const meta = TIMELINE_WORDS[item.state] || TIMELINE_WORDS.next;
+    return html`<div class="vow-timeline__row" data-done="${item.state === 'done'}">
+      <div class="vow-timeline__date">${V.fmtDate(item.date, 'weekdayShort')}</div>
+      <div class="vow-stack vow-stack--2">
+        <p class="vow-timeline__text">${item.text}</p>
+        ${raw(ui.status(meta.word, { icon: meta.icon, tone: meta.tone }))}
+        ${item.blockedBy ? raw(html`<p class="vow-meta">Blocked by: ${item.blockedBy}.</p>`) : ''}
+      </div>
+    </div>`;
+  };
+
+  /* Receipt: what was done, to whom, and what happens next. Replaces a toast
+     for anything that left the product (11.4). */
+  ui.receipt = function (title, lines, opts) {
+    const o = opts || {};
+    const rows = lines.map((l) => html`<div class="vow-receipt__line">
+      <span class="vow-receipt__key">${l[0]}</span><span>${l[1]}</span>
+    </div>`).join('');
+    return html`<section class="vow-receipt vow-stack vow-stack--4">
+      <div class="vow-row" style="gap:var(--vow-space-2)">
+        ${raw(V.icon('check', { size: 19 }))}<h3 class="vow-section-title">${title}</h3>
+      </div>
+      <div>${raw(rows)}</div>
+      ${o.next ? raw(ui.agentNote(esc(o.next))) : ''}
+    </section>`;
+  };
+
+  /* Budget meter. Segments are labelled in a legend; the "not yet known"
+     segment is always shown rather than folded into an optimistic total. */
+  ui.meter = function (segments, total) {
+    const bars = segments.map((s) =>
+      `<span class="vow-meter__seg" data-kind="${esc(s.kind)}" style="width:${(s.amount / total) * 100}%"></span>`
+    ).join('');
+    const legend = segments.map((s) => html`<span>
+      <span class="vow-legend__dot" style="background:${raw(s.color)}"></span>${s.label}, ${V.fmtMoney(s.amount)}
+    </span>`).join('');
+    return html`<div class="vow-stack vow-stack--3">
+      <div class="vow-meter">${raw(bars)}</div>
+      <div class="vow-legend">${raw(legend)}</div>
+    </div>`;
+  };
+
+  ui.pageHead = function (eyebrow, title, lede) {
+    return html`<header class="vow-pagehead">
+      <p class="vow-label">${eyebrow}</p>
+      <h1 class="vow-display">${title}</h1>
+      ${lede ? raw(html`<p class="vow-lede">${lede}</p>`) : ''}
+    </header>`;
+  };
+
+  ui.sectionHead = function (title, note) {
+    return html`<div class="vow-section__head vow-stack vow-stack--2">
+      <h2 class="vow-section-title">${title}</h2>
+      ${note ? raw(html`<p class="vow-meta">${note}</p>`) : ''}
+    </div>`;
+  };
+
+  /* The imagery credit line. Wherever a composition could be mistaken for a
+     photograph of the real place, it says what it is (UI Plan 14). */
+  ui.mediaCredit = function () {
+    return html`<p class="vow-meta">${V.imagery.credit}</p>`;
+  };
+
+  V.ui = ui;
+})(window.VowOS);
+
+/* js/screens-core.js */
+/* VowOS prototype — Today, Vision, Places, and place detail.
+ * Priority artifacts 1, 2, and 3 from UI Plan section 17.
+ */
+(function (V) {
+  'use strict';
+
+  const html = V.html;
+  const raw = V.raw;
+  const ui = V.ui;
+
+  const screens = {};
+
+  function greeting() {
+    const hour = V.NOW.getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  function placeStatus(place) {
+    return V.state.placeStatus[place.id] || place.status;
+  }
+
+  function livePlace(id) {
+    const place = V.byId(V.data.places, id);
+    if (!place) return null;
+    return Object.assign({}, place, { status: placeStatus(place) });
+  }
+
+  /* ========================================================= 1. TODAY == */
+  /* The Planning Pulse. An editorial briefing, not a dashboard: one greeting,
+     one foreground decision, then quiet work, look-ahead, and recent progress
+     in decreasing weight (UI Plan 7.2). */
+
+  screens.today = function () {
+    const d = V.data;
+    const days = V.daysBetween(V.NOW, d.wedding.date);
+    const holdDays = V.daysBetween(V.NOW, d.decision.deadline);
+    const orchard = V.byId(d.places, 'orchard-house');
+    const maison = V.byId(d.places, 'maison-98');
+
+    const feeFacts = [
+      V.trust.resolve(orchard.facts.find((f) => f.id === 'oh-fee')),
+      V.trust.resolve(maison.facts.find((f) => f.id === 'm98-fee')),
+    ];
+
+    const work = d.agentWork.map((w) => html`<li class="vow-row" style="align-items:flex-start;flex-wrap:nowrap;gap:var(--vow-space-3)">
+      <span style="flex:none;margin-top:3px;color:${raw(w.tone === 'done' ? 'var(--vow-color-moss)' : 'var(--vow-color-ash)')}">
+        ${raw(V.icon(w.icon, { size: 17 }))}
+      </span>
+      <span style="font-size:var(--vow-font-size-body-small)">${w.text}</span>
+    </li>`).join('');
+
+    const week = d.thisWeek.map((item) => html`<li class="vow-timeline__row">
+      <span class="vow-timeline__date">${V.fmtDate(item.date, 'weekdayShort')}</span>
+      <span>${item.text}${item.risk ? raw(html` <span class="vow-status" data-tone="risk">${raw(V.icon('alert'))}Ends soon</span>`) : ''}</span>
+    </li>`).join('');
+
+    const done = d.recent.map((item) => html`<li class="vow-timeline__row" data-done="true">
+      <span class="vow-timeline__date">${V.fmtDate(item.date, 'short')}</span>
+      <span class="vow-timeline__text">${item.text}</span>
+    </li>`).join('');
+
+    return html`
+      <div class="vow-col">
+        <header class="vow-pagehead">
+          <p class="vow-label">${V.fmtDate(V.NOW, 'weekday')}. ${days} days until ${raw(V.fmtDate(d.wedding.date, 'dayMonth'))}.</p>
+          <h1 class="vow-display">${greeting()}, ${d.couple.title}.</h1>
+        </header>
+
+        <section class="vow-surface vow-surface--airy vow-stack vow-stack--5">
+          <p class="vow-label">One thing worth deciding this week</p>
+          <h2 class="vow-title">Two places are ready to compare.</h2>
+          <p class="vow-body">
+            The Orchard House and Maison 98 both fit the long dinner you described.
+            Maison 98 keeps about ${raw(V.fmtMoney(7400))} more of your budget available for food and music.
+            The Orchard House lets the music run two hours later.
+          </p>
+
+          <div class="vow-evidence-list">
+            ${raw(feeFacts.map((f) => ui.evidence(f)).join(''))}
+          </div>
+
+          <hr class="vow-rule"/>
+
+          <div class="vow-stack vow-stack--3">
+            <div class="vow-row vow-row--actions">
+              ${raw(ui.button('Compare the two places', { variant: 'primary', act: 'go', value: '#/decide' }))}
+              ${raw(ui.button('Not this week', { variant: 'quiet', act: 'defer-decision' }))}
+            </div>
+            <p class="vow-consequence">
+              Comparing does not commit you to anything. The Orchard House is holding
+              ${raw(V.fmtDate(d.wedding.date, 'dayMonth'))} until ${raw(V.fmtDate(d.decision.deadline, 'weekday'))}
+              at ${raw(V.fmtTime(d.decision.deadline))}, which is ${raw(V.numberWord(holdDays))} days from now.
+            </p>
+          </div>
+        </section>
+
+        <section class="vow-section">
+          <div class="vow-panel vow-stack vow-stack--3" style="border-left:2px solid var(--vow-color-alert)">
+            <h2 class="vow-section-title">${d.correction.title}</h2>
+            <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">${d.correction.body}</p>
+            <div class="vow-row">
+              ${raw(ui.button('See what changed in the budget', { variant: 'secondary', act: 'go', value: '#/plan' }))}
+            </div>
+          </div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Moving quietly', 'Work that is underway. Nothing here needs you.'))}
+          <ul class="vow-stack vow-stack--4">${raw(work)}</ul>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('This week'))}
+          <ul class="vow-timeline">${raw(week)}</ul>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Recently'))}
+          <ul class="vow-timeline">${raw(done)}</ul>
+        </section>
+      </div>`;
+  };
+
+  /* ======================================================== 2. VISION == */
+  /* The Vision Readback. Proves understanding without pretending certainty:
+     every line is labelled confirmed, heard, or still open (UI Plan 8.1). */
+
+  screens.vision = function () {
+    const d = V.data;
+    const v = d.vision;
+    const palette = V.byId(v.palettes, V.state.palette) || v.palettes[0];
+
+    const priorities = v.priorities.map((p, i) => html`<li class="vow-row" style="align-items:flex-start;flex-wrap:nowrap;gap:var(--vow-space-3)">
+      <span class="vow-quiet" style="flex:none;font-variant-numeric:tabular-nums;font-size:var(--vow-font-size-meta);margin-top:3px">${i + 1}</span>
+      <span>${p}</span>
+    </li>`).join('');
+
+    const avoiding = v.avoiding.map((a) => html`<li class="vow-row" style="align-items:flex-start;flex-wrap:nowrap;gap:var(--vow-space-3)">
+      <span class="vow-quiet" style="flex:none;margin-top:3px">${raw(V.icon('avoid', { size: 15 }))}</span>
+      <span>${a}</span>
+    </li>`).join('');
+
+    const practical = v.practical.map((p) => html`<div class="vow-receipt__line">
+      <span class="vow-receipt__key">${p.label}</span>
+      <span>${p.value}
+        <span class="vow-status" style="margin-left:var(--vow-space-2)">${p.certainty === 'fixed' ? 'Fixed' : 'Flexible'}</span>
+      </span>
+    </div>`).join('');
+
+    const questions = v.questions.map((q, i) => html`<li class="vow-stack vow-stack--2" style="padding:var(--vow-space-4) 0;border-top:1px solid var(--vow-color-hairline)">
+      <p>${q}</p>
+      <div class="vow-row">
+        ${raw(ui.button('Answer now', { variant: 'secondary', act: 'answer-question', value: String(i) }))}
+        ${raw(ui.button('Skip for now', { variant: 'quiet', act: 'skip-question', value: String(i) }))}
+      </div>
+    </li>`).join('');
+
+    const palettes = v.palettes.map((p) => html`<button type="button" class="vow-palette"
+        data-act="choose-palette" data-value="${p.id}" aria-pressed="${p.id === palette.id}">
+      <span class="vow-swatches">${raw(p.colors.map((c) => `<span class="vow-swatch" style="background:${c}"></span>`).join(''))}</span>
+      <span style="display:block;font-weight:600;font-size:var(--vow-font-size-body-small)">${p.name}</span>
+      <span class="vow-meta" style="display:block;margin-top:4px">${p.note}</span>
+      <span class="vow-status" style="margin-top:var(--vow-space-3)" data-tone="${p.id === palette.id ? 'ready' : 'neutral'}">
+        ${raw(p.id === palette.id ? V.icon('check') : '')}${p.id === palette.id ? 'Accepted' : 'Explore this one'}
+      </span>
+    </button>`).join('');
+
+    const delegation = V.state.delegation;
+    const levels = V.delegation.LEVELS.map((l) => html`<button type="button" class="vow-dateopt"
+        data-act="set-delegation" data-value="${l.id}" aria-pressed="${l.id === delegation.level}">
+      <span class="vow-dateopt__day">${l.name}</span>
+      <span class="vow-dateopt__note">${l.summary}</span>
+    </button>`).join('');
+
+    const scopes = V.delegation.SCOPES.map((s) => {
+      const on = delegation.scopes.indexOf(s.id) !== -1;
+      return html`<li class="vow-row vow-row--between" style="padding:var(--vow-space-3) 0;border-top:1px solid var(--vow-color-hairline);flex-wrap:nowrap;gap:var(--vow-space-4)">
+        <span style="font-size:var(--vow-font-size-body-small)">${s.label}</span>
+        ${raw(ui.button(on ? 'On' : 'Off', {
+          variant: 'secondary', act: 'toggle-scope', value: s.id, icon: on ? 'check' : null,
+          ariaLabel: `${s.label}. Currently ${on ? 'on' : 'off'}.`, pressed: on,
+        }))}
+      </li>`;
+    }).join('');
+
+    return html`
+      <div class="vow-col vow-col--wide">
+        ${raw(ui.pageHead('Vision readback', 'This is what we heard.',
+          'Correct anything that is not right. Nothing here is fixed, and changing it changes what we look for.'))}
+
+        <div class="vow-readback">
+          <div class="vow-sticky vow-stack vow-stack--3">
+            <div class="vow-media vow-media--tall">${raw(V.imagery.palette(palette.colors))}</div>
+            ${raw(ui.mediaCredit())}
+          </div>
+
+          <div class="vow-stack vow-stack--7">
+            <section class="vow-stack vow-stack--3">
+              <p class="vow-label">The feeling</p>
+              <p class="vow-editable vow-body" contenteditable="true" role="textbox" aria-label="The feeling, editable"
+                 style="font-family:var(--vow-font-display);font-size:23px;line-height:1.4">${v.feeling}</p>
+              <div class="vow-row">
+                ${raw(ui.button('Not quite', { variant: 'quiet', act: 'refine-feeling' }))}
+              </div>
+            </section>
+
+            <section class="vow-stack vow-stack--4">
+              <div class="vow-row vow-row--between">
+                <p class="vow-label">What matters most</p>
+                <span class="vow-status" data-tone="ready">${raw(V.icon('check'))}Confirmed by you both on ${raw(V.fmtDate('2026-08-05', 'dayMonth'))}</span>
+              </div>
+              <ul class="vow-stack vow-stack--3">${raw(priorities)}</ul>
+            </section>
+
+            <section class="vow-stack vow-stack--4">
+              <p class="vow-label">What we are avoiding</p>
+              <ul class="vow-stack vow-stack--3">${raw(avoiding)}</ul>
+            </section>
+
+            <section class="vow-stack vow-stack--4">
+              <p class="vow-label">The practical shape</p>
+              <div>${raw(practical)}</div>
+            </section>
+
+            <section class="vow-stack vow-stack--3">
+              <p class="vow-label">We still need to know</p>
+              <p class="vow-meta">Three questions, no more. Skipping one is a real answer and I will stop asking.</p>
+              <ul>${raw(questions)}</ul>
+            </section>
+          </div>
+        </div>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Visual direction', 'The accepted palette shapes what we show you and what your guest website looks like. It never changes the parts of VowOS you need to read.'))}
+          <div class="vow-palettes">${raw(palettes)}</div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('What VowOS may do on its own',
+            V.delegation.summarize(delegation)))}
+          <div class="vow-stack vow-stack--5">
+            <div class="vow-daterail" style="flex-direction:column">${raw(levels)}</div>
+            ${delegation.level === 'standing' ? raw(html`
+              <div class="vow-panel vow-stack vow-stack--2">
+                <p class="vow-label">The permissions you have given</p>
+                <ul>${raw(scopes)}</ul>
+                ${raw(ui.agentNote('Money and anything you cannot take back always come back to you both, whatever is switched on here.'))}
+              </div>`) : ''}
+          </div>
+        </section>
+
+        <section class="vow-section">
+          <div class="vow-row vow-row--actions">
+            ${raw(ui.button('Yes, this feels like us', { variant: 'primary', act: 'confirm-vision' }))}
+            ${raw(ui.button('Help us refine it', { variant: 'secondary', act: 'refine-feeling' }))}
+          </div>
+        </section>
+      </div>`;
+  };
+
+  /* ======================================================== 3. PLACES == */
+  /* A private viewing room, not a marketplace: at most five places, no star
+     ratings, no ad labels, no filter wall (UI Plan 9.1). */
+
+  screens.places = function () {
+    const places = V.data.places.map((p) => livePlace(p.id));
+    const shown = places.filter((p) => placeStatus(p) !== 'ruled-out');
+    const ruledOut = places.filter((p) => placeStatus(p) === 'ruled-out');
+
+    const cards = shown.map((p) => ui.placeCard(p, { primaryLabel: 'Look properly' })).join('');
+
+    return html`
+      <div class="vow-col vow-col--wide">
+        ${raw(ui.pageHead('Places', `${V.capitalize(V.numberWord(shown.length))} places, chosen for the evening you described.`,
+          'These are not search results. Each one was read against what you said matters, and each one has something wrong with it that you should know before you fall in love.'))}
+
+        <div class="vow-stack vow-stack--4">${raw(cards)}</div>
+
+        ${ruledOut.length ? raw(html`
+          <section class="vow-section">
+            ${raw(ui.sectionHead('Ruled out', 'Kept here in case you change your mind.'))}
+            <div class="vow-stack vow-stack--4">${raw(ruledOut.map((p) => ui.placeCard(p)).join(''))}</div>
+          </section>`) : ''}
+
+        <section class="vow-section">
+          <div class="vow-panel vow-stack vow-stack--3">
+            <h2 class="vow-section-title">What you are not seeing</h2>
+            <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">
+              I read 43 places in your range and set aside 38. Most were ruled out on capacity or on the curfew,
+              and eleven never published a 2027 rate. None of this is hidden from you, it is just not worth your evening.
+            </p>
+            <div class="vow-row">
+              ${raw(ui.button('Show me why each one was set aside', { variant: 'quiet', act: 'show-ruled-out' }))}
+            </div>
+          </div>
+        </section>
+      </div>`;
+  };
+
+  /* Place detail. Gallery, plain-language fit, then capability, budget,
+     evidence, and a collapsible list of what is still unverified (9.1). */
+
+  screens.place = function (id) {
+    const place = livePlace(id);
+    if (!place) return screens.places();
+
+    const facts = V.trust.resolveAll(place.facts);
+    const known = facts.filter((f) => f.state === 'confirmed');
+    const unsure = facts.filter((f) => f.state !== 'confirmed');
+    const fee = facts.find((f) => f.category === 'pricing' && typeof f.value === 'number');
+    const remaining = fee ? V.data.budget.comfort - fee.value : null;
+
+    const reasons = place.whyItFits.map((r) => html`<li class="vow-row" style="align-items:flex-start;flex-wrap:nowrap;gap:var(--vow-space-3)">
+      <span style="flex:none;margin-top:3px;color:var(--vow-color-moss)">${raw(V.icon('check', { size: 17 }))}</span>
+      <span>${r}</span>
+    </li>`).join('');
+
+    const tourCheck = V.delegation.evaluate('request-tour', V.state.delegation);
+    const status = placeStatus(place);
+    const isSaved = status === 'saved' || status === 'toured' || status === 'contacted';
+
+    return html`
+      <div class="vow-col vow-col--wide">
+        <div class="vow-row" style="margin-bottom:var(--vow-space-5)">
+          ${raw(ui.button('All places', { variant: 'quiet', act: 'go', value: '#/places' }))}
+        </div>
+
+        <div class="vow-media vow-media--wide">${raw(V.imagery.scene(place.scene))}</div>
+        <p class="vow-meta" style="margin-top:var(--vow-space-3)">${V.imagery.credit}</p>
+
+        <header class="vow-stack vow-stack--3" style="margin:var(--vow-space-6) 0 var(--vow-space-7)">
+          <h1 class="vow-display vow-display--sm">${place.name}</h1>
+          <p class="vow-lede">${place.location}. ${place.travel}.</p>
+          <span class="vow-status">${status === 'saved' ? 'Saved' : status === 'contacted' ? 'Contacted, waiting on a reply' : 'Suggested'}</span>
+        </header>
+
+        <section class="vow-section vow-stack vow-stack--4">
+          ${raw(ui.sectionHead('Why it fits'))}
+          <ul class="vow-stack vow-stack--3">${raw(reasons)}</ul>
+          ${raw(ui.reality(place.realityCheck))}
+        </section>
+
+        ${fee ? raw(html`
+        <section class="vow-section">
+          ${raw(ui.sectionHead('What it does to your budget'))}
+          <div class="vow-panel vow-stack vow-stack--4">
+            <div class="vow-row vow-row--between vow-row--baseline">
+              <span class="vow-compare__amount">${V.fmtMoney(fee.value)}</span>
+              <span class="vow-meta">site fee</span>
+            </div>
+            ${raw(ui.evidence(fee))}
+            <hr class="vow-rule"/>
+            <p style="font-size:var(--vow-font-size-body-small)">
+              That leaves ${V.fmtMoney(remaining)} of your ${V.fmtMoney(V.data.budget.comfort)} comfort for everything else.
+            </p>
+            ${raw(ui.agentNote('This is not a total. It excludes the service charge, which we have not confirmed here yet.'))}
+          </div>
+        </section>`) : ''}
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('What we know', 'Verified against the place itself, with the date it was checked.'))}
+          <div class="vow-stack vow-stack--5">${raw(known.map((f) => ui.factRow(f)).join(''))}</div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.drawer('verify-' + place.id,
+            `What we still need to verify (${unsure.length})`,
+            html`<div class="vow-stack vow-stack--5" style="padding-top:var(--vow-space-3)">
+              ${raw(unsure.map((f) => ui.factRow(f)).join(''))}
+            </div>`,
+            V.state.drawers['verify-' + place.id]))}
+        </section>
+
+        <section class="vow-section">
+          <div class="vow-surface vow-stack vow-stack--4">
+            <h2 class="vow-section-title">What would you like to do?</h2>
+            <div class="vow-row vow-row--actions">
+              ${raw(ui.button('Ask VowOS to request a tour', {
+                variant: 'primary', act: 'request-tour', value: place.id,
+              }))}
+              ${raw(ui.button(isSaved ? 'Saved' : 'Save this place', {
+                variant: 'secondary', act: 'save-place', value: place.id, disabled: isSaved,
+              }))}
+              ${raw(ui.button('Rule it out', { variant: 'quiet', act: 'rule-out', value: place.id }))}
+            </div>
+            <p class="vow-consequence">${tourCheck.reason}</p>
+          </div>
+        </section>
+      </div>`;
+  };
+
+  V.screens = Object.assign(V.screens || {}, screens);
+})(window.VowOS);
+
+/* js/screens-plan.js */
+/* VowOS prototype — Decision Room, tour coordination, Plan, Guests,
+ * Website Studio, and the living design system page.
+ * Priority artifacts 4, 5, and 6 from UI Plan section 17.
+ */
+(function (V) {
+  'use strict';
+
+  const html = V.html;
+  const raw = V.raw;
+  const ui = V.ui;
+  const screens = {};
+
+  /* ================================================= 4. DECISION ROOM == */
+  /* The most visual restraint in the product. Two choices side by side, one
+     calm recommendation, evidence one layer deeper, and a named consequence on
+     the action. When both partners must approve and disagree, the room holds
+     the decision open and offers a next step instead of a tie-breaker (9.3). */
+
+  screens.decide = function () {
+    const d = V.data;
+    const dec = d.decision;
+    const options = dec.options.map((id) => V.byId(d.places, id));
+    const [a, b] = options;
+
+    const factOf = (place, id) => V.trust.resolve(place.facts.find((f) => f.id === id));
+    /* Cells are tagged by column so that narrow screens can show one option at
+       a time rather than stacking two unlabelled answers under one row label
+       (UI Plan 9.3). */
+    const slot = (i) => (i === 0 ? 'a' : 'b');
+    const cell = (content, i) => `<div class="vow-compare__cell vow-compare__cell--${slot(i)}">${content}</div>`;
+    const label = (text) => `<div class="vow-compare__label">${V.esc(text)}</div>`;
+    const focus = V.state.compareFocus || 'a';
+
+    const scenarios = d.budget.scenarios;
+    const baseline = d.budget.committed.reduce((n, i) => n + i.amount, 0) +
+      d.budget.projected.reduce((n, i) => n + i.amount, 0);
+
+    const heads = options.map((p, i) => `<div class="vow-compare__cell vow-compare__cell--${slot(i)} vow-compare__head">
+      <div class="vow-media" style="margin-bottom:var(--vow-space-4)">${V.imagery.scene(p.scene)}</div>
+      <h2 class="vow-title" style="font-size:23px">${V.esc(p.name)}</h2>
+      <p class="vow-meta">${V.esc(p.location)}. ${V.esc(p.travel)}.</p>
+    </div>`).join('');
+
+    const fitCells = options.map((p, i) => cell(html`
+      <p>${p.whyItFits[0]}</p>
+      ${raw(ui.reality(p.realityCheck))}`, i)).join('');
+
+    const costCells = options.map((p, i) => {
+      const s = scenarios.find((x) => x.placeId === p.id);
+      const total = baseline + s.siteFee;
+      const delta = d.budget.comfort - total;
+      return cell(html`
+        <p class="vow-compare__amount">${V.fmtMoney(s.siteFee)}</p>
+        <p class="vow-meta">site fee</p>
+        <p style="margin-top:var(--vow-space-3)">
+          Everything you have planned so far comes to ${V.fmtMoney(total)}.
+          ${delta >= 0
+            ? raw(html`That is ${V.fmtMoney(delta)} inside your comfort.`)
+            : raw(html`That is ${V.fmtMoney(Math.abs(delta))} over your comfort.`)}
+        </p>
+        ${raw(ui.evidence(factOf(p, p.id === 'orchard-house' ? 'oh-fee' : 'm98-fee')))}`, i);
+    }).join('');
+
+    const practicalCells = options.map((p, i) => {
+      const ids = p.id === 'orchard-house'
+        ? ['oh-cap', 'oh-curfew', 'oh-rain', 'oh-access']
+        : ['m98-cap', 'm98-curfew', 'm98-rain', 'm98-access'];
+      return cell(html`<div class="vow-stack vow-stack--3">
+        ${raw(ids.map((id) => {
+          const f = factOf(p, id);
+          return html`<p style="font-size:var(--vow-font-size-body-small)">
+            <span class="vow-quiet">${f.label}.</span> ${V.trust.displayValue(f)}
+          </p>`;
+        }).join(''))}
+      </div>`, i);
+    }).join('');
+
+    const evidenceCells = options.map((p, i) => {
+      const facts = V.trust.resolveAll(p.facts);
+      const gaps = facts.filter((f) => f.state !== 'confirmed');
+      return cell(html`
+        <p class="vow-meta">${V.capitalize(V.numberWord(facts.length - gaps.length))} of ${raw(V.numberWord(facts.length))} facts verified with the place itself.</p>
+        ${raw(ui.drawer('ev-' + p.id, `${gaps.length} we are not sure about`,
+          html`<div class="vow-stack vow-stack--4">${raw(gaps.map((f) => ui.factRow(f)).join(''))}</div>`,
+          V.state.drawers['ev-' + p.id]))}`, i);
+    }).join('');
+
+    /* Persistent on narrow screens, hidden once both columns fit side by side. */
+    const switcher = html`<div class="vow-compare-switch" role="group" aria-label="Which place are you looking at?">
+      <span class="vow-label" style="width:100%">Looking at</span>
+      ${raw(options.map((p, i) => ui.button(p.name, {
+        variant: 'secondary', act: 'pick-compare', value: slot(i), pressed: slot(i) === focus,
+      })).join(''))}
+    </div>`;
+
+    const positions = dec.positions.map((pos) => {
+      const place = V.byId(d.places, pos.prefers);
+      return html`<div class="vow-panel">
+        ${raw(ui.partnerNote(pos.partner, html`
+          <p style="margin-bottom:var(--vow-space-3)"><strong>${place.name}</strong></p>
+          <p class="vow-quiet">${pos.note}</p>`, { suffix: 'prefers' }))}
+      </div>`;
+    }).join('');
+
+    const holdCheck = V.delegation.evaluate('ask-question', V.state.delegation);
+
+    return html`
+      <div class="vow-col vow-col--wide">
+        ${raw(ui.pageHead('Decision room', dec.title))}
+
+        <section class="vow-surface vow-surface--airy vow-stack vow-stack--4">
+          <p class="vow-label">What VowOS thinks</p>
+          <p class="vow-body" style="font-size:19px">${dec.recommendation}</p>
+          ${raw(ui.drawer('why-rec', 'How I got there',
+            html`<div class="vow-stack vow-stack--3">
+              <p style="font-size:var(--vow-font-size-body-small)">
+                Both places clear everything on your confirmed priorities except one each.
+                The Orchard House fails nothing outright but costs ${raw(V.fmtMoney(7400))} more.
+                Maison 98 seats 96 if the ceremony has to move indoors, and you are planning for 110.
+              </p>
+              <p style="font-size:var(--vow-font-size-body-small)">
+                I have not weighted your priorities against each other, because you have not told me how,
+                and guessing at that is how I would get this wrong.
+              </p>
+            </div>`, V.state.drawers['why-rec']))}
+        </section>
+
+        <section class="vow-section">
+          ${raw(switcher)}
+          <div class="vow-compare" data-focus="${focus}">
+            <div class="vow-compare__label vow-compare__head"></div>
+            ${raw(heads)}
+            ${raw(label('Fit'))}${raw(fitCells)}
+            ${raw(label('Cost'))}${raw(costCells)}
+            ${raw(label('Practicality'))}${raw(practicalCells)}
+            ${raw(label('Evidence'))}${raw(evidenceCells)}
+          </div>
+          <p class="vow-meta" style="margin-top:var(--vow-space-4)">
+            Neither total includes a service charge. We have not confirmed one at either place,
+            so these are working figures, not quotes.
+          </p>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Where you both are', 'Both positions, as you each described them. Nothing moves forward until you agree.'))}
+          <div class="vow-positions">${raw(positions)}</div>
+        </section>
+
+        <section class="vow-section">
+          <div class="vow-surface vow-stack vow-stack--5">
+            <h2 class="vow-section-title">What happens next</h2>
+            <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">${dec.openQuestion}</p>
+            <hr class="vow-rule"/>
+            <div class="vow-row vow-row--actions">
+              ${raw(ui.button('Ask them to extend the hold', { variant: 'primary', act: 'extend-hold' }))}
+              ${raw(ui.button('Leave a note for each other', { variant: 'secondary', act: 'leave-note' }))}
+              ${raw(ui.button('We have agreed on one', { variant: 'quiet', act: 'open-commit' }))}
+            </div>
+            <p class="vow-consequence">
+              ${dec.deadlineNote} ${holdCheck.reason}
+            </p>
+          </div>
+        </section>
+      </div>`;
+  };
+
+  /* ==================================================== 5. TOUR VISIT == */
+  /* A thoughtful calendar invitation. The interface never implies the system
+     has booked something when it has only proposed a time (UI Plan 9.2). */
+
+  screens.tour = function () {
+    const d = V.data;
+    const confirmed = d.tours.filter((t) => (V.state.tourStatus[t.id] || t.status) === 'confirmed');
+    const proposing = d.tours.filter((t) => (V.state.tourStatus[t.id] || t.status) !== 'confirmed');
+
+    const confirmedCards = confirmed.map((t) => {
+      const place = V.byId(d.places, t.placeId);
+      const when = t.confirmedFor || V.state.tourConfirmedFor;
+      return html`<div class="vow-surface vow-stack vow-stack--4">
+        <div class="vow-row vow-row--between">
+          <h2 class="vow-section-title">${place.name}</h2>
+          ${raw(ui.status('Confirmed by the place', { icon: 'check', tone: 'ready' }))}
+        </div>
+        <p style="font-family:var(--vow-font-display);font-size:27px">
+          ${V.fmtDate(when, 'weekday')} at ${raw(V.fmtTime(when))}
+        </p>
+        <p class="vow-meta">${place.travel}. ${t.reason}</p>
+        <div class="vow-row vow-row--actions">
+          ${raw(ui.button('Add to our calendars', { variant: 'primary', act: 'add-calendar', value: t.id }))}
+          ${raw(ui.button('See the tour brief', { variant: 'secondary', act: 'tour-brief', value: t.id }))}
+        </div>
+        ${raw(ui.agentNote('I will send you both a short list of questions the day before, built from what we still have not verified.'))}
+      </div>`;
+    }).join('');
+
+    const requests = proposing.map((t) => {
+      const place = V.byId(d.places, t.placeId);
+      const dates = [];
+      t.windows.forEach((w) => { if (dates.indexOf(w.date) === -1) dates.push(w.date); });
+      const activeDate = V.state.tourDate || dates[0];
+      const windows = t.windows.filter((w) => w.date === activeDate);
+
+      const rail = dates.map((date) => html`<button type="button" class="vow-dateopt"
+          data-act="pick-tour-date" data-value="${date}" aria-pressed="${date === activeDate}">
+        <span class="vow-dateopt__day">${V.fmtDate(date, 'weekdayShort')}</span>
+        <span class="vow-dateopt__note">${V.numberWord(t.windows.filter((w) => w.date === date).length)} times offered</span>
+      </button>`).join('');
+
+      const times = windows.map((w) => html`<button type="button" class="vow-timeopt"
+          data-act="pick-tour-time" data-value="${w.id}" aria-pressed="${V.state.tourSelection === w.id}">
+        <span class="vow-timeopt__time">${V.fmtTime(w.time)}</span>
+        <span class="vow-timeopt__meta">${w.note}</span>
+      </button>`).join('');
+
+      const selected = t.windows.find((w) => w.id === V.state.tourSelection);
+
+      return html`<div class="vow-stack vow-stack--5">
+        <div class="vow-row vow-row--between">
+          <h2 class="vow-section-title">${place.name}</h2>
+          ${raw(ui.status('No time requested yet', { icon: 'clock' }))}
+        </div>
+        <p class="vow-lede">${t.reason} ${place.travel}.</p>
+        <div class="vow-tour">
+          <div class="vow-daterail">${raw(rail)}</div>
+          <div class="vow-stack vow-stack--4">
+            <div class="vow-times">${raw(times)}</div>
+            <hr class="vow-rule"/>
+            <div class="vow-row vow-row--actions">
+              ${raw(ui.button('Ask for this time', {
+                variant: 'primary', act: 'ask-tour-time', value: t.id, disabled: !selected,
+              }))}
+              ${raw(ui.button('None of these work', { variant: 'quiet', act: 'no-times-work' }))}
+            </div>
+            <p class="vow-consequence">
+              ${selected
+                ? raw(html`This sends ${raw(place.name)} a request for ${raw(V.fmtDate(selected.date, 'weekday'))} at ${raw(V.fmtTime(selected.time))} Nothing is booked until they answer.`)
+                : 'Choose a time to see exactly what gets sent.'}
+            </p>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return html`
+      <div class="vow-col vow-col--wide">
+        ${raw(ui.pageHead('Tours', 'Seeing the places.',
+          'A time is proposed, held, or confirmed. VowOS will always tell you which one it is.'))}
+        <div class="vow-stack vow-stack--6">${raw(confirmedCards)}</div>
+        <section class="vow-section">${raw(requests)}</section>
+      </div>`;
+  };
+
+  /* ========================================================== 6. PLAN == */
+  /* A gently structured timeline, not a project board. Budget health at the
+     top, the next six to eight weeks by default (UI Plan 9.4). */
+
+  screens.plan = function () {
+    const d = V.data;
+    const committed = d.budget.committed.reduce((n, i) => n + i.amount, 0);
+    const projected = d.budget.projected.reduce((n, i) => n + i.amount, 0);
+    const unallocated = d.budget.comfort - committed - projected;
+
+    const meter = ui.meter([
+      { kind: 'committed', label: 'Committed', amount: committed, color: 'var(--vow-color-moss)' },
+      { kind: 'projected', label: 'Planned, not committed', amount: projected, color: 'var(--vow-color-rose-clay)' },
+      { kind: 'unknown', label: 'Not allocated yet', amount: unallocated, color: 'var(--vow-color-hairline-strong)' },
+    ], d.budget.comfort);
+
+    const scenarios = d.budget.scenarios.map((s) => {
+      const place = V.byId(d.places, s.placeId);
+      const total = committed + projected + s.siteFee;
+      const delta = d.budget.comfort - total;
+      return html`<div class="vow-receipt__line">
+        <span class="vow-receipt__key">With ${place.name}</span>
+        <span>
+          <strong>${V.fmtMoney(total)}</strong><span class="vow-quiet">${delta >= 0
+            ? raw(html`, ${V.fmtMoney(delta)} inside your comfort`)
+            : raw(html`, ${V.fmtMoney(Math.abs(delta))} over your comfort`)}</span>
+          <span class="vow-meta" style="display:block;margin-top:4px">${s.note}</span>
+        </span>
+      </div>`;
+    }).join('');
+
+    const lines = d.budget.projected.concat(d.budget.committed)
+      .map((item) => ui.factRow(Object.assign({}, item, { label: item.label, value: item.amount }))).join('');
+
+    const rows = d.timeline.map((item) => ui.timelineRow(item)).join('');
+
+    const docs = d.documents.map((doc) => html`<li class="vow-receipt__line">
+      <span class="vow-receipt__key">${doc.kind}</span>
+      <span>${doc.name}
+        <span class="vow-meta" style="display:block;margin-top:4px">From ${doc.source}, ${V.fmtDate(doc.date, 'long')}.</span>
+      </span>
+    </li>`).join('');
+
+    return html`
+      <div class="vow-col">
+        ${raw(ui.pageHead('Plan', 'Where the wedding stands.',
+          'The next eight weeks. Everything further out is there when you want it.'))}
+
+        <section class="vow-surface vow-stack vow-stack--5">
+          <div class="vow-row vow-row--between vow-row--baseline">
+            <h2 class="vow-section-title">Budget</h2>
+            <span class="vow-meta">${V.fmtMoney(d.budget.comfort)} comfort</span>
+          </div>
+          ${raw(meter)}
+          <p class="vow-meta">The place is not in these figures yet. It will take most of what is unallocated.</p>
+          <hr class="vow-rule"/>
+          <div>${raw(scenarios)}</div>
+          ${raw(ui.agentNote('Neither figure includes a service charge. Until one of them confirms it, I will not show you a total that looks final.'))}
+          ${raw(ui.drawer('budget-lines', 'Every line',
+            html`<div class="vow-stack vow-stack--5">${raw(lines)}</div>`,
+            V.state.drawers['budget-lines']))}
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('What happens next'))}
+          <div class="vow-timeline">${raw(rows)}</div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Documents and commitments'))}
+          <ul>${raw(docs)}</ul>
+        </section>
+      </div>`;
+  };
+
+  /* ======================================================== 7. GUESTS == */
+  /* People, not rows in a CRM. Household readiness first, individual records
+     only when someone needs to act (UI Plan 9.5). */
+
+  screens.guests = function () {
+    const g = V.data.guests;
+    const clusters = g.clusters.map((c) => html`<div class="vow-panel vow-stack vow-stack--2">
+      <span class="vow-cluster__count">${c.count}</span>
+      <span style="font-weight:600;font-size:var(--vow-font-size-body-small)">${c.label}</span>
+      <span class="vow-meta">${c.note}</span>
+    </div>`).join('');
+
+    return html`
+      <div class="vow-col">
+        ${raw(ui.pageHead('Guests', `${g.households} households, about ${g.expected} people.`, g.note))}
+        <div class="vow-cluster">${raw(clusters)}</div>
+
+        <section class="vow-section">
+          <div class="vow-surface vow-stack vow-stack--4">
+            <h2 class="vow-section-title">One thing would move this along</h2>
+            <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">
+              Eighteen households have no address. Save the dates cannot go out to them,
+              and save the dates cannot go out at all until the place is decided.
+              If you want, I can draft a short message asking those eighteen for an address.
+            </p>
+            <div class="vow-row vow-row--actions">
+              ${raw(ui.button('Draft the message', { variant: 'primary', act: 'draft-address-request' }))}
+              ${raw(ui.button('Show me the households', { variant: 'secondary', act: 'show-households' }))}
+            </div>
+            <p class="vow-consequence">Drafting does not send anything. You will see the exact message and the exact eighteen names first.</p>
+          </div>
+        </section>
+      </div>`;
+  };
+
+  /* ================================================ 8. WEBSITE STUDIO == */
+  /* Live preview in the centre, unobtrusive content rail. Sections are
+     editorial chapters, and the layout baseline cannot be broken (9.5). */
+
+  screens.studio = function () {
+    const d = V.data;
+    const palette = V.byId(d.vision.palettes, V.state.palette) || d.vision.palettes[0];
+    const active = V.state.siteSection || 's1';
+
+    const rail = d.website.sections.map((s) => html`<button type="button" class="vow-dateopt"
+        data-act="pick-section" data-value="${s.id}" aria-pressed="${s.id === active}">
+      <span class="vow-dateopt__day">${s.name}</span>
+      <span class="vow-dateopt__note">${s.ready ? 'Ready' : s.blocked}</span>
+    </button>`).join('');
+
+    const previewStyle = `--vow-site-accent:${palette.colors[1]};--vow-site-canvas:${palette.colors[3]};--vow-site-accent-ink:${palette.colors[1]}`;
+
+    const bodies = {
+      s1: html`<p class="vow-site__eyebrow">You are invited</p>
+        <h2 class="vow-site__title">${d.couple.title}</h2>
+        <div class="vow-site__rule"></div>
+        <p>${V.fmtDate(d.wedding.date, 'weekday')}, 2027. ${d.wedding.region}.</p>
+        <p style="margin-top:var(--vow-space-4);max-width:44ch">
+          We are having a long dinner and we would like you at it. Everything you need is on this page.
+        </p>`,
+      s2: html`<p class="vow-site__eyebrow">The day</p>
+        <h2 class="vow-site__title">How it runs</h2>
+        <div class="vow-site__rule"></div>
+        <p style="max-width:46ch">The ceremony is short. Dinner is long and seated. There is no receiving line,
+        so please just come and find us.</p>`,
+      s3: html`<p class="vow-site__eyebrow">Travel</p>
+        <h2 class="vow-site__title">Getting there</h2>
+        <div class="vow-site__rule"></div>
+        <p style="max-width:46ch">This section is waiting on where you are getting married.
+        VowOS will fill in the station, the drive, and the rooms once you decide.</p>`,
+      s4: html`<p class="vow-site__eyebrow">Questions</p>
+        <h2 class="vow-site__title">Things people ask</h2>
+        <div class="vow-site__rule"></div>
+        <p style="max-width:46ch">Children are welcome. There is a vegetarian option.
+        The dress code is whatever you would wear to a good dinner.</p>`,
+    };
+
+    const section = d.website.sections.find((s) => s.id === active);
+
+    return html`
+      <div class="vow-col vow-col--wide">
+        ${raw(ui.pageHead('Website studio', 'What your people will see.',
+          'The palette you accepted carries through. The layout does not bend far enough to break.'))}
+
+        <div class="vow-studio">
+          <div class="vow-stack vow-stack--5">
+            <div class="vow-stack vow-stack--2">
+              <p class="vow-label">Chapters</p>
+              <div class="vow-daterail" style="flex-direction:column">${raw(rail)}</div>
+            </div>
+            <div class="vow-panel vow-stack vow-stack--3">
+              <p class="vow-label">Palette</p>
+              <span class="vow-swatches">${raw(palette.colors.map((c) => `<span class="vow-swatch" style="background:${c};height:34px"></span>`).join(''))}</span>
+              <p class="vow-meta">${palette.name}, accepted in your vision.</p>
+              ${raw(ui.button('Change it in Vision', { variant: 'quiet', act: 'go', value: '#/vision' }))}
+            </div>
+          </div>
+
+          <div class="vow-stack vow-stack--4">
+            <div class="vow-preview" style="${raw(previewStyle)}">
+              <div class="vow-preview__chrome">
+                ${raw(V.icon('doc', { size: 15 }))} mayaandalex.wedding
+                <span style="margin-left:auto">${d.website.published ? 'Published' : 'Not published yet'}</span>
+              </div>
+              <div class="vow-site" style="background:var(--vow-site-canvas)">${raw(bodies[active])}</div>
+            </div>
+
+            ${section && !section.ready ? raw(html`
+              <div class="vow-panel">${raw(ui.agentNote(section.blocked + ' I will write it the day you decide, and show it to you before anyone sees it.', 'action'))}</div>`) : ''}
+
+            <div class="vow-row vow-row--actions">
+              ${raw(ui.button('Publish this change', { variant: 'primary', act: 'publish-site' }))}
+              ${raw(ui.button('View as a guest', { variant: 'secondary', act: 'view-as-guest' }))}
+            </div>
+            <p class="vow-consequence">
+              Publishing makes this visible to anyone with the link. You will see exactly what changes first,
+              and no guest is notified unless you ask for that separately.
+            </p>
+          </div>
+        </div>
+      </div>`;
+  };
+
+  /* ================================================= 9. DESIGN SYSTEM == */
+  /* The component library and its usage rules, in the product rather than in a
+     separate document engineers may not open (Masterplan section 9). Token
+     values are read from the live stylesheet, so this page cannot drift from
+     what the product actually renders. */
+
+  screens.system = function () {
+    const read = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+    const colorNames = ['porcelain', 'paper', 'ink', 'ash', 'moss', 'terracotta',
+      'rose-clay', 'mist-blue', 'soft-gold', 'alert', 'hairline'];
+
+    const swatches = colorNames.map((name) => {
+      const value = read(`--vow-color-${name}`);
+      return html`<div class="vow-spec__tile">
+        <div class="vow-spec__chip" style="background:${raw(value)}"></div>
+        <div class="vow-spec__meta">
+          <div class="vow-spec__name">${name.replace(/-/g, ' ')}</div>
+          <div class="vow-spec__val">${value}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    const spaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((n) => {
+      const value = read(`--vow-space-${n}`);
+      return html`<div class="vow-row" style="gap:var(--vow-space-4)">
+        <span class="vow-spec__val" style="width:64px">space-${n}</span>
+        <span style="height:10px;width:${raw(value)};background:var(--vow-color-rose-clay);border-radius:3px"></span>
+        <span class="vow-spec__val">${value}</span>
+      </div>`;
+    }).join('');
+
+    const states = Object.keys(V.trust.STATES).map((key) => {
+      const s = V.trust.STATES[key];
+      const window = V.trust.FRESHNESS;
+      return html`<tr>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.definition}</td>
+        <td>${raw(ui.evidence(sampleFact(key)))}</td>
+      </tr>`;
+    }).join('');
+
+    const levels = V.delegation.LEVELS.map((l) => html`<tr>
+      <td><strong>${l.name}</strong></td>
+      <td>${l.detail}</td>
+    </tr>`).join('');
+
+    const actions = Object.keys(V.delegation.ACTIONS).map((id) => {
+      const result = V.delegation.evaluate(id, V.state.delegation);
+      return html`<tr>
+        <td><strong>${V.delegation.ACTIONS[id].label}</strong></td>
+        <td>${raw(ui.status(result.allowed ? 'Acts on its own' : 'Asks you first',
+          { icon: result.allowed ? 'check' : 'hold', tone: result.allowed ? 'ready' : 'neutral' }))}</td>
+        <td>${result.reason}</td>
+      </tr>`;
+    }).join('');
+
+    return html`
+      <div class="vow-col vow-col--wide">
+        ${raw(ui.pageHead('Design system', 'The system, as built.',
+          'Every value on this page is read from the live stylesheet, which is generated from tokens.json. If this page and the product ever disagree, the build is broken.'))}
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Color', 'Rose clay, mist blue, and soft gold are fills only. Terracotta is a fill and a rule, never body text.'))}
+          <div class="vow-spec">${raw(swatches)}</div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Spacing'))}
+          <div class="vow-stack vow-stack--3">${raw(spaces)}</div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Buttons', 'One primary per visible decision area. A high-commitment action names its consequence beside it rather than taking a second color.'))}
+          <div class="vow-row">
+            ${raw(ui.button('Primary action', { variant: 'primary' }))}
+            ${raw(ui.button('Secondary', { variant: 'secondary' }))}
+            ${raw(ui.button('Quiet action', { variant: 'quiet' }))}
+            ${raw(ui.button('Unavailable', { variant: 'primary', disabled: true }))}
+          </div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Trust states', 'Every fact in the product resolves to exactly one of these four. A fact with no state renders as Unknown and reports itself to the console.'))}
+          <div class="vow-scroll-x">
+            <table class="vow-table">
+              <thead><tr><th>State</th><th>Definition</th><th>How it reads</th></tr></thead>
+              <tbody>${raw(states)}</tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Delegation levels'))}
+          <div class="vow-scroll-x">
+            <table class="vow-table">
+              <thead><tr><th>Level</th><th>What it means</th></tr></thead>
+              <tbody>${raw(levels)}</tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Every action VowOS can take',
+            `Evaluated live against your current setting: ${V.delegation.levelById(V.state.delegation.level).name}.`))}
+          <div class="vow-scroll-x">
+            <table class="vow-table">
+              <thead><tr><th>Action</th><th>Right now</th><th>Why</th></tr></thead>
+              <tbody>${raw(actions)}</tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('Agent notes and partner notes'))}
+          <div class="vow-stack vow-stack--5">
+            ${raw(ui.agentNote('I have sent the five venue inquiries you approved.'))}
+            ${raw(ui.agentNote('This email was not sent. No venue received it.', 'correction'))}
+            ${raw(ui.partnerNote('maya', 'Ready to review the two places.', { suffix: 'said' }))}
+          </div>
+        </section>
+      </div>`;
+  };
+
+  function sampleFact(state) {
+    const samples = {
+      confirmed: { label: 'Capacity', value: '140 seated', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
+      reported: { label: 'Service charge', value: '22 percent', state: 'reported', source: 'a venue directory', category: 'pricing' },
+      inferred: { label: 'Service charge', value: 5900, state: 'inferred', basis: 'three comparable Hudson venues', category: 'pricing' },
+      unknown: { label: 'Outside catering', value: null, state: 'unknown', category: 'policy', pending: 'I asked on August 9.' },
+    };
+    return V.trust.resolve(samples[state]);
+  }
+
+  V.screens = Object.assign(V.screens || {}, screens);
+})(window.VowOS);
+
+/* js/app.js */
+/* VowOS prototype — shell, routing, state, and interaction behavior.
+ *
+ * Interaction rules implemented here come from UI Plan 11.4: approvals show
+ * exact recipients before sending, evidence expands in place, rejection asks
+ * for an optional one-tap reason, and nothing implies a booking that has only
+ * been proposed.
+ */
+(function (V) {
+  'use strict';
+
+  const html = V.html;
+  const raw = V.raw;
+  const ui = V.ui;
+
+  /* ------------------------------------------------------------- state */
+
+  V.state = {
+    route: { name: 'today', param: null },
+    drawers: {},
+    placeStatus: {},
+    palette: 'late-orchard',
+    delegation: {
+      level: 'standing',
+      scopes: ['follow-up-once', 'propose-tour-times', 'request-missing-facts'],
+    },
+    tourDate: null,
+    tourSelection: null,
+    tourStatus: {},
+    tourConfirmedFor: null,
+    compareFocus: 'a',
+    siteSection: 's1',
+    dialog: null,
+    toast: null,
+    announcement: '',
+  };
+
+  let toastTimer = null;
+
+  function toast(message, announce) {
+    V.state.toast = message;
+    if (announce !== false) V.state.announcement = message;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      V.state.toast = null;
+      render();
+    }, 6000);
+    render();
+  }
+
+  /* ---------------------------------------------------------- navigation */
+
+  const NAV = [
+    { id: 'today', label: 'Today', href: '#/today', icon: 'today', question: 'What deserves our attention right now?' },
+    { id: 'vision', label: 'Vision', href: '#/vision', icon: 'vision', question: 'What are we actually creating?' },
+    { id: 'places', label: 'Places', href: '#/places', icon: 'places', question: 'Where could this happen?' },
+    { id: 'plan', label: 'Plan', href: '#/plan', icon: 'plan', question: 'Is the wedding feasible and moving?' },
+    { id: 'guests', label: 'Guests', href: '#/guests', icon: 'guests', question: 'What will our people need from us?' },
+    { id: 'more', label: 'More', href: '#/more', icon: 'more', question: 'Where are the details?' },
+  ];
+
+  /* Mobile keeps four workspaces plus an overflow, per UI Plan 7.1. */
+  const TABS = ['today', 'vision', 'places', 'plan', 'more'];
+
+  function parseRoute() {
+    const hash = (window.location.hash || '#/today').replace(/^#\/?/, '');
+    const [name, param] = hash.split('/');
+    return { name: name || 'today', param: param || null };
+  }
+
+  function activeWorkspace(route) {
+    if (route.name === 'tour') return 'places';
+    if (route.name === 'studio') return 'guests';
+    if (route.name === 'system') return 'more';
+    return route.name;
+  }
+
+  /* ------------------------------------------------------------ screens */
+
+  V.screens = V.screens || {};
+
+  V.screens.more = function () {
+    const items = [
+      { label: 'Tours', note: 'Times proposed, held, and confirmed.', href: '#/tour' },
+      { label: 'Website studio', note: 'What your guests will see.', href: '#/studio' },
+      { label: 'Documents and commitments', note: 'Proposals, rates, and the one contract you have signed.', href: '#/plan' },
+      { label: 'Preferences and privacy', note: 'What VowOS may do on its own, and what stays between you.', href: '#/vision' },
+      { label: 'Design system', note: 'The system this product is built from, as built.', href: '#/system' },
+    ];
+    const rows = items.map((i) => html`<li>
+      <a class="vow-timeline__row" href="${i.href}" style="text-decoration:none;grid-template-columns:minmax(0,1fr) auto;align-items:center">
+        <span>
+          <span style="font-weight:600">${i.label}</span>
+          <span class="vow-meta" style="display:block;margin-top:4px">${i.note}</span>
+        </span>
+        ${raw(V.icon('chevron', { size: 17 }))}
+      </a>
+    </li>`).join('');
+
+    return html`<div class="vow-col">
+      ${raw(ui.pageHead('More', 'The details.', 'Nothing here needs you today. It is kept out of the way on purpose.'))}
+      <ul class="vow-timeline">${raw(rows)}</ul>
+    </div>`;
+  };
+
+  /* ------------------------------------------------------------ dialogs */
+
+  const DIALOGS = {
+    /* Approval shows exact recipients and a final send summary before anything
+       leaves the product (11.4). */
+    approveTour: function (payload) {
+      const place = V.byId(V.data.places, payload.placeId);
+      const window_ = payload.window;
+      return {
+        title: 'Before this goes to ' + place.name,
+        body: html`
+          ${raw(ui.receipt('This is exactly what gets sent', [
+            ['To', `${place.name}, events inbox`],
+            ['From', 'VowOS, on behalf of Maya and Alex'],
+            ['Asking for', `${V.fmtDate(window_.date, 'weekday')} at ${V.fmtTime(window_.time)}`],
+            ['Also asking', 'Whether the service charge is included in the site fee'],
+          ]))}
+          <p class="vow-consequence" style="margin-top:var(--vow-space-4)">
+            This is a request, not a booking. ${place.name} has to answer before anything is held.
+          </p>`,
+        primary: { label: 'Send the request', act: 'confirm-tour-time' },
+      };
+    },
+
+    commit: function () {
+      const d = V.data;
+      return {
+        title: 'Committing to a place',
+        body: html`
+          <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">
+            You have not both chosen the same place yet, so there is nothing for me to send.
+            When you agree, this is what committing will mean.
+          </p>
+          ${raw(ui.receipt('What committing does', [
+            ['Money', 'A deposit, which is the first non-refundable thing in your plan'],
+            ['Your date', 'Saturday, June 12, 2027 stops being available to anyone else'],
+            ['The other place', 'I write to them and withdraw, so nobody is left waiting'],
+            ['Your plan', 'Travel, save the dates, and the guest website all unblock'],
+          ]))}
+          ${raw(ui.agentNote('Money and anything you cannot take back always come back to you both. This is not something I will ever do on a standing approval.'))}`,
+        primary: null,
+        secondaryLabel: 'Understood',
+      };
+    },
+
+    ruleOut: function (payload) {
+      const place = V.byId(V.data.places, payload.placeId);
+      const reasons = ['Too expensive', 'Wrong room', 'Too far', 'Just not it'];
+      return {
+        title: `Ruling out ${place.name}`,
+        body: html`
+          <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">
+            One tap if you want to tell me why. It makes the next suggestions better.
+            Skipping is fine and I will not ask again.
+          </p>
+          <div class="vow-row" style="margin-top:var(--vow-space-5)">
+            ${raw(reasons.map((r) => ui.button(r, { variant: 'secondary', act: 'confirm-rule-out', value: payload.placeId + '|' + r })).join(''))}
+          </div>`,
+        primary: null,
+        secondaryLabel: 'Rule it out without saying why',
+        secondaryAct: 'confirm-rule-out',
+        secondaryValue: payload.placeId + '|',
+      };
+    },
+
+    publish: function () {
+      return {
+        title: 'Publishing to your guest website',
+        body: html`
+          ${raw(ui.receipt('What changes', [
+            ['Page', 'mayaandalex.wedding'],
+            ['Visible to', 'Anyone with the link'],
+            ['Changing', 'The welcome chapter and the questions chapter'],
+            ['Not changing', 'Travel, which is still waiting on the place'],
+            ['Guests notified', 'Nobody. That is a separate thing you would ask for.'],
+          ]))}`,
+        primary: { label: 'Publish', act: 'confirm-publish' },
+      };
+    },
+
+    addressRequest: function () {
+      return {
+        title: 'A message to eighteen households',
+        body: html`
+          <div class="vow-panel vow-stack vow-stack--3">
+            <p class="vow-label">Draft</p>
+            <p style="font-size:var(--vow-font-size-body-small)">
+              Hello. Maya and Alex are getting married next June and would like to send you something in the post.
+              Would you mind replying with your address? That is all we need for now.
+            </p>
+          </div>
+          <p class="vow-consequence" style="margin-top:var(--vow-space-4)">
+            Nothing has been sent. You will see all eighteen names, and you can take any of them out,
+            before this goes anywhere.
+          </p>`,
+        primary: { label: 'Show me the eighteen names', act: 'close-dialog' },
+      };
+    },
+
+    tourBrief: function () {
+      return {
+        title: 'Tour brief, The Orchard House',
+        body: html`
+          <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">
+            Four questions, built from what we still have not verified. I will send this to you both
+            on Monday, the day before you go.
+          </p>
+          <ul class="vow-stack vow-stack--3" style="margin-top:var(--vow-space-5)">
+            ${raw([
+              'Is the 22 percent service charge real, and is it on the site fee or the food?',
+              'Can we bring in outside catering, and what does that change?',
+              'How long does the barn take to set up if it rains, and who does it?',
+              'Is 1 a.m. the music curfew or the everyone-out curfew?',
+            ].map((q) => `<li class="vow-row" style="align-items:flex-start;flex-wrap:nowrap;gap:var(--vow-space-3)">
+              <span class="vow-quiet" style="flex:none;margin-top:3px">${V.icon('unknown', { size: 15 })}</span>
+              <span style="font-size:var(--vow-font-size-body-small)">${V.esc(q)}</span></li>`).join(''))}
+          </ul>`,
+        primary: null,
+        secondaryLabel: 'Close',
+      };
+    },
+
+    note: function () {
+      return {
+        title: 'A note for each other',
+        body: html`
+          <div class="vow-field">
+            <label class="vow-field__label" for="vow-note">What do you want to say?</label>
+            <textarea class="vow-input" id="vow-note" placeholder="I want to see the barn before we decide anything."></textarea>
+            <p class="vow-field__help">This goes to Alex and stays between you both. VowOS does not use it to change what it recommends.</p>
+          </div>`,
+        primary: { label: 'Leave the note', act: 'confirm-note' },
+      };
+    },
+
+    needsApproval: function (payload) {
+      return {
+        title: 'This one needs you',
+        body: html`
+          <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">${payload.reason}</p>
+          ${raw(ui.agentNote('You can change what I am allowed to do in Vision, under what VowOS may do on its own. Money and anything you cannot take back will still always come back to you.'))}`,
+        primary: { label: 'Approve just this one', act: payload.confirmAct || 'close-dialog', value: payload.value },
+      };
+    },
+  };
+
+  function openDialog(kind, payload) {
+    V.state.dialog = { kind, payload: payload || {} };
+    render();
+  }
+
+  function closeDialog() {
+    V.state.dialog = null;
+    render();
+  }
+
+  function renderDialog() {
+    const d = V.state.dialog;
+    if (!d) return '';
+    const spec = DIALOGS[d.kind](d.payload);
+    return html`<div class="vow-scrim" data-act="close-dialog">
+      <div class="vow-dialog vow-stack vow-stack--5" role="dialog" aria-modal="true"
+           aria-label="${spec.title}" data-stop="true" tabindex="-1">
+        <h2 class="vow-title" style="font-size:23px">${spec.title}</h2>
+        <div>${raw(spec.body)}</div>
+        <div class="vow-row vow-row--actions">
+          ${raw(spec.primary ? ui.button(spec.primary.label, {
+            variant: 'primary', act: spec.primary.act, value: spec.primary.value || (d.payload && d.payload.value) || '',
+          }) : '')}
+          ${raw(ui.button(spec.secondaryLabel || 'Not now', {
+            variant: spec.primary ? 'quiet' : 'secondary',
+            act: spec.secondaryAct || 'close-dialog',
+            value: spec.secondaryValue || '',
+          }))}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* ------------------------------------------------------------- render */
+
+  function renderRail(route) {
+    const active = activeWorkspace(route);
+    const items = NAV.map((n) => html`<a class="vow-nav__item" href="${n.href}"
+        ${raw(n.id === active ? 'aria-current="page"' : '')}>
+      ${raw(V.icon(n.icon))}${n.label}
+    </a>`).join('');
+
+    return html`<nav class="vow-rail" aria-label="Workspaces">
+      <div class="vow-brand">
+        <div class="vow-brand__mark">VowOS</div>
+        <div class="vow-brand__event">${V.data.couple.title}<br/>${V.fmtDate(V.data.wedding.date, 'long')}</div>
+      </div>
+      <div class="vow-nav">${raw(items)}</div>
+      <div class="vow-rail__foot">
+        <a class="vow-nav__item" href="#/today" style="padding-left:0">
+          ${raw(V.icon('clock'))}VowOS is working on ${raw(V.numberWord(V.data.agentWork.filter((w) => w.tone === 'waiting').length))} things
+        </a>
+      </div>
+    </nav>`;
+  }
+
+  function renderTabs(route) {
+    const active = activeWorkspace(route);
+    const items = TABS.map((id) => {
+      const n = V.byId(NAV, id);
+      return html`<a class="vow-tabbar__item" href="${n.href}"
+        ${raw(n.id === active ? 'aria-current="page"' : '')}>
+        ${raw(V.icon(n.icon))}${n.label}
+      </a>`;
+    }).join('');
+    return html`<nav class="vow-tabbar" aria-label="Workspaces">${raw(items)}</nav>`;
+  }
+
+  function renderScreen(route) {
+    switch (route.name) {
+      case 'places': return route.param ? V.screens.place(route.param) : V.screens.places();
+      case 'vision': return V.screens.vision();
+      case 'decide': return V.screens.decide();
+      case 'tour': return V.screens.tour();
+      case 'plan': return V.screens.plan();
+      case 'guests': return V.screens.guests();
+      case 'studio': return V.screens.studio();
+      case 'system': return V.screens.system();
+      case 'more': return V.screens.more();
+      case 'today':
+      default: return V.screens.today();
+    }
+  }
+
+  function render() {
+    const route = V.state.route;
+    /* Keyboard focus survives a re-render, which is what makes the keyboard
+       path in UI Plan 13 real rather than aspirational. */
+    const activeEl = document.activeElement;
+    const focusKey = activeEl && activeEl.dataset && activeEl.dataset.act
+      ? activeEl.dataset.act + '|' + (activeEl.dataset.value || '')
+      : null;
+    const scroll = window.scrollY;
+
+    const root = document.getElementById('app');
+    root.innerHTML = html`
+      <a class="vow-skip" href="#vow-main">Skip to the main content</a>
+      <div class="vow-shell">
+        ${raw(renderRail(route))}
+        <div>
+          <div class="vow-mobilehead">
+            <span class="vow-brand__mark" style="font-size:19px">VowOS</span>
+            <span class="vow-meta">${V.data.couple.title}, ${V.fmtDate(V.data.wedding.date, 'long')}</span>
+          </div>
+          <main class="vow-canvas" id="vow-main" tabindex="-1">${raw(renderScreen(route))}</main>
+        </div>
+      </div>
+      ${raw(renderTabs(route))}
+      ${raw(renderDialog())}
+      ${V.state.toast ? raw(html`<div class="vow-toast">${V.state.toast}</div>`) : ''}
+      <div class="vow-sr" role="status" aria-live="polite">${V.state.announcement}</div>`;
+
+    if (V.state.dialog) {
+      const dialog = root.querySelector('.vow-dialog');
+      if (dialog) dialog.focus();
+    } else if (focusKey) {
+      const restored = root.querySelector(
+        `[data-act="${focusKey.split('|')[0]}"]${focusKey.split('|')[1] ? `[data-value="${focusKey.split('|')[1]}"]` : ''}`
+      );
+      if (restored) restored.focus({ preventScroll: true });
+      window.scrollTo({ top: scroll, behavior: 'instant' in window ? 'instant' : 'auto' });
+    }
+  }
+
+  V.render = render;
+
+  /* ------------------------------------------------------------ actions */
+
+  const ACTIONS = {
+    noop: function () {},
+
+    go: function (value) {
+      window.location.hash = value;
+    },
+
+    'toggle-drawer': function (value) {
+      V.state.drawers[value] = !V.state.drawers[value];
+      render();
+    },
+
+    'defer-decision': function () {
+      toast('Nothing moves until you say so. I will bring this back on Monday, August 17.');
+    },
+
+    'choose-palette': function (value) {
+      V.state.palette = value;
+      const p = V.byId(V.data.vision.palettes, value);
+      toast(`${p.name} is now your direction. Your guest website follows it.`);
+    },
+
+    'set-delegation': function (value) {
+      V.state.delegation.level = value;
+      toast(`Changed. ${V.delegation.levelById(value).summary}`);
+    },
+
+    'toggle-scope': function (value) {
+      const list = V.state.delegation.scopes;
+      const at = list.indexOf(value);
+      if (at === -1) list.push(value); else list.splice(at, 1);
+      const scope = V.byId(V.delegation.SCOPES, value);
+      toast(at === -1
+        ? `On. VowOS will now do this without asking: ${scope.label.toLowerCase()}.`
+        : `Off. VowOS will ask you first from now on.`);
+    },
+
+    'confirm-vision': function () {
+      toast('Confirmed. I will look for places against this, and tell you when something does not fit.');
+    },
+
+    'refine-feeling': function () {
+      toast('Tell me what is off and I will rewrite it. Nothing else changes until you are happy with this.');
+    },
+
+    'answer-question': function () {
+      toast('Answered. That takes one unknown out of the comparison.');
+    },
+
+    'skip-question': function () {
+      toast('Skipped. I will stop asking, and I will say it is unknown rather than guess.');
+    },
+
+    /* Narrow screens compare one place at a time. Switching focus never
+       changes either option's state, only which one is on screen (11.4). */
+    'pick-compare': function (value) {
+      V.state.compareFocus = value;
+      render();
+    },
+
+    'open-place': function (value) {
+      window.location.hash = '#/places/' + value;
+    },
+
+    'save-place': function (value) {
+      V.state.placeStatus[value] = 'saved';
+      const place = V.byId(V.data.places, value);
+      toast(`${place.name} is saved. It is in your places, nothing has been sent to them.`);
+    },
+
+    'rule-out': function (value) {
+      openDialog('ruleOut', { placeId: value });
+    },
+
+    'confirm-rule-out': function (value) {
+      const [id, reason] = value.split('|');
+      V.state.placeStatus[id] = 'ruled-out';
+      const place = V.byId(V.data.places, id);
+      closeDialog();
+      toast(reason
+        ? `${place.name} is out. I will stop suggesting places that are ${reason.toLowerCase()}.`
+        : `${place.name} is out. It stays in your list in case you change your mind.`);
+    },
+
+    'show-ruled-out': function () {
+      toast('All 38 are there with the reason each one was set aside. Nothing is hidden, it is just not in your way.');
+    },
+
+    /* Delegation-aware. A request for a tour time is covered by a standing
+       approval; without that approval it becomes an explicit ask. */
+    'request-tour': function (value) {
+      const result = V.delegation.evaluate('request-tour', V.state.delegation);
+      const place = V.byId(V.data.places, value);
+      if (!result.allowed) {
+        openDialog('needsApproval', { reason: result.reason, confirmAct: 'go', value: '#/tour' });
+        return;
+      }
+      window.location.hash = '#/tour';
+      setTimeout(() => toast(`${result.reason} Choose a time and I will ask ${place.name} for it.`), 60);
+    },
+
+    'pick-tour-date': function (value) {
+      V.state.tourDate = value;
+      V.state.tourSelection = null;
+      render();
+    },
+
+    'pick-tour-time': function (value) {
+      V.state.tourSelection = value;
+      render();
+    },
+
+    'ask-tour-time': function (value) {
+      const tour = V.byId(V.data.tours, value);
+      const window_ = tour.windows.find((w) => w.id === V.state.tourSelection);
+      if (!window_) return;
+      openDialog('approveTour', { placeId: tour.placeId, window: window_, value });
+    },
+
+    'confirm-tour-time': function (value) {
+      const tour = V.byId(V.data.tours, value) || V.data.tours[1];
+      const window_ = tour.windows.find((w) => w.id === V.state.tourSelection);
+      const place = V.byId(V.data.places, tour.placeId);
+      closeDialog();
+      /* fmtTime already ends in a period ("5:30 p.m."), so the sentence
+         continues without adding a second one. */
+      toast(`Asked. ${place.name} has your request for ${V.fmtDate(window_.date, 'weekday')} at ${V.fmtTime(window_.time)} Nothing is booked until they answer, and I will tell you when they do.`);
+    },
+
+    'no-times-work': function () {
+      toast('Understood. I will ask them what else they have, rather than making you guess.');
+    },
+
+    'add-calendar': function () {
+      toast('Added to both your calendars, with the travel time from Rhinecliff built in.');
+    },
+
+    'tour-brief': function () {
+      openDialog('tourBrief', {});
+    },
+
+    'extend-hold': function () {
+      const result = V.delegation.evaluate('ask-question', V.state.delegation);
+      if (!result.allowed) {
+        openDialog('needsApproval', { reason: result.reason });
+        return;
+      }
+      toast('Asked. The Orchard House has a request to hold June 12 past Friday. I will tell you either way by Thursday.');
+    },
+
+    'leave-note': function () {
+      openDialog('note', {});
+    },
+
+    'confirm-note': function () {
+      closeDialog();
+      toast('Left for Alex. It is between you both, and it does not change what I recommend.');
+    },
+
+    'open-commit': function () {
+      openDialog('commit', {});
+    },
+
+    'draft-address-request': function () {
+      openDialog('addressRequest', {});
+    },
+
+    'show-households': function () {
+      toast('Eighteen households, with what is missing from each. None of them have been contacted.');
+    },
+
+    'pick-section': function (value) {
+      V.state.siteSection = value;
+      render();
+    },
+
+    'publish-site': function () {
+      const result = V.delegation.evaluate('publish-website', V.state.delegation);
+      if (!result.allowed) {
+        openDialog('publish', {});
+        return;
+      }
+      openDialog('publish', {});
+    },
+
+    'confirm-publish': function () {
+      V.data.website.published = true;
+      closeDialog();
+      toast('Published. Two chapters changed. Nobody was notified.');
+    },
+
+    'view-as-guest': function () {
+      toast('This is what a guest sees. Nothing about your budget, your places, or your notes is on that page.');
+    },
+
+    'close-dialog': function () {
+      closeDialog();
+    },
+  };
+
+  /* ------------------------------------------------------------- events */
+
+  function onClick(event) {
+    const trigger = event.target.closest('[data-act]');
+    if (!trigger) return;
+
+    /* Clicking the dialog body must not close the dialog behind it. */
+    if (trigger.classList.contains('vow-scrim') && event.target.closest('[data-stop]')) return;
+
+    const act = trigger.dataset.act;
+    const handler = ACTIONS[act];
+    if (!handler) return;
+
+    event.preventDefault();
+    handler(trigger.dataset.value || '');
+  }
+
+  function onKeydown(event) {
+    if (event.key === 'Escape' && V.state.dialog) {
+      event.preventDefault();
+      closeDialog();
+    }
+  }
+
+  function onHashChange() {
+    V.state.route = parseRoute();
+    V.state.dialog = null;
+    render();
+    const main = document.getElementById('vow-main');
+    if (main) {
+      window.scrollTo({ top: 0 });
+      main.focus({ preventScroll: true });
+    }
+  }
+
+  function start() {
+    V.state.route = parseRoute();
+    document.addEventListener('click', onClick);
+    document.addEventListener('keydown', onKeydown);
+    window.addEventListener('hashchange', onHashChange);
+    render();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})(window.VowOS);
+
+</script>
+</body>
+</html>
