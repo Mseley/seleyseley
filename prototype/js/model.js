@@ -138,7 +138,7 @@
   /* A fact's value is only shown as a number when the state supports it.
      Unknown never renders a figure, because a figure implies a source. */
   function displayValue(resolved) {
-    if (!resolved) return '—';
+    if (!resolved) return 'Not confirmed';
     if (resolved.state === 'unknown') return 'Not confirmed';
     if (resolved.value === null || resolved.value === undefined) return 'Not confirmed';
     if (resolved.state === 'inferred' && typeof resolved.value === 'number') {

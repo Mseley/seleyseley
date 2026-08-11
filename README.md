@@ -13,11 +13,14 @@ npm run serve      # http://localhost:4173
 No dependencies, no install step. Node 18 or newer.
 
 ```bash
+npm test           # 36 checks against the trust model, permission model, and editorial rules
+npm run check      # the above, plus fail if generated files have drifted from tokens.json
 npm run tokens     # regenerate tokens.css and the contrast report from tokens.json
-npm run check      # fail if the generated files have drifted from tokens.json
 npm run bundle     # inline everything into dist/
 npm run build      # tokens + bundle
 ```
+
+`npm run check` is the CI entry point. It fails the build on a drifted token, a contrast regression, a permission-model hole, or an editorial slip.
 
 `dist/vowos-prototype.html` is a single self-contained file you can open by double-clicking. It makes no external requests: no CDN, no web fonts, no remote images.
 
@@ -31,6 +34,7 @@ npm run build      # tokens + bundle
 | `docs/diagrams/` | Information architecture, decision loop, trust states, delegation. |
 | `design-system/tokens.json` | The only place a token value may be edited. |
 | `design-system/build.mjs` | Generates the CSS, audits contrast, blocks the build on a failure. |
+| `scripts/verify.mjs` | 36 checks. No dependencies, no browser: the models load into a bare context. |
 | `prototype/` | The prototype source. |
 | `prototype/js/model.js` | The trust data model and the agent permission model. |
 
@@ -39,6 +43,8 @@ npm run build      # tokens + bundle
 **A token changes in exactly one place.** `tokens.json` is the source. `prototype/styles/tokens.css` is generated and carries a do-not-edit header. `npm run check` fails if the two disagree, which is how a hand-typed hex value gets caught before it forks the system.
 
 **A trust claim is machine-checkable or it is not made.** Every fact resolves through `V.trust.resolve()` to one of four states: Confirmed, Reported, Inferred, Unknown. A fact with no state renders as Unknown and reports itself to the console. No screen is allowed to write its own evidence line.
+
+Both rules are enforced by `npm run check` rather than by anyone remembering them. The harness itself was mutation-tested: granting a financial action, planting an em dash, hand-typing a hex value, and inverting a scenario's arithmetic were each introduced deliberately, and each was caught by the check written for it.
 
 ## Seeing the system work
 

@@ -60,6 +60,10 @@ This one is new, and it comes from the build. The UI Plan bans rose clay, mist b
 
 The general form: when a rule can be expressed as a check, expressing it as prose instead is a decision to let it rot. Not every rule can be checked. Those that can, must be.
 
+The principle turned on its author twice, which is the best argument for it. The first pass of `app.css` carried seven hand-typed `rgba(29, 28, 26, …)` washes, restating ink's value in the one file whose header claims no raw color appears in it. The same pass shipped an em dash in `displayValue`, in a document that bans em dashes. Both were written by someone who had just written the rule down, and neither was caught by reading. They are now two lines in `npm test`.
+
+A corollary, learned the same way: **a check that cannot fail is also decoration.** The harness in `scripts/verify.mjs` was mutation-tested before being trusted. Granting a financial action, planting an em dash and a doubled period, hand-typing a hex value, and inverting a scenario's arithmetic were each introduced deliberately; each was caught by the check written for it, and by no other. A suite nobody has seen fail is a suite nobody has tested.
+
 ---
 
 ## 3. Trust and evidence data model  **Built**
@@ -145,6 +149,7 @@ The third clause is the one teams forget, and it is the one that determines whet
 | Design tokens | Design systems lead | `design-system/tokens.json`, consumed by the build | Any change requires a documented reason and passes the contrast gate. `npm run check` fails on drift. |
 | Components | Shared design and engineering pair | `prototype/js/components.js`, each carrying its 11.2 design rule as a comment | A new component requires its design rule *before* build |
 | Copy and agent language | Content design lead | Rendered from one place per pattern | Any new situation requires the "avoid" column, not just the preferred language, so the pattern is falsifiable |
+| Interaction washes | Design systems lead | Derived from ink with `color-mix` in the token file, never restated as literals | Ink's value stays in exactly one place. If `color-mix` is unavailable the wash drops out and the state still reads through weight, border, and wording, which is UI Plan 13 working as intended. |
 
 **The rule that prevents drift:** nothing in UI Plan sections 3, 11, or 14 exists in two places with two values. `prototype/styles/tokens.css` is generated and carries a do-not-edit header. `app.css` uses no raw hex, spacing number, or duration.
 
@@ -155,6 +160,22 @@ The audit is not decoration. It found something on the first run.
 **CF-01 — Terracotta is a fill, not a text color.** Terracotta measures 4.88:1 on porcelain and **4.48:1 on paper**, which is below the 4.5:1 AA minimum for body text. Since paper is the background of every decision surface, terracotta body copy on a decision surface would have failed AA. It is therefore cleared only as a button fill, a left rule, and large-text emphasis at 24px and above. Small text needing a warm accent uses ink or moss (6.89:1 on paper).
 
 This is precisely the class of error that ships when a palette is specified in prose and implemented by eye.
+
+### 5.2 What `npm run check` enforces
+
+The governance in this section is only as good as the gate in front of it. One command, no dependencies, runs in about a second:
+
+| Gate | What it catches |
+|---|---|
+| Token drift | A generated file edited by hand, or one left stale after a `tokens.json` change |
+| Contrast | Any of 21 required pairs regressing, and any of the three banned text colors becoming passable |
+| Trust model | Staleness not firing, an unstated fact rendering as something other than Unknown, a figure printed for a state that has no source |
+| Permission model | A financial action permitted at any level under any scope, an external action escaping propose-only, an undeclared action being reachable, an evaluation returning no user-facing reason |
+| Scenario coherence | Copy quoting a figure the data no longer supports, a scenario note contradicting its own arithmetic, the shortlist exceeding five |
+| Editorial rules | Em dashes, doubled periods, placeholder leakage, "reservation" where the glossary says "hold", and gendered defaults |
+| Design system | A raw color literal in `app.css`, a token with no stated usage rule |
+
+The permission-model gate matters most. It is the only one where a regression is a safety failure rather than a quality failure, and it is the one a code review is least likely to catch, because permitting an action looks exactly like enabling a feature.
 
 **CF-02 — Porcelain and paper are close by design, so layering never relies on fill alone.** The two surfaces differ by 1.09:1. UI Plan 3.1 flagged the risk that they collapse on a low-quality panel in daylight. The resolution: **every paper surface carries a hairline border in addition to its fill.** Removing that border is a system change, not a visual preference. The same reasoning drove painting the desktop rail column on the shell rather than on the sticky rail element, so the column reads as continuous down a long page.
 
@@ -290,7 +311,9 @@ UI Plan section 13's checklist stays. It needs a cadence and an owner to hold at
 |---|---|---|
 | Can every "Confirmed" fact trace to a timestamped source? | Yes, via the Section 3 model, no exceptions for launch pressure | **Yes**, enforced in code |
 | Can a user state, in their own words, what VowOS may do without asking? | Yes, tested via research, not assumed from UI copy | **Not yet.** The model is built and disclosed; nobody has tested comprehension. |
-| Does a token change happen in exactly one place? | Yes | **Yes**, enforced by `npm run check` |
+| Does a token change happen in exactly one place? | Yes | **Yes**, enforced by `npm run check`. Interaction washes derive from ink rather than restating it, so `app.css` holds no color literal at all. |
+| Can the permission model regress without anyone noticing? | No | **No.** Every action is evaluated against every level with every scope granted, on each run. |
+| Has the check suite itself been seen to fail? | Yes, deliberately | **Yes**, mutation-tested against four planted defects |
 | Has this quarter's research sample included a couple outside the team's own cultural or relationship default? | Yes | **No.** No research has run. |
 | Is any success metric implicitly rewarding more screen time or more opens? | No | **Yes, satisfied.** The anti-metric is explicit and no metric contradicts it. |
 | Does every new component or agent-language pattern have a named owner and a change process? | Yes | **Partly.** The process exists; the roles are unfilled. |

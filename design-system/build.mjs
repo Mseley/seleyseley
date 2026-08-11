@@ -75,6 +75,7 @@ const kebab = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 
 const GROUPS = [
   ['color', 'Color'],
+  ['state', 'Interaction washes, derived from ink'],
   ['space', 'Spacing scale'],
   ['radius', 'Corner radius'],
   ['font', 'Type families'],
@@ -103,6 +104,8 @@ function emitCss() {
   for (const [group, title] of GROUPS) {
     lines.push(`  /* ${title} */`);
     for (const [name, token] of Object.entries(tokens[group])) {
+      /* Keys beginning with $ are notes to the reader, not tokens. */
+      if (name.startsWith('$')) continue;
       const varName = `--vow-${kebab(group)}-${kebab(name)}`;
       lines.push(`  ${varName}: ${token.value};`);
     }

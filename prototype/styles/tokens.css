@@ -26,6 +26,11 @@
   --vow-color-overlay: #1D1C1AA3;
   --vow-color-focus: #1D1C1A;
 
+  /* Interaction washes, derived from ink */
+  --vow-state-wash-subtle: color-mix(in srgb, var(--vow-color-ink) 3%, transparent);
+  --vow-state-wash-hover: color-mix(in srgb, var(--vow-color-ink) 4.5%, transparent);
+  --vow-state-wash-selected: color-mix(in srgb, var(--vow-color-ink) 7%, transparent);
+
   /* Spacing scale */
   --vow-space-1: 4px;
   --vow-space-2: 8px;

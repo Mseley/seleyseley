@@ -40,6 +40,11 @@
   --vow-color-overlay: #1D1C1AA3;
   --vow-color-focus: #1D1C1A;
 
+  /* Interaction washes, derived from ink */
+  --vow-state-wash-subtle: color-mix(in srgb, var(--vow-color-ink) 3%, transparent);
+  --vow-state-wash-hover: color-mix(in srgb, var(--vow-color-ink) 4.5%, transparent);
+  --vow-state-wash-selected: color-mix(in srgb, var(--vow-color-ink) 7%, transparent);
+
   /* Spacing scale */
   --vow-space-1: 4px;
   --vow-space-2: 8px;
@@ -268,10 +273,10 @@ a { color: inherit; }
   transition: background var(--vow-motion-fast) var(--vow-motion-ease);
 }
 
-.vow-nav__item:hover { background: rgba(29, 28, 26, 0.045); }
+.vow-nav__item:hover { background: var(--vow-state-wash-hover); }
 
 .vow-nav__item[aria-current='page'] {
-  background: rgba(29, 28, 26, 0.075);
+  background: var(--vow-state-wash-selected);
   font-weight: 600;
 }
 
@@ -371,14 +376,14 @@ a { color: inherit; }
   border-color: var(--vow-color-hairline-strong);
   color: var(--vow-color-ink);
 }
-.vow-btn--secondary:hover { background: rgba(29, 28, 26, 0.04); }
+.vow-btn--secondary:hover { background: var(--vow-state-wash-hover); }
 
 /* A selected toggle reads through its border, its label, and a check, not
    through the primary accent. Terracotta stays reserved for the one primary
    action in a view, so a column of switches cannot dilute it. */
 .vow-btn--secondary[aria-pressed='true'] {
   border-color: var(--vow-color-ink);
-  background: rgba(29, 28, 26, 0.06);
+  background: var(--vow-state-wash-selected);
 }
 
 /* Quiet action: never looks like a hidden link (11.2). */
@@ -545,7 +550,7 @@ a { color: inherit; }
   gap: var(--vow-space-1);
   padding: 4px var(--vow-space-2);
   border-radius: var(--vow-radius-sm);
-  background: rgba(29, 28, 26, 0.05);
+  background: var(--vow-state-wash-selected);
   font-size: var(--vow-font-size-label);
   font-weight: 600;
   color: var(--vow-color-ink);
@@ -673,7 +678,7 @@ textarea.vow-input { min-height: 120px; resize: vertical; line-height: var(--vow
   cursor: text;
 }
 
-.vow-editable:hover { background: rgba(29, 28, 26, 0.03); }
+.vow-editable:hover { background: var(--vow-state-wash-subtle); }
 .vow-editable:focus { background: var(--vow-color-porcelain); border-color: var(--vow-color-hairline-strong); }
 
 /* --------------------------------------------------- 11.2 / sheet + toast */
@@ -874,7 +879,7 @@ textarea.vow-input { min-height: 120px; resize: vertical; line-height: var(--vow
 .vow-meter {
   height: 10px;
   border-radius: 999px;
-  background: rgba(29, 28, 26, 0.07);
+  background: var(--vow-state-wash-selected);
   overflow: hidden;
   display: flex;
 }
@@ -1726,7 +1731,7 @@ window.VowOS = window.VowOS || {};
   /* A fact's value is only shown as a number when the state supports it.
      Unknown never renders a figure, because a figure implies a source. */
   function displayValue(resolved) {
-    if (!resolved) return '—';
+    if (!resolved) return 'Not confirmed';
     if (resolved.state === 'unknown') return 'Not confirmed';
     if (resolved.value === null || resolved.value === undefined) return 'Not confirmed';
     if (resolved.state === 'inferred' && typeof resolved.value === 'number') {

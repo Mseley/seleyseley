@@ -6,7 +6,8 @@
   "description": "VowOS design program: tokens as code, a governed design system, and a working prototype of the six priority artifacts.",
   "scripts": {
     "tokens": "node design-system/build.mjs",
-    "check": "node design-system/build.mjs --check",
+    "test": "node scripts/verify.mjs",
+    "check": "node design-system/build.mjs --check && node scripts/verify.mjs",
     "bundle": "node scripts/bundle.mjs",
     "build": "node design-system/build.mjs && node scripts/bundle.mjs",
     "serve": "node scripts/serve.mjs"

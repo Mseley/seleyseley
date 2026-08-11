@@ -70,8 +70,34 @@ There is no licensed venue photography and UI Plan section 14 bans generic stock
 
 This is the third option the plan already permits, not a placeholder for photography. It carries a visible credit line wherever it could be mistaken for a photograph of the real place, which means the imagery rule is demonstrated by the prototype rather than merely described by it.
 
+### The rule caught its own author, twice
+
+Principle 2.9 says a rule is executable or it is decoration. Two defects found while writing the verification harness are the argument for it, because both were committed by someone who had just written the rule down.
+
+`app.css` opens with a header stating that no raw hex value appears in the file. It contained seven hand-typed `rgba(29, 28, 26, ...)` washes, restating ink's value in the one place that claims not to. They now derive from ink through `color-mix` in the token file, so ink's value lives in exactly one place and `app.css` holds no color literal at all.
+
+`displayValue` returned an em dash for a missing fact, in a product whose review checklist bans em dashes. It was user-visible copy, not a comment.
+
+Neither was caught by reading, twice. Both are now one line each in `npm test`.
+
+A useful side effect of the `color-mix` change: if a browser does not support it, the wash drops out and the state still reads through font weight, border, and wording. The colour was never load-bearing, which is UI Plan section 13 working as designed rather than as claimed.
+
+### The harness was mutation-tested before being trusted
+
+A suite nobody has seen fail is a suite nobody has tested. Four defects were planted deliberately in a throwaway copy:
+
+| Planted defect | Caught by |
+|---|---|
+| `evaluate()` permits financial actions | Money refused at every level and scope, plus two collateral checks |
+| An em dash and a doubled period in vision copy | The two editorial checks, separately |
+| A hand-typed hex in `app.css` | No raw color literals |
+| A scenario note claiming comfort while its arithmetic goes over | Each note agrees with the direction of its arithmetic |
+
+Each was caught by the check written for it and not masked by another. The financial mutant tripping three checks rather than one is the correct behaviour: a permission hole should be over-detected, not under-detected.
+
 ### Verified before hand-off
 
+- 36 of 36 verification checks pass, covering the trust model, the permission model, scenario arithmetic, the editorial rules, and design system enforcement.
 - 21 of 21 contrast checks pass, including the three that must fail.
 - No console errors or failed network requests on any route, desktop or mobile.
 - Approval flow shows exact recipients before anything leaves the product.
