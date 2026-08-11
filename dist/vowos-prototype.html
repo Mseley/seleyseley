@@ -126,6 +126,11 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* The system commits to one warm daylight world. UI Plan section 3 defines a
+     single palette and never describes a dark variant, so rather than inventing
+     one, the page declares its scheme and paints every ground explicitly. It
+     then holds on a dark host without borrowing anything from it. */
+  color-scheme: light;
 }
 
 body {
