@@ -1,6 +1,6 @@
 # Production readiness
 
-**Verdict: no, but it is no longer only a design program.** The repository now contains a system of record with the permission model enforced on the server, alongside the design program and the prototype. What it still does not contain is authentication, an HTTP layer, or the agent.
+**Verdict: no, but the gap is now specific rather than total.** The repository contains a design program, a prototype, a system of record, accounts, and an HTTP API where the household boundary is structural. What it does not contain is the agent, rate limiting, password reset, and everything that touches the outside world.
 
 That is not a criticism of the work, and it is not hedging. The distinction matters because the two are worth different things and cost different amounts, and confusing them is how a project ships a beautiful shell over an agent that has never sent an email.
 
@@ -15,7 +15,7 @@ These are finished, and a team could take them into a real build tomorrow withou
 | The design system | Tokens are a single source, generated, drift-checked, and contrast-gated in CI. `app.css` contains no raw color literal. This is how a mature design system is run. |
 | The trust data model | Four states, staleness, supersession, contested claims. Roughly 300 lines of dependency-free logic with no DOM and no framework. It ports into a real backend nearly as-is. |
 | The delegation model | Three levels, four scopes, a closed action registry, and a hard branch that money cannot reach around. Same portability. |
-| The verification approach | 68 checks, all mutation-tested, wired to CI. The suite is the specification in executable form. |
+| The verification approach | 89 checks, all mutation-tested, wired to CI. The suite is the specification in executable form. |
 | The system of record | `server/`. Facts are append only, enforced by database triggers rather than convention. Permissions are evaluated against stored settings, so a caller cannot assert its own authority. Money requires approval from both partners before an effect can fire. |
 | The documentation | The masterplan, glossary, metrics schema, and research kit are the artifacts that survive a team change. |
 
@@ -33,7 +33,7 @@ This is the whole of it, and everything else is a footnote by comparison.
 |---|---|
 | Backend | **Started.** `server/` holds the system of record: an append-only fact ledger, the permission model enforced against stored settings, dual approval for money, and an audit log. No HTTP layer yet, so it is a library rather than a service. |
 | Persistence | **Started.** SQLite via `node:sqlite`, with append-only enforced by database triggers rather than by convention. |
-| Accounts and authentication | None. No login, no sessions, no identity. `actor` and `partnerId` are passed in and trusted, which is the next piece. |
+| Accounts and authentication | **Built.** scrypt passwords, session tokens stored only as hashes, bearer auth, and a scoped handle that makes cross-household access unrepresentable rather than merely checked. **No rate limiting**, which is now the most important missing piece: a password can be guessed as fast as the server answers. No password reset, verification, or second factor. |
 | The agent itself | None. There is no model, no email sending, no reading of replies, no ingestion of place data. |
 | Real data | Five fictional places with hand-authored facts. |
 
@@ -82,7 +82,7 @@ Rough order of magnitude, not an estimate. The ordering matters more than the si
 |---|---|---|
 | 1 | Run the generative research. It can invalidate parts of the design, and it is cheapest to find that out now. | Weeks |
 | 2 | Build the data pipeline: place ingestion, outbound email, reply parsing, and writing results into the trust model. | The largest single piece |
-| 3 | Accounts, authentication, and an HTTP layer over the system of record. The ledger and the permission enforcement now exist; identity does not. | Medium |
+| 3 | Harden what now exists: rate limiting, password reset, migrations, TLS and a secret store at deployment. | Small, and blocking |
 | 4 | Rebuild the frontend on a real framework, porting the design system and the two models rather than the rendering. | Medium |
 | 5 | Security review, legal and compliance, deliverability. | Medium, and blocking |
 | 6 | Evaluative research rounds against the real thing, then launch. | Weeks |

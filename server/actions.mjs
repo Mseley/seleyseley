@@ -28,15 +28,19 @@ function requiresBothPartners(actionId) {
   return Boolean(action && (action.financial || action.reversible === false));
 }
 
-export function createExecutor(db, effects = {}) {
-  function settingsFor(householdId) {
-    return db.getDelegation(householdId);
+/* Takes a SCOPED handle, never the raw database. The executor therefore has no
+   way to name a household at all, so an effect cannot land on the wrong one. */
+export function createExecutor(scope, effects = {}) {
+  const householdId = scope.householdId;
+
+  function settingsFor() {
+    return scope.getDelegation();
   }
 
-  function record(householdId, actor, actionId, verdict, payload) {
-    const settings = settingsFor(householdId);
-    db.logAttempt({
-      householdId, actor, actionId,
+  function record(actor, actionId, verdict, payload) {
+    const settings = settingsFor();
+    scope.logAttempt({
+      actor, actionId,
       allowed: verdict.allowed,
       reason: verdict.reason,
       level: settings.level,
@@ -45,42 +49,42 @@ export function createExecutor(db, effects = {}) {
     });
   }
 
-  async function run(householdId, actionId, payload) {
+  async function run(actionId, payload) {
     const effect = effects[actionId];
     if (!effect) {
       /* A declared action with no implementation must fail loudly. Silently
          succeeding would report work to a couple that never happened. */
       throw new Error(`action "${actionId}" is permitted but has no effect wired up`);
     }
-    return effect({ householdId, payload, db });
+    return effect({ householdId, payload, scope });
   }
 
   return {
     /* The agent acting on its own. Evaluated against stored settings only. */
-    async attempt(householdId, actionId, payload) {
-      const settings = settingsFor(householdId);
+    async attempt(actionId, payload) {
+      const settings = settingsFor();
       const verdict = delegation.evaluate(actionId, settings);
-      record(householdId, 'agent', actionId, verdict, payload);
+      record('agent', actionId, verdict, payload);
 
       if (!verdict.allowed) {
         return { ran: false, allowed: false, reason: verdict.reason, requiresApproval: true };
       }
-      const result = await run(householdId, actionId, payload);
+      const result = await run(actionId, payload);
       return { ran: true, allowed: true, reason: verdict.reason, result };
     },
 
     /* A partner explicitly authorising one specific request. */
-    async authorize(householdId, requestId, actionId, partnerId, payload) {
+    async authorize(requestId, actionId, partnerId, payload) {
       if (!delegation.ACTIONS[actionId]) {
         const verdict = { allowed: false, reason: 'This is not a capability VowOS has been given.' };
-        record(householdId, partnerId, actionId, verdict, payload);
+        record(partnerId, actionId, verdict, payload);
         return { ran: false, allowed: false, reason: verdict.reason };
       }
 
-      db.recordApproval(householdId, requestId, actionId, partnerId, payload);
+      scope.recordApproval(requestId, actionId, partnerId, payload);
 
-      const partners = db.partnerIds(householdId);
-      const approvals = db.approvalsFor(householdId, requestId);
+      const partners = scope.partnerIds();
+      const approvals = scope.approvalsFor(requestId);
       const approvedBy = new Set(approvals.map((a) => a.partner_id));
 
       if (requiresBothPartners(actionId)) {
@@ -90,7 +94,7 @@ export function createExecutor(db, effects = {}) {
             allowed: false,
             reason: `Waiting on ${missing.join(' and ')}. Anything involving money or a commitment needs you both.`,
           };
-          record(householdId, partnerId, actionId, verdict, payload);
+          record(partnerId, actionId, verdict, payload);
           return { ran: false, allowed: false, reason: verdict.reason, waitingOn: missing };
         }
       }
@@ -101,15 +105,15 @@ export function createExecutor(db, effects = {}) {
           ? `Approved by ${partners.join(' and ')}.`
           : `Approved by ${partnerId}.`,
       };
-      record(householdId, partnerId, actionId, verdict, payload);
-      const result = await run(householdId, actionId, payload);
+      record(partnerId, actionId, verdict, payload);
+      const result = await run(actionId, payload);
       return { ran: true, allowed: true, reason: verdict.reason, result };
     },
 
     /* Read-only: what would happen, without doing it or logging an attempt.
        Used by the interface to render a consequence line honestly. */
-    preview(householdId, actionId) {
-      const settings = settingsFor(householdId);
+    preview(actionId) {
+      const settings = settingsFor();
       const verdict = delegation.evaluate(actionId, settings);
       return {
         allowed: verdict.allowed,
@@ -122,8 +126,8 @@ export function createExecutor(db, effects = {}) {
 
 /* Resolving a household's facts through the shared model, so the server and the
    interface can never disagree about what is Confirmed. */
-export function readFacts(db, householdId, placeId) {
-  const stored = db.factsFor(householdId, placeId);
+export function readFacts(scope, placeId) {
+  const stored = scope.facts(placeId);
   return {
     facts: trust.resolveAll(stored).filter((f) => !f.superseded),
     disputes: trust.disputes(stored),

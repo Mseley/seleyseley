@@ -6,12 +6,13 @@
   "description": "VowOS: a governed design system, a working prototype, and a system of record that enforces the permission model server-side.",
   "scripts": {
     "tokens": "node design-system/build.mjs",
-    "test": "node scripts/verify.mjs && node server/test.mjs",
-    "check": "node design-system/build.mjs --check && node scripts/verify.mjs && node server/test.mjs",
+    "test": "node scripts/verify.mjs && node server/test.mjs && node server/test-http.mjs",
+    "check": "node design-system/build.mjs --check && npm test",
     "bundle": "node scripts/bundle.mjs",
     "build": "node design-system/build.mjs && node scripts/bundle.mjs",
     "serve": "node scripts/serve.mjs",
-    "test:server": "node server/test.mjs"
+    "test:server": "node server/test.mjs",
+    "test:http": "node server/test-http.mjs"
   },
   "engines": {
     "node": ">=22.5"

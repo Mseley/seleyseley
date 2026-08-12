@@ -3,8 +3,9 @@
 The first piece of the real product. It exists to move two things out of the browser, where they were designs, into a place where they are enforcement.
 
 ```bash
-npm run test:server    # 19 checks
-npm run check          # design system, interface, and server together
+npm run test:server    # 19 checks on the ledger and the gate
+npm run test:http      # 21 checks on authentication and the household boundary
+npm run check          # everything, 89 checks
 ```
 
 No dependencies. Storage is `node:sqlite`, built into Node 22.5 and later.
@@ -70,9 +71,48 @@ const exec = createExecutor(db, { 'request-tour': async ({ payload }) => mailer.
 
 An action that is permitted but has no effect wired up throws, rather than silently succeeding. Reporting work to a couple that never happened is worse than an error.
 
+## The household boundary is structural
+
+Every method on the database takes a `householdId`, which means one handler that
+forgets to pass the right one reads another couple's wedding. Checking for that
+in each handler is the kind of discipline that holds until the day it does not.
+
+`db.scopedTo(householdId)` removes the parameter instead. The executor and every
+request handler receive one of these and never the raw database, so addressing
+another household is not something they can express. The query is bound when the
+handle is created, so even reassigning `scope.householdId` afterward changes
+nothing, and there is a test that tries exactly that.
+
+## Authentication
+
+`node:crypto` only, and the conservative choices rather than the clever ones,
+because this is the layer where being clever is how people get hurt.
+
+- **Passwords** are hashed with scrypt, which is memory-hard, with a per-account
+  salt. The parameters are recorded in the stored string so they can be raised
+  later without invalidating existing accounts.
+- **Only the hash of a session token is stored.** A dump of the sessions table
+  does not let the reader sign in as anyone. The token exists once, in the
+  response to the login that created it.
+- **A wrong password and an unknown address are indistinguishable**, in both the
+  response and the time taken, because an unknown address still runs a full hash
+  against a decoy. Otherwise the endpoint becomes an account enumerator.
+- **Bearer tokens, not cookies.** A cookie is attached by the browser to every
+  request to this origin, including ones another site caused, which is what
+  makes CSRF possible. A bearer token is attached only by code that means to,
+  so the class of attack does not arise.
+- **The approving partner comes from the session, never the request body.**
+  There is a test where one partner approves twice, the second time claiming to
+  be the other, and asserts the commitment still does not go through.
+
 ## What this is not
 
-- **No HTTP layer, no auth.** There are no accounts, sessions, or tokens. `actor` and `partnerId` are passed in and trusted. Wiring authentication is the next piece, and until it exists this is a library rather than a service.
+- **No rate limiting or lockout.** A password can be guessed as fast as the
+  server will answer. This is the most important missing piece and it is not
+  hard; it is simply not done.
+- **No password reset, email verification, or second factor.** Sessions are also
+  not revoked when a password changes.
+- **No real secret store, and no TLS here.** Both belong to deployment.
 - **No agent.** The ingestion pipeline that would read a place's website, write to them, and file the reply as a sourced fact is still entirely unbuilt. This is what that pipeline would write *into*.
 - **No migrations.** The schema is created on open. A real deployment needs versioned migrations before the first row anyone cares about.
 

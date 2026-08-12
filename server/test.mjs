@@ -129,8 +129,8 @@ describe('Permissions are enforced on the server, not asserted by the caller');
 await check('a granted scope lets the agent act, and the effect actually runs', async () => {
   const db = seed();
   const { sent, effects } = recordingEffects();
-  const exec = createExecutor(db, effects);
-  const out = await exec.attempt('hh1', 'request-tour', { placeId: 'orchard', time: '2026-08-20T17:00' });
+  const exec = createExecutor(db.scopedTo('hh1'), effects);
+  const out = await exec.attempt('request-tour', { placeId: 'orchard', time: '2026-08-20T17:00' });
   assert(out.ran === true, `expected the action to run: ${out.reason}`);
   equal(sent.length, 1, 'the effect should have fired exactly once');
   db.close();
@@ -139,9 +139,9 @@ await check('a granted scope lets the agent act, and the effect actually runs', 
 await check('revoking the scope stops the same call, and no effect fires', async () => {
   const db = seed();
   const { sent, effects } = recordingEffects();
-  const exec = createExecutor(db, effects);
+  const exec = createExecutor(db.scopedTo('hh1'), effects);
   db.setDelegation('hh1', { level: 'standing', scopes: [] });
-  const out = await exec.attempt('hh1', 'request-tour', { placeId: 'orchard' });
+  const out = await exec.attempt('request-tour', { placeId: 'orchard' });
   assert(out.ran === false, 'the action should have been refused');
   equal(sent.length, 0, 'no effect may fire behind a refusal');
   db.close();
@@ -151,10 +151,10 @@ await check('revoking the scope stops the same call, and no effect fires', async
 await check('the caller cannot assert its own permission', async () => {
   const db = seed();
   const { sent, effects } = recordingEffects();
-  const exec = createExecutor(db, effects);
+  const exec = createExecutor(db.scopedTo('hh1'), effects);
   db.setDelegation('hh1', { level: 'propose', scopes: [] });
   /* A hostile client sending everything it can think of to look authorised. */
-  const out = await exec.attempt('hh1', 'send-inquiry-pack', {
+  const out = await exec.attempt('send-inquiry-pack', {
     allowed: true, approved: true, delegation: { level: 'standing', scopes: ['send-inquiry-packs'] },
     scopes: ['send-inquiry-packs'], level: 'report', bypass: true,
   });
@@ -167,13 +167,13 @@ await check('the caller cannot assert its own permission', async () => {
 await check('money is refused for the agent at every level and every scope', async () => {
   const db = seed();
   const { sent, effects } = recordingEffects();
-  const exec = createExecutor(db, effects);
+  const exec = createExecutor(db.scopedTo('hh1'), effects);
   const everyScope = ['follow-up-once', 'propose-tour-times', 'request-missing-facts', 'send-inquiry-packs'];
   let tried = 0;
   for (const level of ['propose', 'standing', 'report']) {
     db.setDelegation('hh1', { level, scopes: everyScope });
     for (const actionId of ['hold-date', 'approve-place']) {
-      const out = await exec.attempt('hh1', actionId, {});
+      const out = await exec.attempt(actionId, {});
       tried++;
       assert(out.ran === false, `"${actionId}" ran at level "${level}"`);
     }
@@ -186,8 +186,8 @@ await check('money is refused for the agent at every level and every scope', asy
 await check('an undeclared action cannot reach an effect', async () => {
   const db = seed();
   const { sent, effects } = recordingEffects();
-  const exec = createExecutor(db, effects);
-  const out = await exec.attempt('hh1', 'wire-the-deposit', { amount: 5000 });
+  const exec = createExecutor(db.scopedTo('hh1'), effects);
+  const out = await exec.attempt('wire-the-deposit', { amount: 5000 });
   assert(out.ran === false, 'an undeclared action must not run');
   equal(sent.length, 0, 'no effect may fire');
   db.close();
@@ -208,8 +208,8 @@ describe('Money needs both partners, on the human path too');
 await check('one partner approving a financial action is not enough', async () => {
   const db = seed();
   const { sent, effects } = recordingEffects();
-  const exec = createExecutor(db, effects);
-  const out = await exec.authorize('hh1', 'req-1', 'approve-place', 'maya', { placeId: 'orchard' });
+  const exec = createExecutor(db.scopedTo('hh1'), effects);
+  const out = await exec.authorize('req-1', 'approve-place', 'maya', { placeId: 'orchard' });
   assert(out.ran === false, 'one approval must not be enough for a commitment');
   assert(out.waitingOn.includes('alex'), 'it should name who is still needed');
   equal(sent.length, 0, 'no effect may fire on a partial approval');
@@ -220,9 +220,9 @@ await check('one partner approving a financial action is not enough', async () =
 await check('both partners approving the same request lets it through', async () => {
   const db = seed();
   const { sent, effects } = recordingEffects();
-  const exec = createExecutor(db, effects);
-  await exec.authorize('hh1', 'req-1', 'approve-place', 'maya', { placeId: 'orchard' });
-  const out = await exec.authorize('hh1', 'req-1', 'approve-place', 'alex', { placeId: 'orchard' });
+  const exec = createExecutor(db.scopedTo('hh1'), effects);
+  await exec.authorize('req-1', 'approve-place', 'maya', { placeId: 'orchard' });
+  const out = await exec.authorize('req-1', 'approve-place', 'alex', { placeId: 'orchard' });
   assert(out.ran === true, `expected it to run once both approved: ${out.reason}`);
   equal(sent.length, 1, 'the effect should fire exactly once');
   db.close();
@@ -231,9 +231,9 @@ await check('both partners approving the same request lets it through', async ()
 await check('one partner cannot approve twice to stand in for the other', async () => {
   const db = seed();
   const { sent, effects } = recordingEffects();
-  const exec = createExecutor(db, effects);
-  await exec.authorize('hh1', 'req-1', 'approve-place', 'maya', {});
-  const out = await exec.authorize('hh1', 'req-1', 'approve-place', 'maya', {});
+  const exec = createExecutor(db.scopedTo('hh1'), effects);
+  await exec.authorize('req-1', 'approve-place', 'maya', {});
+  const out = await exec.authorize('req-1', 'approve-place', 'maya', {});
   assert(out.ran === false, 'a duplicate approval must not satisfy the second partner');
   equal(sent.length, 0, 'no effect may fire');
   db.close();
@@ -242,10 +242,10 @@ await check('one partner cannot approve twice to stand in for the other', async 
 await check('someone outside the household cannot approve anything', async () => {
   const db = seed();
   const { effects } = recordingEffects();
-  const exec = createExecutor(db, effects);
+  const exec = createExecutor(db.scopedTo('hh1'), effects);
   let threw = false;
   try {
-    await exec.authorize('hh1', 'req-9', 'approve-place', 'a-stranger', {});
+    await exec.authorize('req-9', 'approve-place', 'a-stranger', {});
   } catch (e) {
     threw = /not a partner/.test(e.message);
   }
@@ -260,9 +260,9 @@ describe('Every attempt is recorded, refusals included');
 await check('a refusal is logged with the reason and the settings in force', async () => {
   const db = seed();
   const { effects } = recordingEffects();
-  const exec = createExecutor(db, effects);
+  const exec = createExecutor(db.scopedTo('hh1'), effects);
   db.setDelegation('hh1', { level: 'propose', scopes: [] });
-  await exec.attempt('hh1', 'send-inquiry-pack', { to: 5 });
+  await exec.attempt('send-inquiry-pack', { to: 5 });
   const log = db.auditLog('hh1');
   equal(log.length, 1, 'the refusal should be in the log');
   equal(log[0].allowed, false, 'it should be recorded as refused');
@@ -274,8 +274,8 @@ await check('a refusal is logged with the reason and the settings in force', asy
 await check('preview does not log an attempt or cause an effect', async () => {
   const db = seed();
   const { sent, effects } = recordingEffects();
-  const exec = createExecutor(db, effects);
-  const p = exec.preview('hh1', 'request-tour');
+  const exec = createExecutor(db.scopedTo('hh1'), effects);
+  const p = exec.preview('request-tour');
   assert(typeof p.reason === 'string' && p.reason.length > 10, 'preview should explain itself');
   equal(db.auditLog('hh1').length, 0, 'a preview is not an attempt');
   equal(sent.length, 0, 'a preview must not cause an effect');
@@ -292,7 +292,7 @@ await check('the server resolves facts through the same trust model', () => {
     id: 'oh-date', label: 'Your date', value: 'June 12, 2027 is open', state: 'confirmed',
     source: 'The Orchard House', asOf: '2026-07-20', category: 'availability',
   });
-  const view = readFacts(db, 'hh1', 'orchard');
+  const view = readFacts(db.scopedTo('hh1'), 'orchard');
   const date = view.facts.find((f) => f.id === 'oh-date');
   /* Staleness is computed by the shared model against its fixed present, so the
      server and the interface cannot disagree about what is still Confirmed. */
@@ -307,7 +307,7 @@ await check('a fact stored with no state resolves to Unknown rather than vanishi
   db.recordFact('hh1', 'orchard', {
     id: 'oh-corkage', label: 'Corkage', value: null, state: 'unknown', category: 'policy',
   });
-  const view = readFacts(db, 'hh1', 'orchard');
+  const view = readFacts(db.scopedTo('hh1'), 'orchard');
   const f = view.facts.find((x) => x.id === 'oh-corkage');
   equal(trust.displayValue(f), 'Not confirmed', 'an unknown must never render a figure');
   db.close();

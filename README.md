@@ -13,7 +13,7 @@ npm run serve      # http://localhost:4173
 No dependencies, no install step. Node 22.5 or newer, for the built-in SQLite the server uses.
 
 ```bash
-npm test           # 68 checks: 49 on the design system and interface, 19 on the server
+npm test           # 89 checks: 49 design system and interface, 19 server, 21 auth and HTTP
 npm run check      # the above, plus fail if generated files have drifted from tokens.json
 npm run tokens     # regenerate tokens.css and the contrast report from tokens.json
 npm run bundle     # inline everything into dist/
@@ -41,7 +41,7 @@ npm run build      # tokens + bundle
 | `scripts/verify.mjs` | 49 checks. No dependencies, no browser: the models load into a bare context. |
 | `prototype/` | The prototype source. |
 | `prototype/js/model.js` | The trust data model and the agent permission model. |
-| `server/` | The system of record. Append-only fact ledger, server-side permission enforcement, dual approval for money. |
+| `server/` | The system of record and the API. Append-only ledger, permissions enforced server-side, dual approval for money, scoped access per household. |
 
 ## The two rules that hold this together
 
@@ -71,7 +71,7 @@ The prototype is not a click-through mockup. A few things are worth doing in ord
 
 ## Is this production ready
 
-Not yet, but it is no longer only a prototype. `server/` is the beginning of the real thing: an append-only fact ledger, permissions enforced against stored settings rather than asserted by the caller, and money gated behind approval from both partners. What is still missing is authentication, an HTTP layer, and the agent itself. The premise of the product, software that reads a place's website, writes to them, and files the reply as a sourced fact, is the largest piece of engineering in it and none of it is here. [`docs/production-readiness.md`](docs/production-readiness.md) is the full assessment, including what *is* production-grade and what a real build would take.
+Not yet, but it is no longer only a prototype. `server/` is the beginning of the real thing: an append-only fact ledger, permissions enforced against stored settings rather than asserted by the caller, and money gated behind approval from both partners. It now has accounts, sessions, and an HTTP API where the household boundary is structural rather than checked. What is still missing is rate limiting, password reset, and the agent itself. The premise of the product, software that reads a place's website, writes to them, and files the reply as a sourced fact, is the largest piece of engineering in it and none of it is here. [`docs/production-readiness.md`](docs/production-readiness.md) is the full assessment, including what *is* production-grade and what a real build would take.
 
 ## What the prototype deliberately does not do
 

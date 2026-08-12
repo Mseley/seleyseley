@@ -133,6 +133,29 @@ BEFORE UPDATE ON action_log
 BEGIN
   SELECT RAISE(ABORT, 'the audit log is append only');
 END;
+
+/* An account is a person who can sign in. It is linked to exactly one partner,
+   and a partner belongs to exactly one household, which is how a session
+   resolves to a scope. */
+CREATE TABLE IF NOT EXISTS accounts (
+  id            TEXT PRIMARY KEY,
+  email         TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  password_hash TEXT NOT NULL,
+  partner_id    TEXT NOT NULL UNIQUE REFERENCES partners(id),
+  created_at    TEXT NOT NULL
+);
+
+/* Only the HASH of a session token is stored. A dump of this table does not let
+   the reader sign in as anyone, which is the whole reason not to store the
+   token itself. */
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash TEXT PRIMARY KEY,
+  account_id TEXT NOT NULL REFERENCES accounts(id),
+  created_at TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS sessions_by_account ON sessions(account_id);
 `;
 
 export function open(path = ':memory:') {
@@ -273,6 +296,39 @@ function wrap(db) {
         .run(entry.householdId, entry.actor, entry.actionId, entry.allowed ? 1 : 0,
              entry.reason, entry.level, JSON.stringify(entry.scopes || []),
              entry.payload ? JSON.stringify(entry.payload) : null, now());
+    },
+
+    /* ------------------------------------------------------ the boundary */
+
+    /* Every method above takes a householdId, which means one handler that
+       forgets to pass the right one reads another couple's wedding. Checking
+       for that in each handler is the kind of discipline that holds until the
+       day it does not.
+
+       A scoped handle removes the parameter instead. Request handlers are given
+       one of these and never the raw api, so addressing another household is
+       not something they can express, rather than something they are trusted
+       not to do. */
+    scopedTo(householdId) {
+      if (!api.getHousehold(householdId)) throw new Error('no such household');
+      return {
+        householdId,
+        household: () => api.getHousehold(householdId),
+        places: () => api.listPlaces(householdId),
+        addPlace: (place) => api.addPlace(householdId, place),
+        setPlaceStatus: (placeId, status) => api.setPlaceStatus(householdId, placeId, status),
+        facts: (placeId) => api.factsFor(householdId, placeId),
+        recordFact: (placeId, fact) => api.recordFact(householdId, placeId, fact),
+        historyOf: (factId) => api.historyOf(householdId, factId),
+        getDelegation: () => api.getDelegation(householdId),
+        setDelegation: (settings) => api.setDelegation(householdId, settings),
+        recordApproval: (requestId, actionId, partnerId, payload) =>
+          api.recordApproval(householdId, requestId, actionId, partnerId, payload),
+        approvalsFor: (requestId) => api.approvalsFor(householdId, requestId),
+        partnerIds: () => api.partnerIds(householdId),
+        logAttempt: (entry) => api.logAttempt(Object.assign({}, entry, { householdId })),
+        auditLog: (limit) => api.auditLog(householdId, limit),
+      };
     },
 
     auditLog(householdId, limit = 100) {
