@@ -147,18 +147,87 @@
     return typeof resolved.value === 'number' ? V.fmtMoney(resolved.value) : String(resolved.value);
   }
 
+  /* How much the product is entitled to claim, per state. Used to detect the
+     direction of a correction: replacing a fact with a less certain one is the
+     case that most needs saying out loud, because the product is walking back
+     a claim rather than sharpening it. */
+  const CERTAINTY = { confirmed: 3, reported: 2, inferred: 1, unknown: 0 };
+
+  function supersededIds(facts) {
+    const dead = Object.create(null);
+    for (const f of facts || []) if (f && f.supersedes) dead[f.supersedes] = true;
+    return dead;
+  }
+
+  /* Masterplan 4.5. A correction is not a paragraph somebody wrote. It is what
+     the product owes the couple whenever a fact it *acted on* is replaced, and
+     it is assembled from the transition itself: what was said, where it came
+     from, what it touched, what replaced it, what is being done, and what did
+     not happen. The last clause is the one teams forget and the one that
+     decides whether trust survives. */
+  function corrections(facts, now) {
+    const byId = Object.create(null);
+    for (const f of facts || []) if (f && f.id) byId[f.id] = f;
+
+    const out = [];
+    for (const fact of facts || []) {
+      if (!fact || !fact.supersedes) continue;
+      const previous = byId[fact.supersedes];
+      /* Superseding a fact nobody was shown is just an update, not a
+         correction. The product does not apologise for work in progress. */
+      if (!previous || !previous.actedOn) continue;
+
+      const before = resolve(previous, now);
+      const after = resolve(fact, now);
+      const subject = previous.subject || previous.label.toLowerCase();
+
+      const sentences = [
+        `On ${V.fmtDate(previous.asOf, 'dayMonth')} I told you ${subject} was ${displayValue(before)}.`,
+        `That came from ${previous.source}, and it was ${previous.actedOn}.`,
+        `${V.capitalize(fact.supersededBecause)}.`,
+        `I have ${fact.remedy}.`,
+      ];
+
+      const lessCertain = CERTAINTY[after.state] < CERTAINTY[before.state];
+      if (lessCertain) sentences.push('That leaves us less certain than I implied, not more.');
+      if (fact.bound) sentences.push(fact.bound);
+
+      out.push({
+        id: `correction-${fact.id}`,
+        title: `I was wrong about ${subject}.`,
+        body: sentences.join(' '),
+        lessCertain,
+        before,
+        after,
+      });
+    }
+    return out;
+  }
+
   V.trust = {
     STATES,
     FRESHNESS,
+    CERTAINTY,
     resolve,
     displayValue,
+    corrections,
+    /* Resolves a list together, so each fact knows whether a later one has
+       replaced it. A superseded fact stays in the record, because the history
+       is what makes the correction checkable, but it never renders as current. */
     resolveAll: function (facts, now) {
-      return (facts || []).map((f) => resolve(f, now)).filter(Boolean);
+      const dead = supersededIds(facts);
+      return (facts || []).map((f) => {
+        const r = resolve(f, now);
+        if (r) r.superseded = Boolean(dead[r.id]);
+        return r;
+      }).filter(Boolean);
     },
     /* Used by the budget: totals must declare what they exclude. A total built
        over any Unknown is never presented as a total. */
     summarize: function (facts, now) {
-      const resolved = V.trust.resolveAll(facts, now);
+      /* A superseded fact is history, not a current claim, so it never counts
+         toward what the product knows or admits it does not know. */
+      const resolved = V.trust.resolveAll(facts, now).filter((f) => !f.superseded);
       return {
         facts: resolved,
         confirmed: resolved.filter((f) => f.state === 'confirmed').length,

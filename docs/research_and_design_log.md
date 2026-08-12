@@ -95,9 +95,23 @@ A suite nobody has seen fail is a suite nobody has tested. Four defects were pla
 
 Each was caught by the check written for it and not masked by another. The financial mutant tripping three checks rather than one is the correct behaviour: a permission hole should be over-detected, not under-detected.
 
+### Modelling the apology produced a better apology
+
+The masterplan listed one item under section 3 as Deferred: the correction scenario was narrative copy rather than a state transition. By the document's own principle 2.9, that made it decoration. A paragraph explaining one mistake is a promise that the *next* mistake will also be explained, made by people who may not be on the team by then.
+
+Supersession is now modelled. A fact can be replaced; both stay in the record, and the replaced one is marked so it never renders as current or counts toward what the product knows. One field on the old fact, `actedOn`, does most of the work: it separates a quiet update from something the couple is owed an explanation for. Superseding a fact nobody saw produces silence, which is correct.
+
+The result was better than the copy it replaced. Ranking the four states by certainty let the model read the *direction* of a correction, and this one moves downward: a Reported figure was replaced by an Inferred estimate, so the product ended up knowing less than it had implied. The generated text says so:
+
+> That leaves us less certain than I implied, not more.
+
+That sentence was not in the hand-written version. Nobody thought to write it. It exists because the transition was modelled rather than described, and it is arguably the most honest line in the product.
+
+The remedy and the bound are now required fields rather than good intentions: `npm test` fails if a fact supersedes something the couple was shown without declaring both what is being done and what did not happen.
+
 ### Verified before hand-off
 
-- 36 of 36 verification checks pass, covering the trust model, the permission model, scenario arithmetic, the editorial rules, and design system enforcement.
+- 42 of 42 verification checks pass, covering the trust model, corrections, the permission model, scenario arithmetic, the editorial rules, and design system enforcement.
 - 21 of 21 contrast checks pass, including the three that must fail.
 - No console errors or failed network requests on any route, desktop or mobile.
 - Approval flow shows exact recipients before anything leaves the product.

@@ -13,7 +13,7 @@ npm run serve      # http://localhost:4173
 No dependencies, no install step. Node 18 or newer.
 
 ```bash
-npm test           # 36 checks against the trust model, permission model, and editorial rules
+npm test           # 42 checks against the trust model, permission model, and editorial rules
 npm run check      # the above, plus fail if generated files have drifted from tokens.json
 npm run tokens     # regenerate tokens.css and the contrast report from tokens.json
 npm run bundle     # inline everything into dist/
@@ -34,7 +34,7 @@ npm run build      # tokens + bundle
 | `docs/diagrams/` | Information architecture, decision loop, trust states, delegation. |
 | `design-system/tokens.json` | The only place a token value may be edited. |
 | `design-system/build.mjs` | Generates the CSS, audits contrast, blocks the build on a failure. |
-| `scripts/verify.mjs` | 36 checks. No dependencies, no browser: the models load into a bare context. |
+| `scripts/verify.mjs` | 42 checks. No dependencies, no browser: the models load into a bare context. |
 | `prototype/` | The prototype source. |
 | `prototype/js/model.js` | The trust data model and the agent permission model. |
 
@@ -42,7 +42,7 @@ npm run build      # tokens + bundle
 
 **A token changes in exactly one place.** `tokens.json` is the source. `prototype/styles/tokens.css` is generated and carries a do-not-edit header. `npm run check` fails if the two disagree, which is how a hand-typed hex value gets caught before it forks the system.
 
-**A trust claim is machine-checkable or it is not made.** Every fact resolves through `V.trust.resolve()` to one of four states: Confirmed, Reported, Inferred, Unknown. A fact with no state renders as Unknown and reports itself to the console. No screen is allowed to write its own evidence line.
+**A trust claim is machine-checkable or it is not made.** Every fact resolves through `V.trust.resolve()` to one of four states: Confirmed, Reported, Inferred, Unknown. A fact with no state renders as Unknown and reports itself to the console. No screen is allowed to write its own evidence line, and no apology is written by hand: replacing a fact the couple was shown generates the correction, and the build fails if it lacks a remedy or a bound.
 
 Both rules are enforced by `npm run check` rather than by anyone remembering them. The harness itself was mutation-tested: granting a financial action, planting an em dash, hand-typing a hex value, and inverting a scenario's arithmetic were each introduced deliberately, and each was caught by the check written for it.
 
@@ -56,9 +56,11 @@ The prototype is not a click-through mockup. A few things are worth doing in ord
 
 3. **Open the Decision Room and press "We have agreed on one."** Committing is financial, so no delegation setting reaches it. Both partners disagree, so the room holds the decision open and offers a next step rather than a tie-breaker.
 
-4. **Open Design system.** The action table is evaluated live against your current settings, so it cannot describe a permission model the product does not actually have.
+4. **Read "I was wrong about the service charge at Maison 98" on Today.** That apology is not stored anywhere. A figure taken from a directory was shown in the budget comparison, then replaced when the venue's own proposal turned out not to state one. The product assembles the explanation from that transition, including the line "That leaves us less certain than I implied, not more," which it works out by comparing the two certainty levels. Delete the superseded fact and the apology disappears with it.
 
-5. **Narrow the window below 1024px.** The Decision Room switches to one place at a time with a persistent switcher rather than stacking two unlabelled answers under one row label.
+5. **Open Design system.** The action table is evaluated live against your current settings, so it cannot describe a permission model the product does not actually have. The "When a fact is replaced" panel shows the before and after that generated the correction above.
+
+6. **Narrow the window below 1024px.** The Decision Room switches to one place at a time with a persistent switcher rather than stacking two unlabelled answers under one row label.
 
 ## What the prototype deliberately does not do
 

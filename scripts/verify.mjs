@@ -290,11 +290,74 @@ check('the shortlist stays a shortlist', () => {
   return `${D.places.length} places`;
 });
 
+/* ============================================ 3b. CORRECTIONS ========= */
+
+describe('Corrections as a state transition (Masterplan section 4.5)');
+
+const corrections = V.trust.corrections(D.allFacts());
+
+check('replacing a fact the couple was shown produces a correction', () => {
+  equal(corrections.length, 1, 'the superseded service charge should produce exactly one correction');
+  return corrections[0].title;
+});
+
 check('the correction names what happened, what it touched, and its bound', () => {
-  const body = D.correction.body;
+  const body = corrections[0].body;
   assert(/On August 6 I told you/.test(body), 'it should state what it said and when');
-  assert(/taken the figure out/.test(body), 'it should state what it affected');
-  assert(/Nothing was sent to anyone/.test(body), 'it should bound the damage, which is the clause teams forget');
+  assert(/a venue directory/.test(body), 'it should name where the wrong figure came from');
+  assert(/in the budget comparison/.test(body), 'it should state what it affected');
+  assert(/I have taken that figure out/.test(body), 'it should state the remedy');
+  assert(/Nothing was sent to anyone/.test(body), 'it should bound the damage, the clause teams forget');
+});
+
+check('a correction that walks a claim back says the certainty went down', () => {
+  const c = corrections[0];
+  assert(c.lessCertain === true,
+    'reported replaced by inferred is a loss of certainty and must be flagged');
+  assert(/less certain than I implied/.test(c.body),
+    'the loss of certainty should be stated, not left for the reader to infer');
+});
+
+check('no correction is written by hand anywhere in the data', () => {
+  const source = readFileSync(join(JS, 'data.js'), 'utf8');
+  assert(!/const correction\s*=/.test(source),
+    'a stored apology is copy; corrections must be assembled from the transition');
+});
+
+check('a superseded fact never renders as a current claim', () => {
+  const facts = V.trust.resolveAll(V.byId(D.places, 'maison-98').facts);
+  const dead = facts.find((f) => f.id === 'm98-service-directory');
+  assert(dead && dead.superseded === true, 'the replaced fact should be marked superseded');
+  const summary = V.trust.summarize(V.byId(D.places, 'maison-98').facts);
+  assert(!summary.facts.some((f) => f.id === 'm98-service-directory'),
+    'a superseded fact must not be counted among what the product knows');
+});
+
+check('superseding a fact nobody was shown is an update, not an apology', () => {
+  const quiet = V.trust.corrections([
+    { id: 'old', label: 'Corkage', value: '$20', state: 'reported', source: 'a listing', asOf: '2026-08-01', category: 'policy' },
+    { id: 'new', label: 'Corkage', value: '$25', state: 'confirmed', source: 'the venue', asOf: '2026-08-09', category: 'policy',
+      supersedes: 'old', supersededBecause: 'the venue confirmed it', remedy: 'updated it' },
+  ]);
+  equal(quiet.length, 0, 'without actedOn there is nothing to apologise for');
+});
+
+check('every superseding fact declares a remedy and a bound', () => {
+  const all = D.allFacts();
+  const byId = {};
+  all.forEach((f) => { byId[f.id] = f; });
+  for (const f of all) {
+    if (!f.supersedes) continue;
+    const previous = byId[f.supersedes];
+    assert(previous, `${f.id} supersedes "${f.supersedes}", which is not in the record`);
+    assert(typeof f.supersededBecause === 'string' && f.supersededBecause.length > 0,
+      `${f.id} does not say why it replaced the earlier fact`);
+    if (previous.actedOn) {
+      assert(typeof f.remedy === 'string' && f.remedy.length > 0, `${f.id} states no remedy`);
+      assert(typeof f.bound === 'string' && f.bound.length > 0,
+        `${f.id} states no bound on the damage, which is the clause that decides whether trust survives`);
+    }
+  }
 });
 
 /* ============================================== 4. EDITORIAL RULES ==== */

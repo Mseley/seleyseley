@@ -75,7 +75,23 @@
         { id: 'm98-date', label: 'Your date', value: 'Saturday, June 12, 2027 is open', state: 'confirmed', source: 'Maison 98', asOf: '2026-08-07', category: 'availability' },
         { id: 'm98-rain', label: 'Rain plan', value: 'Ceremony moves indoors and the room seats 96', state: 'confirmed', source: 'the proposal Maison 98 sent', asOf: '2026-08-07', category: 'capability' },
         { id: 'm98-access', label: 'Accessibility', value: 'Step-free throughout, elevator to the mezzanine', state: 'confirmed', source: 'the proposal Maison 98 sent', asOf: '2026-08-07', category: 'capability' },
-        { id: 'm98-service', label: 'Service charge', value: 5900, state: 'inferred', basis: 'three comparable Hudson venues', category: 'pricing' },
+        /* The superseded fact. It stays in the record because the history is
+           what makes the correction checkable. `actedOn` is what turns a quiet
+           update into something the couple is owed an explanation for. */
+        {
+          id: 'm98-service-directory', label: 'Service charge', value: '18 percent',
+          state: 'reported', source: 'a venue directory', asOf: '2026-08-06', category: 'pricing',
+          subject: 'the service charge at Maison 98',
+          actedOn: 'in the budget comparison I put in front of you',
+        },
+        {
+          id: 'm98-service', label: 'Service charge', value: 5900, state: 'inferred',
+          basis: 'three comparable Hudson venues', asOf: '2026-08-07', category: 'pricing',
+          supersedes: 'm98-service-directory',
+          supersededBecause: 'their proposal arrived on August 7 and does not state a service charge at all',
+          remedy: 'taken that figure out of your comparison and asked Maison 98 to confirm the real one',
+          bound: 'Nothing was sent to anyone and no money was committed on it.',
+        },
         { id: 'm98-noise', label: 'Street noise after 10 p.m.', value: 'Two reviews mention traffic noise near the loading door', state: 'reported', source: 'guest reviews from 2025', category: 'capability' },
       ],
       hold: null,
@@ -212,18 +228,10 @@
     },
   ];
 
-  /* Masterplan 5.2: the agent already acted on something that turned out to be
-     wrong, and has to say so plainly. What happened, what it affected, what is
-     being done about it. */
-  const correction = {
-    id: 'c1',
-    title: 'I was wrong about one number.',
-    body:
-      'On August 6 I told you Maison 98 charges an 18 percent service fee. I took that from a directory listing, not from them. ' +
-      'Their proposal arrived on August 7 and does not state a service charge at all. ' +
-      'I have taken the figure out of your budget comparison and asked Maison 98 to confirm the real one. ' +
-      'Nothing was sent to anyone and no money was committed based on the wrong number.',
-  };
+  /* Corrections are no longer written here. Masterplan 4.5 is generated from
+     the fact history by V.trust.corrections(): see the superseded service
+     charge on Maison 98. Nothing in this file states an apology, because an
+     apology nobody can trace to a transition is just copy. */
 
   const thisWeek = [
     { date: '2026-08-12', text: 'Your tour brief for The Orchard House is ready for you both.' },
@@ -339,7 +347,12 @@
   };
 
   V.data = {
-    couple, wedding, places, vision, agentWork, correction, thisWeek, recent,
+    couple, wedding, places, vision, agentWork, thisWeek, recent,
     decision, tours, budget, timeline, documents, guests, website,
+    /* Every fact in the product, flattened, so the trust model can reason
+       across places rather than one place at a time. */
+    allFacts: function () {
+      return places.reduce((all, place) => all.concat(place.facts), []);
+    },
   };
 })(window.VowOS);

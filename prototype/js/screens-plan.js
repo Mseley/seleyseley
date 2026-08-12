@@ -76,7 +76,7 @@
     }).join('');
 
     const evidenceCells = options.map((p, i) => {
-      const facts = V.trust.resolveAll(p.facts);
+      const facts = V.trust.resolveAll(p.facts).filter((f) => !f.superseded);
       const gaps = facts.filter((f) => f.state !== 'confirmed');
       return cell(html`
         <p class="vow-meta">${V.capitalize(V.numberWord(facts.length - gaps.length))} of ${raw(V.numberWord(facts.length))} facts verified with the place itself.</p>
@@ -537,6 +537,30 @@
               <thead><tr><th>State</th><th>Definition</th><th>How it reads</th></tr></thead>
               <tbody>${raw(states)}</tbody>
             </table>
+          </div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('When a fact is replaced',
+            'A fact the couple was shown, then replaced, produces a correction. It is assembled from the transition, never written by hand, so the product cannot quietly drop a claim it already made.'))}
+          <div class="vow-stack vow-stack--5">
+            ${raw(V.trust.corrections(V.data.allFacts()).map((c) => html`
+              <div class="vow-panel vow-stack vow-stack--4">
+                <div class="vow-compare" style="grid-template-columns:110px minmax(0,1fr) minmax(0,1fr)">
+                  <div class="vow-compare__label vow-compare__head"></div>
+                  <div class="vow-compare__cell vow-compare__head"><strong>What we said</strong></div>
+                  <div class="vow-compare__cell vow-compare__head"><strong>What replaced it</strong></div>
+                  <div class="vow-compare__label">State</div>
+                  <div class="vow-compare__cell">${c.before.meta.name}</div>
+                  <div class="vow-compare__cell">${c.after.meta.name}</div>
+                  <div class="vow-compare__label">Value</div>
+                  <div class="vow-compare__cell">${V.trust.displayValue(c.before)}</div>
+                  <div class="vow-compare__cell">${V.trust.displayValue(c.after)}</div>
+                </div>
+                ${raw(ui.status(c.lessCertain ? 'Certainty went down, so the product says so' : 'Certainty held or improved',
+                  { icon: c.lessCertain ? 'alert' : 'check', tone: c.lessCertain ? 'risk' : 'ready' }))}
+                ${raw(ui.agentNote(c.body, 'correction'))}
+              </div>`).join(''))}
           </div>
         </section>
 

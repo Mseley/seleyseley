@@ -44,6 +44,10 @@
       V.trust.resolve(maison.facts.find((f) => f.id === 'm98-fee')),
     ];
 
+    /* Assembled from the fact history, not stored anywhere. If no fact the
+       couple was shown has been replaced, this section does not exist. */
+    const corrections = V.trust.corrections(d.allFacts());
+
     const work = d.agentWork.map((w) => html`<li class="vow-row" style="align-items:flex-start;flex-wrap:nowrap;gap:var(--vow-space-3)">
       <span style="flex:none;margin-top:3px;color:${raw(w.tone === 'done' ? 'var(--vow-color-moss)' : 'var(--vow-color-ash)')}">
         ${raw(V.icon(w.icon, { size: 17 }))}
@@ -96,15 +100,16 @@
           </div>
         </section>
 
+        ${raw(corrections.map((c) => html`
         <section class="vow-section">
           <div class="vow-panel vow-stack vow-stack--3" style="border-left:2px solid var(--vow-color-alert)">
-            <h2 class="vow-section-title">${d.correction.title}</h2>
-            <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">${d.correction.body}</p>
+            <h2 class="vow-section-title">${c.title}</h2>
+            <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">${c.body}</p>
             <div class="vow-row">
               ${raw(ui.button('See what changed in the budget', { variant: 'secondary', act: 'go', value: '#/plan' }))}
             </div>
           </div>
-        </section>
+        </section>`).join(''))}
 
         <section class="vow-section">
           ${raw(ui.sectionHead('Moving quietly', 'Work that is underway. Nothing here needs you.'))}
@@ -306,7 +311,8 @@
     const place = livePlace(id);
     if (!place) return screens.places();
 
-    const facts = V.trust.resolveAll(place.facts);
+    /* Superseded facts stay in the record but never render as current. */
+    const facts = V.trust.resolveAll(place.facts).filter((f) => !f.superseded);
     const known = facts.filter((f) => f.state === 'confirmed');
     const unsure = facts.filter((f) => f.state !== 'confirmed');
     const fee = facts.find((f) => f.category === 'pricing' && typeof f.value === 'number');

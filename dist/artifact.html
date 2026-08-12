@@ -1730,18 +1730,87 @@ window.VowOS = window.VowOS || {};
     return typeof resolved.value === 'number' ? V.fmtMoney(resolved.value) : String(resolved.value);
   }
 
+  /* How much the product is entitled to claim, per state. Used to detect the
+     direction of a correction: replacing a fact with a less certain one is the
+     case that most needs saying out loud, because the product is walking back
+     a claim rather than sharpening it. */
+  const CERTAINTY = { confirmed: 3, reported: 2, inferred: 1, unknown: 0 };
+
+  function supersededIds(facts) {
+    const dead = Object.create(null);
+    for (const f of facts || []) if (f && f.supersedes) dead[f.supersedes] = true;
+    return dead;
+  }
+
+  /* Masterplan 4.5. A correction is not a paragraph somebody wrote. It is what
+     the product owes the couple whenever a fact it *acted on* is replaced, and
+     it is assembled from the transition itself: what was said, where it came
+     from, what it touched, what replaced it, what is being done, and what did
+     not happen. The last clause is the one teams forget and the one that
+     decides whether trust survives. */
+  function corrections(facts, now) {
+    const byId = Object.create(null);
+    for (const f of facts || []) if (f && f.id) byId[f.id] = f;
+
+    const out = [];
+    for (const fact of facts || []) {
+      if (!fact || !fact.supersedes) continue;
+      const previous = byId[fact.supersedes];
+      /* Superseding a fact nobody was shown is just an update, not a
+         correction. The product does not apologise for work in progress. */
+      if (!previous || !previous.actedOn) continue;
+
+      const before = resolve(previous, now);
+      const after = resolve(fact, now);
+      const subject = previous.subject || previous.label.toLowerCase();
+
+      const sentences = [
+        `On ${V.fmtDate(previous.asOf, 'dayMonth')} I told you ${subject} was ${displayValue(before)}.`,
+        `That came from ${previous.source}, and it was ${previous.actedOn}.`,
+        `${V.capitalize(fact.supersededBecause)}.`,
+        `I have ${fact.remedy}.`,
+      ];
+
+      const lessCertain = CERTAINTY[after.state] < CERTAINTY[before.state];
+      if (lessCertain) sentences.push('That leaves us less certain than I implied, not more.');
+      if (fact.bound) sentences.push(fact.bound);
+
+      out.push({
+        id: `correction-${fact.id}`,
+        title: `I was wrong about ${subject}.`,
+        body: sentences.join(' '),
+        lessCertain,
+        before,
+        after,
+      });
+    }
+    return out;
+  }
+
   V.trust = {
     STATES,
     FRESHNESS,
+    CERTAINTY,
     resolve,
     displayValue,
+    corrections,
+    /* Resolves a list together, so each fact knows whether a later one has
+       replaced it. A superseded fact stays in the record, because the history
+       is what makes the correction checkable, but it never renders as current. */
     resolveAll: function (facts, now) {
-      return (facts || []).map((f) => resolve(f, now)).filter(Boolean);
+      const dead = supersededIds(facts);
+      return (facts || []).map((f) => {
+        const r = resolve(f, now);
+        if (r) r.superseded = Boolean(dead[r.id]);
+        return r;
+      }).filter(Boolean);
     },
     /* Used by the budget: totals must declare what they exclude. A total built
        over any Unknown is never presented as a total. */
     summarize: function (facts, now) {
-      const resolved = V.trust.resolveAll(facts, now);
+      /* A superseded fact is history, not a current claim, so it never counts
+         toward what the product knows or admits it does not know. */
+      const resolved = V.trust.resolveAll(facts, now).filter((f) => !f.superseded);
       return {
         facts: resolved,
         confirmed: resolved.filter((f) => f.state === 'confirmed').length,
@@ -2000,7 +2069,23 @@ window.VowOS = window.VowOS || {};
         { id: 'm98-date', label: 'Your date', value: 'Saturday, June 12, 2027 is open', state: 'confirmed', source: 'Maison 98', asOf: '2026-08-07', category: 'availability' },
         { id: 'm98-rain', label: 'Rain plan', value: 'Ceremony moves indoors and the room seats 96', state: 'confirmed', source: 'the proposal Maison 98 sent', asOf: '2026-08-07', category: 'capability' },
         { id: 'm98-access', label: 'Accessibility', value: 'Step-free throughout, elevator to the mezzanine', state: 'confirmed', source: 'the proposal Maison 98 sent', asOf: '2026-08-07', category: 'capability' },
-        { id: 'm98-service', label: 'Service charge', value: 5900, state: 'inferred', basis: 'three comparable Hudson venues', category: 'pricing' },
+        /* The superseded fact. It stays in the record because the history is
+           what makes the correction checkable. `actedOn` is what turns a quiet
+           update into something the couple is owed an explanation for. */
+        {
+          id: 'm98-service-directory', label: 'Service charge', value: '18 percent',
+          state: 'reported', source: 'a venue directory', asOf: '2026-08-06', category: 'pricing',
+          subject: 'the service charge at Maison 98',
+          actedOn: 'in the budget comparison I put in front of you',
+        },
+        {
+          id: 'm98-service', label: 'Service charge', value: 5900, state: 'inferred',
+          basis: 'three comparable Hudson venues', asOf: '2026-08-07', category: 'pricing',
+          supersedes: 'm98-service-directory',
+          supersededBecause: 'their proposal arrived on August 7 and does not state a service charge at all',
+          remedy: 'taken that figure out of your comparison and asked Maison 98 to confirm the real one',
+          bound: 'Nothing was sent to anyone and no money was committed on it.',
+        },
         { id: 'm98-noise', label: 'Street noise after 10 p.m.', value: 'Two reviews mention traffic noise near the loading door', state: 'reported', source: 'guest reviews from 2025', category: 'capability' },
       ],
       hold: null,
@@ -2137,18 +2222,10 @@ window.VowOS = window.VowOS || {};
     },
   ];
 
-  /* Masterplan 5.2: the agent already acted on something that turned out to be
-     wrong, and has to say so plainly. What happened, what it affected, what is
-     being done about it. */
-  const correction = {
-    id: 'c1',
-    title: 'I was wrong about one number.',
-    body:
-      'On August 6 I told you Maison 98 charges an 18 percent service fee. I took that from a directory listing, not from them. ' +
-      'Their proposal arrived on August 7 and does not state a service charge at all. ' +
-      'I have taken the figure out of your budget comparison and asked Maison 98 to confirm the real one. ' +
-      'Nothing was sent to anyone and no money was committed based on the wrong number.',
-  };
+  /* Corrections are no longer written here. Masterplan 4.5 is generated from
+     the fact history by V.trust.corrections(): see the superseded service
+     charge on Maison 98. Nothing in this file states an apology, because an
+     apology nobody can trace to a transition is just copy. */
 
   const thisWeek = [
     { date: '2026-08-12', text: 'Your tour brief for The Orchard House is ready for you both.' },
@@ -2264,8 +2341,13 @@ window.VowOS = window.VowOS || {};
   };
 
   V.data = {
-    couple, wedding, places, vision, agentWork, correction, thisWeek, recent,
+    couple, wedding, places, vision, agentWork, thisWeek, recent,
     decision, tours, budget, timeline, documents, guests, website,
+    /* Every fact in the product, flattened, so the trust model can reason
+       across places rather than one place at a time. */
+    allFacts: function () {
+      return places.reduce((all, place) => all.concat(place.facts), []);
+    },
   };
 })(window.VowOS);
 
@@ -2536,6 +2618,10 @@ window.VowOS = window.VowOS || {};
       V.trust.resolve(maison.facts.find((f) => f.id === 'm98-fee')),
     ];
 
+    /* Assembled from the fact history, not stored anywhere. If no fact the
+       couple was shown has been replaced, this section does not exist. */
+    const corrections = V.trust.corrections(d.allFacts());
+
     const work = d.agentWork.map((w) => html`<li class="vow-row" style="align-items:flex-start;flex-wrap:nowrap;gap:var(--vow-space-3)">
       <span style="flex:none;margin-top:3px;color:${raw(w.tone === 'done' ? 'var(--vow-color-moss)' : 'var(--vow-color-ash)')}">
         ${raw(V.icon(w.icon, { size: 17 }))}
@@ -2588,15 +2674,16 @@ window.VowOS = window.VowOS || {};
           </div>
         </section>
 
+        ${raw(corrections.map((c) => html`
         <section class="vow-section">
           <div class="vow-panel vow-stack vow-stack--3" style="border-left:2px solid var(--vow-color-alert)">
-            <h2 class="vow-section-title">${d.correction.title}</h2>
-            <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">${d.correction.body}</p>
+            <h2 class="vow-section-title">${c.title}</h2>
+            <p class="vow-body" style="font-size:var(--vow-font-size-body-small)">${c.body}</p>
             <div class="vow-row">
               ${raw(ui.button('See what changed in the budget', { variant: 'secondary', act: 'go', value: '#/plan' }))}
             </div>
           </div>
-        </section>
+        </section>`).join(''))}
 
         <section class="vow-section">
           ${raw(ui.sectionHead('Moving quietly', 'Work that is underway. Nothing here needs you.'))}
@@ -2798,7 +2885,8 @@ window.VowOS = window.VowOS || {};
     const place = livePlace(id);
     if (!place) return screens.places();
 
-    const facts = V.trust.resolveAll(place.facts);
+    /* Superseded facts stay in the record but never render as current. */
+    const facts = V.trust.resolveAll(place.facts).filter((f) => !f.superseded);
     const known = facts.filter((f) => f.state === 'confirmed');
     const unsure = facts.filter((f) => f.state !== 'confirmed');
     const fee = facts.find((f) => f.category === 'pricing' && typeof f.value === 'number');
@@ -2965,7 +3053,7 @@ window.VowOS = window.VowOS || {};
     }).join('');
 
     const evidenceCells = options.map((p, i) => {
-      const facts = V.trust.resolveAll(p.facts);
+      const facts = V.trust.resolveAll(p.facts).filter((f) => !f.superseded);
       const gaps = facts.filter((f) => f.state !== 'confirmed');
       return cell(html`
         <p class="vow-meta">${V.capitalize(V.numberWord(facts.length - gaps.length))} of ${raw(V.numberWord(facts.length))} facts verified with the place itself.</p>
@@ -3426,6 +3514,30 @@ window.VowOS = window.VowOS || {};
               <thead><tr><th>State</th><th>Definition</th><th>How it reads</th></tr></thead>
               <tbody>${raw(states)}</tbody>
             </table>
+          </div>
+        </section>
+
+        <section class="vow-section">
+          ${raw(ui.sectionHead('When a fact is replaced',
+            'A fact the couple was shown, then replaced, produces a correction. It is assembled from the transition, never written by hand, so the product cannot quietly drop a claim it already made.'))}
+          <div class="vow-stack vow-stack--5">
+            ${raw(V.trust.corrections(V.data.allFacts()).map((c) => html`
+              <div class="vow-panel vow-stack vow-stack--4">
+                <div class="vow-compare" style="grid-template-columns:110px minmax(0,1fr) minmax(0,1fr)">
+                  <div class="vow-compare__label vow-compare__head"></div>
+                  <div class="vow-compare__cell vow-compare__head"><strong>What we said</strong></div>
+                  <div class="vow-compare__cell vow-compare__head"><strong>What replaced it</strong></div>
+                  <div class="vow-compare__label">State</div>
+                  <div class="vow-compare__cell">${c.before.meta.name}</div>
+                  <div class="vow-compare__cell">${c.after.meta.name}</div>
+                  <div class="vow-compare__label">Value</div>
+                  <div class="vow-compare__cell">${V.trust.displayValue(c.before)}</div>
+                  <div class="vow-compare__cell">${V.trust.displayValue(c.after)}</div>
+                </div>
+                ${raw(ui.status(c.lessCertain ? 'Certainty went down, so the product says so' : 'Certainty held or improved',
+                  { icon: c.lessCertain ? 'alert' : 'check', tone: c.lessCertain ? 'risk' : 'ready' }))}
+                ${raw(ui.agentNote(c.body, 'correction'))}
+              </div>`).join(''))}
           </div>
         </section>
 

@@ -93,9 +93,24 @@ Every Confirmed fact carries an expected freshness window by category. Past that
 
 The prototype ships one deliberately stale fact so the mechanism is visible rather than theoretical: The Orchard House confirmed your date on July 20, which is 22 days before the prototype's fixed present, against a 14 day window. It renders as *"Confirmed by The Orchard House on July 20. Availability facts age after 14 days, so we will re-check before you commit."* No screen author wrote that sentence.
 
-### 3.2 What this model does not do yet  **Deferred**
+### 3.2 Supersession  **Built**
 
-It does not model **contested** facts, where two sources disagree, nor **superseded** facts, where a Confirmed value is replaced by a newer Confirmed value and the history matters for a dispute. The prototype's correction scenario (a wrong service charge taken from a directory) is currently handled as narrative copy rather than as a state transition. Trigger for deciding: the first time a real vendor disputes a figure the product displayed.
+A fact can be replaced. The record keeps both, because the history is what makes a correction checkable, and the replaced fact is marked superseded so it never renders as a current claim or counts toward what the product knows.
+
+Two fields carry the weight:
+
+| Field | On | What it does |
+|---|---|---|
+| `actedOn` | The old fact | States what the product did with it. This is what separates a correction from a quiet update. |
+| `supersededBecause`, `remedy`, `bound` | The new fact | What replaced it, what is being done, and what did *not* happen as a result. |
+
+Superseding a fact nobody was shown is an update, and the product says nothing. Superseding a fact the couple was shown produces a correction, assembled by `V.trust.corrections()`. See section 4.5.
+
+The model also reads the **direction** of the change. Certainty is ranked (Confirmed 3, Reported 2, Inferred 1, Unknown 0), and when a replacement lowers it, the correction says so outright: *"That leaves us less certain than I implied, not more."* That sentence was not in the hand-written version of this apology. It only appeared once the transition was modelled, which is the argument for modelling it.
+
+### 3.3 What this model still does not do  **Deferred**
+
+It does not model **contested** facts, where two sources disagree and neither is resolved. Supersession assumes the newer fact wins; a contested fact has no winner and has to be presented as a genuine conflict. Trigger for deciding: the first time a real vendor disputes a figure the product displayed.
 
 ---
 
@@ -130,15 +145,25 @@ Nine actions are declared. An action that is not declared cannot be performed. T
 
 The Design system page in the prototype renders this registry evaluated live against the current settings, so the documentation of the permission model cannot describe a model the product does not have.
 
-### 4.5 The agent must be able to say it was wrong
+### 4.5 The agent must be able to say it was wrong  **Built**
 
-UI Plan 11.3's "gentle correction" covers misunderstanding *before* acting. This covers having already acted on wrong information, which for a product executing real communications is a when, not an if. The pattern states three things in order, following 11.5's error-state structure:
+UI Plan 11.3's "gentle correction" covers misunderstanding *before* acting. This covers having already acted on wrong information, which for a product executing real communications is a when, not an if.
 
-1. **What happened.** "On August 6 I told you Maison 98 charges an 18 percent service fee. I took that from a directory listing, not from them."
-2. **What it affected.** "I have taken the figure out of your budget comparison."
-3. **What is being done, and the bound on the damage.** "I asked Maison 98 to confirm the real one. Nothing was sent to anyone and no money was committed based on the wrong number."
+**The correction is generated, not written.** `V.trust.corrections()` assembles it from the supersession in section 3.2, in this order:
 
-The third clause is the one teams forget, and it is the one that determines whether the user's trust survives.
+| Clause | Source | Rendered |
+|---|---|---|
+| What was said, and when | The old fact's value and date | "On August 6 I told you the service charge at Maison 98 was 18 percent." |
+| Where it came from | The old fact's source | "That came from a venue directory," |
+| What it affected | `actedOn` | "and it was in the budget comparison I put in front of you." |
+| What replaced it | `supersededBecause` | "Their proposal arrived on August 7 and does not state a service charge at all." |
+| What is being done | `remedy` | "I have taken that figure out of your comparison and asked Maison 98 to confirm the real one." |
+| The direction of the change | Derived from the certainty ranks | "That leaves us less certain than I implied, not more." |
+| The bound on the damage | `bound` | "Nothing was sent to anyone and no money was committed on it." |
+
+The last clause is the one teams forget, and it is the one that decides whether trust survives. It is now a required field: `npm test` fails if a fact supersedes something the couple was shown without declaring both a remedy and a bound.
+
+This matters more than it looks. A hand-written apology is a promise that the *next* mistake will also be explained, made by someone who may not be on the team by then. A generated one is a property of the system.
 
 ---
 
@@ -170,6 +195,7 @@ The governance in this section is only as good as the gate in front of it. One c
 | Token drift | A generated file edited by hand, or one left stale after a `tokens.json` change |
 | Contrast | Any of 21 required pairs regressing, and any of the three banned text colors becoming passable |
 | Trust model | Staleness not firing, an unstated fact rendering as something other than Unknown, a figure printed for a state that has no source |
+| Corrections | A superseded fact still rendering as current, a replaced claim producing no correction, a correction missing its remedy or its bound, or an apology reappearing as hand-written copy |
 | Permission model | A financial action permitted at any level under any scope, an external action escaping propose-only, an undeclared action being reachable, an evaluation returning no user-facing reason |
 | Scenario coherence | Copy quoting a figure the data no longer supports, a scenario note contradicting its own arithmetic, the shortlist exceeding five |
 | Editorial rules | Em dashes, doubled periods, placeholder leakage, "reservation" where the glossary says "hold", and gendered defaults |
@@ -317,7 +343,8 @@ UI Plan section 13's checklist stays. It needs a cadence and an owner to hold at
 | Has this quarter's research sample included a couple outside the team's own cultural or relationship default? | Yes | **No.** No research has run. |
 | Is any success metric implicitly rewarding more screen time or more opens? | No | **Yes, satisfied.** The anti-metric is explicit and no metric contradicts it. |
 | Does every new component or agent-language pattern have a named owner and a change process? | Yes | **Partly.** The process exists; the roles are unfilled. |
-| If the agent acted on wrong information, does the product have a designed way to say so? | Yes | **Yes**, Section 4.5, built and visible on the Planning Pulse |
+| If the agent acted on wrong information, does the product have a designed way to say so? | Yes | **Yes**, and it is generated from the fact history rather than written, so it cannot be forgotten for the next mistake |
+| Can a claim the couple was shown be dropped quietly? | No | **No.** Replacing an acted-on fact produces a correction, and the build fails if it lacks a remedy or a bound. |
 
 ---
 
