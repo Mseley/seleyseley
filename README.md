@@ -20,7 +20,7 @@ npm run bundle     # inline everything into dist/
 npm run build      # tokens + bundle
 ```
 
-`npm run check` is the CI entry point. It fails the build on a drifted token, a contrast regression, a permission-model hole, or an editorial slip.
+`npm run check` is the CI entry point, and `.github/workflows/check.yml` runs it on every push. It fails the build on a drifted token, a contrast regression, a permission-model hole, an editorial slip, a stale `dist/`, or an external URL creeping into the bundle.
 
 `dist/vowos-prototype.html` is a single self-contained file you can open by double-clicking. It makes no external requests: no CDN, no web fonts, no remote images.
 
@@ -32,6 +32,7 @@ npm run build      # tokens + bundle
 | `docs/Project_VowOS_UI_Plan.md` | The visual and interaction direction, version 1.1. |
 | `docs/contrast-report.md` | Generated. Every color pair, measured, with the standing findings. |
 | `docs/diagrams/` | Information architecture, decision loop, trust states, delegation. |
+| `docs/research/` | The interview guide, eight protocols, and a screener. Ready to run; not yet run. |
 | `design-system/tokens.json` | The only place a token value may be edited. |
 | `design-system/build.mjs` | Generates the CSS, audits contrast, blocks the build on a failure. |
 | `scripts/verify.mjs` | 42 checks. No dependencies, no browser: the models load into a bare context. |
@@ -63,5 +64,7 @@ The prototype is not a click-through mockup. A few things are worth doing in ord
 6. **Narrow the window below 1024px.** The Decision Room switches to one place at a time with a persistent switcher rather than stacking two unlabelled answers under one row label.
 
 ## What the prototype deliberately does not do
+
+**Most importantly, it has not been tested with anyone.** Every hard case in it was authored by the same people who designed the response to it, which proves the system can express those situations and proves nothing about how couples experience them. [`docs/research/`](docs/research/) is the kit for finding out, and each protocol states in advance what result would mean the design is wrong.
 
 It has no backend, no real venue data, and no real messages are sent. Place imagery is generated abstract composition, labelled as such, because the plan bans stock couple photography and there is no licensed venue photography to use. The display serif falls back to Iowan Old Style or Georgia; production must self-host Newsreader. See section 15 of the masterplan for the full list.

@@ -220,9 +220,17 @@ The permission-model gate matters most. It is the only one where a regression is
 
 ---
 
-## 7. Research and validation program  **Specified**
+## 7. Research and validation program  **Materials built, no research run**
 
-The UI Plan 17.1 acceptance-test methods are the *instruments*. This is the *program*.
+The UI Plan 17.1 acceptance-test methods are the *instruments*. This is the *program*. The runnable materials now live in [`docs/research/`](research/): a generative interview guide, seven evaluative protocols, and a screener with the recruiting quotas built in.
+
+**Every protocol states, before it runs, what result would mean we were wrong.** This is the research form of principle 2.9: a study that cannot come back negative is theatre, and it is the expensive kind, because it produces confident-sounding evidence for whatever the team already believed. The verification suite was mutation-tested for the same reason.
+
+Three protocols cover claims the UI Plan never proposed testing, and all three are load-bearing:
+
+- **Can a user state what the agent may do without asking?** The master checklist asks this and it has never been tested. The pass condition is narrow: they must get the money boundary right. Anyone who believes VowOS can commit money on their behalf is a person the product has quietly frightened.
+- **Does admitting a mistake build trust or spend it?** See risk register.
+- **Proposed, held, or confirmed.** A user who believes something is booked when it was only proposed is the most expensive misunderstanding a delegated-execution product can produce.
 
 | Phase | Timing | Method | What it validates |
 |---|---|---|---|
@@ -244,7 +252,7 @@ UI Plan section 13's checklist stays. It needs a cadence and an owner to hold at
 | Element | Specification |
 |---|---|
 | Owner | One named accessibility lead with authority to block a release, not just flag issues |
-| Cadence | Automated contrast and semantic checks on every build; a full manual screen-reader and keyboard pass before each priority artifact ships |
+| Cadence | **Built.** `.github/workflows/check.yml` runs the contrast audit, the token drift check, and the verification suite on every push. Until that file existed no build ran, which made this row a claim rather than a cadence. A full manual screen-reader and keyboard pass still happens per artifact, and the research kit puts both users inside the ordinary evaluative rounds rather than in a separate track. |
 | Blocking bar | Any regression against the Section 13 table blocks release. New features are not exempt because they are new. |
 | Real-user testing | At minimum one screen-reader user and one keyboard-only user in every evaluative round, not a separate accessibility track that runs later and less often |
 
@@ -315,6 +323,7 @@ UI Plan section 13's checklist stays. It needs a cadence and an owner to hold at
 | Risk | Why it matters | Mitigation |
 |---|---|---|
 | The demonstration is mistaken for evidence | Every hard case in the prototype was authored by the same people who designed the response. It proves the system *can* express these situations, not that couples experience them well. | Section 7 round two exists for exactly this. Until it runs, no claim about how the Decision Room *feels* is supported. |
+| A disclosed error spends trust instead of building it | Section 4.5 assumes a product that says "I was wrong about the service charge" earns trust by saying so. That is an assumption, and it could as easily read as an admission of unreliability. The more prominent the disclosure, the more it costs if the assumption is wrong. The correction currently sits on the home screen, in the only red element on a page designed to be calm. | Protocol 6 in the research kit tests the direction directly, and watches for the specific failure: participants generalising from one disclosed error to doubting everything. If they generalise, the feature is still right and its prominence is wrong: the correction moves next to the fact it concerns rather than onto Today. |
 | Generated imagery becomes a permanent crutch | The abstract compositions are the honest choice with no licensed photography, and they look intentional enough to be kept for the wrong reason | They carry a visible credit line. Real venue photography with rights and provenance replaces them the moment it exists. |
 
 ---
@@ -323,7 +332,7 @@ UI Plan section 13's checklist stays. It needs a cadence and an owner to hold at
 
 | Phase | Focus | Status |
 |---|---|---|
-| **Foundation** | Trust data model and delegation levels as working systems before any priority artifact goes to high fidelity. Token pipeline. Generative research. | Frameworks and pipeline **done**. Generative research **not started**, and it is now the critical path. |
+| **Foundation** | Trust data model and delegation levels as working systems before any priority artifact goes to high fidelity. Token pipeline. Generative research. | Frameworks, pipeline, and the CI that runs them **done**. Generative research **not started**, though the materials to run it now exist. It is the critical path, and it is the only Foundation item that cannot be closed by building something. |
 | **Prove the system** | Build and evaluatively test the six priority artifacts in order. Accessibility cadence. Guardrail metrics dashboard. | Artifacts **built**. Testing, cadence, and dashboard **not started**. |
 | **Scale with governance** | Remaining workspaces under the governance model. Quarterly diverse-sample research. First full risk-register review against production data. | Not started. |
 
@@ -340,7 +349,9 @@ UI Plan section 13's checklist stays. It needs a cadence and an owner to hold at
 | Does a token change happen in exactly one place? | Yes | **Yes**, enforced by `npm run check`. Interaction washes derive from ink rather than restating it, so `app.css` holds no color literal at all. |
 | Can the permission model regress without anyone noticing? | No | **No.** Every action is evaluated against every level with every scope granted, on each run. |
 | Has the check suite itself been seen to fail? | Yes, deliberately | **Yes**, mutation-tested against four planted defects |
-| Has this quarter's research sample included a couple outside the team's own cultural or relationship default? | Yes | **No.** No research has run. |
+| Has this quarter's research sample included a couple outside the team's own cultural or relationship default? | Yes | **No.** No research has run. The quota is written into the screener so it cannot be quietly skipped at recruiting time. |
+| Does every research protocol state, before it runs, what result would mean we were wrong? | Yes | **Yes**, for all eight in the research kit |
+| Do the build gates actually run, rather than merely existing? | Yes | **Yes**, on every push, per section 8 |
 | Is any success metric implicitly rewarding more screen time or more opens? | No | **Yes, satisfied.** The anti-metric is explicit and no metric contradicts it. |
 | Does every new component or agent-language pattern have a named owner and a change process? | Yes | **Partly.** The process exists; the roles are unfilled. |
 | If the agent acted on wrong information, does the product have a designed way to say so? | Yes | **Yes**, and it is generated from the fact history rather than written, so it cannot be forgotten for the next mistake |

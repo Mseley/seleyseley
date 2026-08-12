@@ -1,0 +1,49 @@
+name: check
+
+# The masterplan claims the build blocks on a contrast regression, a token
+# drift, a permission-model hole, or an editorial slip. Until this file existed
+# no build ran, which made the claim decoration. Now every push runs the gates.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # No install step. The project has no dependencies by design, so there is
+      # nothing to resolve, nothing to cache, and no supply chain to trust.
+      - name: Token drift, contrast, and the verification suite
+        run: npm run check
+
+      # A green `check` above proves the source is sound. This proves the
+      # distributed artifact still builds from it and stays self-contained.
+      - name: Rebuild the bundle and confirm it has not drifted
+        run: |
+          npm run bundle
+          if ! git diff --quiet -- dist/; then
+            echo "::error::dist/ is stale. Run 'npm run build' and commit the result."
+            git diff --stat -- dist/
+            exit 1
+          fi
+          echo "dist/ matches its source."
+
+      - name: Confirm the bundle makes no external requests
+        run: |
+          # A CDN link, a web font, or a remote image would break the artifact
+          # under its content security policy and silently change the design.
+          if grep -nEo 'https?://[^"'"'"' )]+' dist/vowos-prototype.html \
+             | grep -vE 'www\.w3\.org|/svg|/1999/xhtml' ; then
+            echo "::error::The bundle references an external URL."
+            exit 1
+          fi
+          echo "No external references."
