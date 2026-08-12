@@ -35,6 +35,7 @@ npm run build      # tokens + bundle
 | `docs/research/` | The interview guide, eight protocols, and a screener. Ready to run; not yet run. |
 | `docs/glossary.md` | One approved term per concept. Enforced by `npm test`, not remembered. |
 | `docs/metrics.md` | The event schema behind the guardrails, and what must never be logged. |
+| `docs/production-readiness.md` | An honest assessment of what this is and is not. Read before planning a launch. |
 | `design-system/tokens.json` | The only place a token value may be edited. |
 | `design-system/build.mjs` | Generates the CSS, audits contrast, blocks the build on a failure. |
 | `scripts/verify.mjs` | 49 checks. No dependencies, no browser: the models load into a bare context. |
@@ -66,6 +67,10 @@ The prototype is not a click-through mockup. A few things are worth doing in ord
 6. **Open Design system.** The action table is evaluated live against your current settings, so it cannot describe a permission model the product does not actually have. The "When a fact is replaced" panel shows the before and after that generated the correction above.
 
 7. **Narrow the window below 1024px.** The Decision Room switches to one place at a time with a persistent switcher rather than stacking two unlabelled answers under one row label.
+
+## Is this production ready
+
+No. It is a design program with a working proof attached, not a product: no backend, no accounts, no persistence, and no agent. The premise of the product, software that reads a place's website, writes to them, and files the reply as a sourced fact, is the largest piece of engineering in it and none of it is here. [`docs/production-readiness.md`](docs/production-readiness.md) is the full assessment, including what *is* production-grade and what a real build would take.
 
 ## What the prototype deliberately does not do
 
