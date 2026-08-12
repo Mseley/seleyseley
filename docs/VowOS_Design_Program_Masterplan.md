@@ -33,9 +33,9 @@ v1.0's audit rated six dimensions as **Gap**. Their status now:
 | Agent behavior and autonomy | **Built** | `prototype/js/model.js`, delegation model. Three levels, four grantable scopes, a closed registry of nine actions, live evaluation. Section 4 below. |
 | Engineering handoff and tokenization | **Built** | `design-system/tokens.json` plus `build.mjs`. Single source, generated CSS, drift check, contrast gate. Section 5 below. |
 | Trust data model (rated *solid but incomplete*) | **Built** | `prototype/js/model.js`, four states plus automatic staleness downgrade. Section 3 below. |
-| Research and validation | **Specified** | Section 7. Unchanged in substance from v1.0, because no research has run. |
-| Success metrics | **Specified** | Section 10. |
-| Governance and change control | **Built in part** | The token pipeline enforces the mechanical half. The human half, Section 11, is still process. |
+| Research and validation | **Materials built, none run** | Section 7 plus [`docs/research/`](research/): an interview guide, eight protocols, a screener. No session has happened. |
+| Success metrics | **Specified** | Section 10, with the event schema in [`docs/metrics.md`](metrics.md). |
+| Governance and change control | **Built in part** | The token pipeline, the glossary, and CI enforce the mechanical half on every push. The human half, Section 11, is still process. |
 | Risk awareness | **Specified**, updated | Section 12, with two risks retired and two added from the build. |
 
 **The honest headline:** the load-bearing frameworks are real, the design system is real, and the six priority artifacts exist at high fidelity. Everything involving *other people* (research participants, metrics from real couples, a named accessibility owner) is still specification, because it cannot be built, only staffed.
@@ -48,7 +48,7 @@ The UI Plan's six principles (Section 2) hold unchanged. v1.0 added two. Buildin
 
 ### 2.7 Every trust claim has a machine-checkable source
 
-"Verified by the venue on June 8" is a promise, not a caption. If a fact shown as verified cannot be traced to a timestamped source in the data model, it must not use verified language. **Built:** `V.trust.resolve()` is the only path to an evidence line, and `V.trust.displayValue()` refuses to print a figure for an Unknown, because a figure implies a source.
+"Verified by the place on June 8" is a promise, not a caption. If a fact shown as verified cannot be traced to a timestamped source in the data model, it must not use verified language. **Built:** `V.trust.resolve()` is the only path to an evidence line, and `V.trust.displayValue()` refuses to print a figure for an Unknown, because a figure implies a source.
 
 ### 2.8 The agent's autonomy is disclosed, not just its output
 
@@ -72,9 +72,9 @@ Every fact the product surfaces resolves to exactly one of four states, and only
 
 | State | Definition | How it reads | Example in the prototype |
 |---|---|---|---|
-| **Confirmed** | Sourced directly from the venue, vendor, or an official document, with a timestamp | "Verified by The Orchard House on August 4." | Site fee of $34,200 |
+| **Confirmed** | Sourced directly from the place, the vendor, or an official document, with a timestamp | "Verified by The Orchard House on August 4." | Site fee of $34,200 |
 | **Reported** | Stated by a third party but not confirmed by the primary source | "According to a Hudson Valley venue directory, not yet confirmed." | A 22 percent service charge |
-| **Inferred** | Derived by the agent from a pattern, not stated by anyone | "Our estimate based on three comparable Hudson venues." | Maison 98's service charge |
+| **Inferred** | Derived by the agent from a pattern, not stated by anyone | "Our estimate based on three comparable places in Hudson." | Maison 98's service charge |
 | **Unknown** | Actively not established, and the agent knows it | "We have not confirmed this yet. I asked on August 9 and expect an answer this week." | Whether outside catering is allowed |
 
 **Design rule, enforced in code:** a fact with no resolved state does not silently vanish and does not quietly render as a value. It resolves to Unknown and writes a console warning naming itself. An omission reads as confidence the product does not have.
@@ -108,9 +108,23 @@ Superseding a fact nobody was shown is an update, and the product says nothing. 
 
 The model also reads the **direction** of the change. Certainty is ranked (Confirmed 3, Reported 2, Inferred 1, Unknown 0), and when a replacement lowers it, the correction says so outright: *"That leaves us less certain than I implied, not more."* That sentence was not in the hand-written version of this apology. It only appeared once the transition was modelled, which is the argument for modelling it.
 
-### 3.3 What this model still does not do  **Deferred**
+### 3.3 Contested claims  **Built**
 
-It does not model **contested** facts, where two sources disagree and neither is resolved. Supersession assumes the newer fact wins; a contested fact has no winner and has to be presented as a genuine conflict. Trigger for deciding: the first time a real vendor disputes a figure the product displayed.
+Supersession assumes the newer fact wins. A **contested** claim has no winner: two live sources describe the same thing, they disagree, and neither is the primary source. Averaging them, taking the pessimistic one, or quietly showing the most recent are all ways of inventing a fact nobody stated.
+
+Facts sharing a `claim` identifier are contested when more than one is live. The product then does three things and refuses a fourth:
+
+| It does | It refuses |
+|---|---|
+| Shows both sides at identical visual weight, each with its own evidence line | To mark either side as likelier |
+| States what the disagreement is worth, in money, when that can be computed | To put either figure into a total, a scenario, or a comparison |
+| Names what would settle it, and what has already been asked | |
+
+**The refusal is structural, not editorial.** `displayValue()` returns "Sources disagree" for any contested fact. Each side's figure is reachable only through `sourceValue()`, which only the disputes component calls. A screen therefore cannot render one side of a disagreement as the answer, even by mistake, because the ordinary value path will not produce one.
+
+In the prototype: The Orchard House's service charge. A directory says 22 percent on top of food and drink; the place's own 2026 brochure says it is included. That is about $6,292 apart, which is larger than the gap between the two places under consideration. The product says so, and puts neither number in the budget.
+
+**Why the sizing matters.** A dispute nobody has quantified is easy to leave open indefinitely. Stating that this one is worth more than the decision it sits inside is what turns "we should check that" into "we cannot decide until we check that."
 
 ---
 
@@ -198,7 +212,7 @@ The governance in this section is only as good as the gate in front of it. One c
 | Corrections | A superseded fact still rendering as current, a replaced claim producing no correction, a correction missing its remedy or its bound, or an apology reappearing as hand-written copy |
 | Permission model | A financial action permitted at any level under any scope, an external action escaping propose-only, an undeclared action being reachable, an evaluation returning no user-facing reason |
 | Scenario coherence | Copy quoting a figure the data no longer supports, a scenario note contradicting its own arithmetic, the shortlist exceeding five |
-| Editorial rules | Em dashes, doubled periods, placeholder leakage, "reservation" where the glossary says "hold", and gendered defaults |
+| Editorial rules | Em dashes, doubled periods, placeholder leakage, and every banned term in the glossary, including gendered defaults and any synonym for a commitment level |
 | Design system | A raw color literal in `app.css`, a token with no stated usage rule |
 
 The permission-model gate matters most. It is the only one where a regression is a safety failure rather than a quality failure, and it is the one a code review is least likely to catch, because permitting an action looks exactly like enabling a feature.
@@ -212,7 +226,7 @@ The permission-model gate matters most. It is the only one where a regression is
 | Component | Content |
 |---|---|
 | Voice principles | Direct, dated, concrete, first person for the agent, never apologetic beyond what is warranted, never performing enthusiasm |
-| Terminology glossary | One approved term per concept. Always "hold," never "reservation" and "hold" interchangeably, so the product does not accumulate synonyms that quietly imply different commitment levels. The prototype already holds this line: a time is **proposed**, **held**, or **confirmed**, and those three words are never traded for each other. |
+| Terminology glossary | **Built** as [`docs/glossary.md`](glossary.md), and enforced rather than remembered: `npm test` parses the table and fails on a banned term in user-facing copy, so adding a row adds a check. Seven concepts, twenty banned terms. A time is **proposed**, **held**, or **confirmed**, and those three words are never traded for each other. |
 | Number style | Small numbers are spelled out in agent sentences ("five inquiries," "three days from now"), figures are used for money and counts in tables. Implemented as `V.numberWord()` so the rule is applied rather than remembered. |
 | Sentence assembly | Formatted values that already end in a period, such as "5:30 p.m.", never take a second one. This sounds trivial and it produced a real defect during the build. |
 | Edge-case taxonomy | **Specified, not built.** Guest-provided content unsafe to publish; a vendor unresponsive past the follow-up window; a couple asking for something outside any delegation level; a Confirmed fact later found false. |
@@ -273,20 +287,20 @@ UI Plan section 13's checklist stays. It needs a cadence and an owner to hold at
 |---|---|---|
 | 1. Tokens as code | `tokens.json` is the literal source the frontend consumes. No manual re-entry of hex values or spacing numbers. | Built |
 | 2. Components with usage docs | Each component carries its design rule as a comment where it is implemented, not in a separate document engineers may not open. | Built |
-| 3. Copy from one source | Evidence sentences are written in exactly one function. A screen cannot compose its own. | Built for evidence; **specified** for the wider glossary |
+| 3. Copy from one source | Evidence sentences are written in exactly one function, corrections are assembled in exactly one function, and the glossary is enforced against all product copy. A screen cannot compose its own vocabulary. | Built |
 | 4. Visual QA gate | Side-by-side design-versus-build review against UI Plan section 15 before ship. | Specified |
 | 5. Figma parity | The token file is designed to be consumed by Figma as well as the codebase. That side does not exist yet. | **Deferred** until there is a Figma file worth binding |
 
 ---
 
-## 10. Success metrics and guardrails  **Specified**
+## 10. Success metrics and guardrails  **Specified**, with the schema in [`docs/metrics.md`](metrics.md)
 
 | Metric type | Example | Why it matters here specifically |
 |---|---|---|
 | North star | Share of foreground decisions resolved within one week of surfacing | Tests whether "one meaningful action per moment" reduces time-to-decision, not just time-to-scroll |
-| Trust guardrail | Rate of Confirmed facts that later downgrade or are found wrong | If this climbs, "trust is visible" is eroding even while the UI still looks calm |
+| Trust guardrail | Rate of Confirmed facts that later downgrade or are found wrong | If this climbs, "trust is visible" is eroding even while the UI still looks calm. The supersession model in section 3.2 makes this directly computable rather than estimated: a walked-back claim is already a state transition. The number that matters is the subset where certainty went *down*. |
 | Calm guardrail | Support contacts citing confusion about agent actions | A rise means the delegation model is felt as opaque regardless of how the UI reads in design review |
-| Equity guardrail | Decision-approval split between partners in shared households | Tests "the relationship is shared" quantitatively |
+| Equity guardrail | Decision-approval split between partners in shared households | Tests "the relationship is shared" quantitatively. It is also the one metric in genuine tension with principle 2.6, since attributing actions to a partner is the same capability that would let the product report on one partner to the other. `docs/metrics.md` section 4 states the constraints that resolve it: aggregate only, never per household, and the product never acts on the split. |
 | **Anti-metric** | Do not optimize screen time, session count, or daily opens | A calm-agent product that couples open *less* because they no longer worry is working as intended. Treating reduced engagement as failure would contradict the product's own thesis. |
 
 ---

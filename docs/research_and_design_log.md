@@ -109,9 +109,37 @@ That sentence was not in the hand-written version. Nobody thought to write it. I
 
 The remedy and the bound are now required fields rather than good intentions: `npm test` fails if a fact supersedes something the couple was shown without declaring both what is being done and what did not happen.
 
+### The glossary caught real drift the moment it was enforced
+
+Section 6 listed a terminology glossary as a thing to write. Writing it was not the point; enforcing it was. `docs/glossary.md` is now parsed by `npm test`, so adding a row adds a check.
+
+On its first run it found what nobody had noticed by reading: **ten uses of "venue" against a hundred and seventy-eight of "place"**, in a product whose workspace is literally called Places. Two words for one thing makes a reader wonder whether they are two things. Also "unknown" leaking out of the data model into a user-facing toast, when Unknown is an internal state name and the couple is supposed to read a sentence.
+
+Building the checker took three passes, and each failure was instructive about what "copy" actually means:
+
+1. Regexing the source flagged `grid-template-columns: ... auto`. CSS is not copy.
+2. Stripping style attributes still flagged `behavior: 'auto'`. A JS value is not copy either.
+3. Extracting string literals flagged `'approve-venue'`. A hyphenated identifier looks like two words.
+
+The working definition, arrived at by being wrong three times: **copy is a string literal containing two words separated by a space**, with console output excluded because it addresses engineers. Anything narrower misses real prose; anything wider drowns in code.
+
+### Contested claims, and a refusal built into the type rather than the guidance
+
+Supersession assumes the newer fact wins. Some facts have no winner: two live sources disagree and neither is the place itself. Averaging them, taking the pessimistic one, or quietly showing the most recent all invent a fact nobody stated.
+
+The interesting part was not the model but where the refusal lives. Guidance saying "do not show one side of a dispute as the answer" would have held until the first deadline. Instead `displayValue()` returns "Sources disagree" for any contested fact, and each side's figure is reachable only through `sourceValue()`, which only the disputes component calls. **A screen cannot render one side as the answer even by mistake, because the ordinary value path will not produce one.**
+
+The prototype's dispute is worth more than the decision it sits inside: The Orchard House's service charge is either 22 percent on top or included, a gap of about $6,292, against a $7,400 difference between the two places being compared. Stating the size is what turns "we should check that" into "we cannot decide until we check that." A dispute nobody has quantified stays open indefinitely.
+
+### Writing the research protocols found a risk in the design
+
+Protocol 6 asks whether admitting a mistake builds trust or spends it. That question did not exist until the exercise of writing "what result would mean we were wrong" forced an argument against the product's own feature.
+
+The correction feature assumes disclosure earns trust. It could as easily read as an admission of unreliability, and it currently sits on the home screen in the only red element on a page designed to be calm. If participants generalise from one disclosed error to doubting everything, the feature is right and its prominence is wrong. That is now in the risk register, found by writing a falsification condition rather than by review.
+
 ### Verified before hand-off
 
-- 42 of 42 verification checks pass, covering the trust model, corrections, the permission model, scenario arithmetic, the editorial rules, and design system enforcement.
+- 49 of 49 verification checks pass, covering the trust model, contested claims, corrections, the permission model, scenario arithmetic, the enforced glossary, and design system enforcement.
 - 21 of 21 contrast checks pass, including the three that must fail.
 - No console errors or failed network requests on any route, desktop or mobile.
 - Approval flow shows exact recipients before anything leaves the product.

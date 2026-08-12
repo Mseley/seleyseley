@@ -504,6 +504,40 @@ a { color: inherit; }
   to { opacity: 1; transform: none; }
 }
 
+/* ------------------------------------------------------- contested claims */
+
+/* Both sides carry identical weight. Nothing here may hint that one source is
+   likelier than the other, because the product does not know that. */
+.vow-dispute {
+  padding: var(--vow-space-5);
+  border: 1px solid var(--vow-color-hairline);
+  border-left: 2px solid var(--vow-color-alert);
+  border-radius: var(--vow-radius-card);
+  background: var(--vow-color-porcelain);
+}
+
+.vow-dispute__sides {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--vow-space-4);
+}
+
+.vow-dispute__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vow-space-2);
+  padding: var(--vow-space-4);
+  background: var(--vow-color-paper);
+  border: 1px solid var(--vow-color-hairline);
+  border-radius: var(--vow-radius-input);
+}
+
+.vow-dispute__value {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: var(--vow-line-height-title);
+}
+
 /* ------------------------------------------------------ 11.2 / agent note */
 
 .vow-agent-note {
@@ -1611,7 +1645,7 @@ window.VowOS = window.VowOS || {};
       id: 'confirmed',
       name: 'Confirmed',
       icon: 'check',
-      definition: 'Sourced directly from the venue, vendor, or an official document, with a timestamp.',
+      definition: 'Sourced directly from the place, the vendor, or an official document, with a timestamp.',
     },
     reported: {
       id: 'reported',
@@ -1719,7 +1753,7 @@ window.VowOS = window.VowOS || {};
       case 'inferred':
         return fact.basis
           ? `Our estimate based on ${fact.basis}.`
-          : 'Our estimate, not stated by the venue.';
+          : 'Our estimate, not stated by the place.';
       case 'unknown':
       default:
         return fact.pending
@@ -1732,6 +1766,11 @@ window.VowOS = window.VowOS || {};
      Unknown never renders a figure, because a figure implies a source. */
   function displayValue(resolved) {
     if (!resolved) return 'Not confirmed';
+    /* A contested claim has no single value, so the ordinary value path
+       refuses to produce one. Each side's figure is reachable only through
+       sourceValue(), which the disputes component uses, so a screen cannot
+       accidentally render one side of a disagreement as the answer. */
+    if (resolved.contested) return 'Sources disagree';
     if (resolved.state === 'unknown') return 'Not confirmed';
     if (resolved.value === null || resolved.value === undefined) return 'Not confirmed';
     if (resolved.state === 'inferred' && typeof resolved.value === 'number') {
@@ -1750,6 +1789,27 @@ window.VowOS = window.VowOS || {};
     const dead = Object.create(null);
     for (const f of facts || []) if (f && f.supersedes) dead[f.supersedes] = true;
     return dead;
+  }
+
+  /* Supersession assumes the newer fact wins. A contested claim has no winner:
+     two live sources describe the same thing and disagree, and neither is the
+     primary source. The product's job is to refuse to resolve it. Averaging
+     them, picking the pessimistic one, or quietly showing the most recent are
+     all ways of inventing a fact nobody stated. */
+  function contestedClaims(facts) {
+    const dead = supersededIds(facts);
+    const byClaim = Object.create(null);
+    for (const f of facts || []) {
+      if (!f || !f.claim || dead[f.id]) continue;
+      (byClaim[f.claim] = byClaim[f.claim] || []).push(f.id);
+    }
+    const contested = Object.create(null);
+    for (const claim of Object.keys(byClaim)) {
+      if (byClaim[claim].length > 1) {
+        for (const id of byClaim[claim]) contested[id] = claim;
+      }
+    }
+    return contested;
   }
 
   /* Masterplan 4.5. A correction is not a paragraph somebody wrote. It is what
@@ -1803,17 +1863,51 @@ window.VowOS = window.VowOS || {};
     CERTAINTY,
     resolve,
     displayValue,
+    /* One side of a dispute, formatted. Only the disputes component may use
+       this, because outside that context a single side is a misrepresentation. */
+    sourceValue: function (resolved) {
+      if (!resolved) return 'Not confirmed';
+      return typeof resolved.value === 'number' ? V.fmtMoney(resolved.value) : String(resolved.value);
+    },
     corrections,
     /* Resolves a list together, so each fact knows whether a later one has
        replaced it. A superseded fact stays in the record, because the history
        is what makes the correction checkable, but it never renders as current. */
     resolveAll: function (facts, now) {
       const dead = supersededIds(facts);
+      const contested = contestedClaims(facts);
       return (facts || []).map((f) => {
         const r = resolve(f, now);
-        if (r) r.superseded = Boolean(dead[r.id]);
+        if (r) {
+          r.superseded = Boolean(dead[r.id]);
+          r.contested = Boolean(contested[r.id]);
+        }
         return r;
       }).filter(Boolean);
+    },
+
+    /* Groups the live facts that disagree, so a screen can present the
+       disagreement itself rather than one side of it. */
+    disputes: function (facts, now) {
+      const resolved = V.trust.resolveAll(facts, now);
+      const groups = Object.create(null);
+      for (const f of resolved) {
+        if (!f.contested) continue;
+        (groups[f.claim] = groups[f.claim] || []).push(f);
+      }
+      return Object.keys(groups).map((claim) => {
+        const sides = groups[claim];
+        return {
+          claim,
+          label: sides[0].label,
+          subject: sides[0].subject || sides[0].label.toLowerCase(),
+          sides,
+          /* What the disagreement is worth, when it can be stated in money.
+             A dispute nobody can size is easy to leave unresolved. */
+          spread: sides[0].spread || null,
+          resolvedBy: sides[0].resolvedBy || null,
+        };
+      });
     },
     /* Used by the budget: totals must declare what they exclude. A total built
        over any Unknown is never presented as a total. */
@@ -1905,7 +1999,7 @@ window.VowOS = window.VowOS || {};
       label: 'Place a hold on a date',
       external: true, financial: true, reversible: false, scope: null,
     },
-    'approve-venue': {
+    'approve-place': {
       label: 'Commit to a place',
       external: true, financial: true, reversible: false, scope: null,
     },
@@ -2047,7 +2141,7 @@ window.VowOS = window.VowOS || {};
         'The dinner is served at one long table under the trees, which is the closest thing we have found to the evening you described.',
         'Music can run until 1 a.m., which is the latest curfew of anywhere in your range.',
       ],
-      realityCheck: 'It is the most expensive place on your list, and the service charge is not confirmed yet.',
+      realityCheck: 'It is the most expensive place on your list, and two sources disagree about the service charge by about 6,300 dollars.',
       facts: [
         { id: 'oh-fee', label: 'Site fee', value: 34200, state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'pricing' },
         { id: 'oh-cap', label: 'Seated capacity', value: '140 seated', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
@@ -2055,7 +2149,22 @@ window.VowOS = window.VowOS || {};
         { id: 'oh-date', label: 'Your date', value: 'Saturday, June 12, 2027 is open', state: 'confirmed', source: 'The Orchard House', asOf: '2026-07-20', category: 'availability' },
         { id: 'oh-rain', label: 'Rain plan', value: 'The restored barn seats all 140', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
         { id: 'oh-access', label: 'Accessibility', value: 'Step-free ceremony lawn, one accessible restroom', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
-        { id: 'oh-service', label: 'Service charge', value: '22 percent', state: 'reported', source: 'a Hudson Valley venue directory', category: 'pricing' },
+        /* A contested claim. Two live sources, neither of them the place
+           itself, describing the same thing and disagreeing by an amount that
+           changes the decision. The product presents the disagreement rather
+           than resolving it. */
+        {
+          id: 'oh-service', label: 'Service charge', value: '22 percent on top of food and drink',
+          state: 'reported', source: 'a Hudson Valley venue directory', asOf: '2026-08-03', category: 'pricing',
+          claim: 'oh-service-charge', subject: 'the service charge at The Orchard House',
+          spread: 6292,
+          resolvedBy: 'The Orchard House confirming it in writing. I asked on August 9.',
+        },
+        {
+          id: 'oh-service-brochure', label: 'Service charge', value: 'Included in the site fee',
+          state: 'reported', source: 'their own 2026 wedding brochure', asOf: '2026-08-04', category: 'pricing',
+          claim: 'oh-service-charge',
+        },
         { id: 'oh-catering', label: 'Outside catering', value: null, state: 'unknown', category: 'policy', pending: 'I asked on August 9 and expect an answer this week.' },
       ],
       hold: { until: '2026-08-14T17:00', what: 'Saturday, June 12, 2027' },
@@ -2090,7 +2199,7 @@ window.VowOS = window.VowOS || {};
         },
         {
           id: 'm98-service', label: 'Service charge', value: 5900, state: 'inferred',
-          basis: 'three comparable Hudson venues', asOf: '2026-08-07', category: 'pricing',
+          basis: 'three comparable places in Hudson', asOf: '2026-08-07', category: 'pricing',
           supersedes: 'm98-service-directory',
           supersededBecause: 'their proposal arrived on August 7 and does not state a service charge at all',
           remedy: 'taken that figure out of your comparison and asked Maison 98 to confirm the real one',
@@ -2419,6 +2528,32 @@ window.VowOS = window.VowOS || {};
       </div>
       ${raw(ui.evidence(r))}
     </div>`;
+  };
+
+  /* A disagreement between sources, presented as a disagreement. Both sides
+     get equal visual weight, neither is marked as likelier, and the size of
+     the gap is stated when it can be, because a dispute nobody has sized is
+     easy to leave unresolved. UI Plan 2.5: trust is visible, not buried. */
+  ui.dispute = function (group) {
+    const sides = group.sides.map((side) => html`<div class="vow-dispute__side">
+      <p class="vow-dispute__value">${V.trust.sourceValue(side)}</p>
+      ${raw(ui.evidence(side))}
+    </div>`).join('');
+
+    return html`<section class="vow-dispute vow-stack vow-stack--4">
+      <div class="vow-stack vow-stack--2">
+        <div class="vow-row" style="gap:var(--vow-space-2)">
+          ${raw(V.icon('alert', { size: 17 }))}
+          <h3 class="vow-section-title" style="font-size:17px">Two sources disagree about ${group.label.toLowerCase()}</h3>
+        </div>
+        ${group.spread ? raw(html`<p class="vow-meta">The difference is about ${V.fmtMoney(group.spread)}, so it is worth settling before you decide.</p>`) : ''}
+      </div>
+      <div class="vow-dispute__sides">${raw(sides)}</div>
+      ${raw(ui.agentNote(
+        'Neither of these came from the place itself, so I am not putting either number in your comparison. ' +
+        (group.resolvedBy ? `This gets settled by ${group.resolvedBy}` : 'I have asked the place to settle it.')
+      ))}
+    </section>`;
   };
 
   /* Reveals expand in place rather than opening a modal, preserving reading
@@ -2897,8 +3032,12 @@ window.VowOS = window.VowOS || {};
 
     /* Superseded facts stay in the record but never render as current. */
     const facts = V.trust.resolveAll(place.facts).filter((f) => !f.superseded);
-    const known = facts.filter((f) => f.state === 'confirmed');
-    const unsure = facts.filter((f) => f.state !== 'confirmed');
+    const disputes = V.trust.disputes(place.facts);
+    const known = facts.filter((f) => f.state === 'confirmed' && !f.contested);
+    /* Contested facts are lifted out of the ordinary list. Left in it, each
+       side would read as one more thing we are unsure about, which hides that
+       they are unsure about the same thing in opposite directions. */
+    const unsure = facts.filter((f) => f.state !== 'confirmed' && !f.contested);
     const fee = facts.find((f) => f.category === 'pricing' && typeof f.value === 'number');
     const remaining = fee ? V.data.budget.comfort - fee.value : null;
 
@@ -2947,6 +3086,11 @@ window.VowOS = window.VowOS || {};
             </p>
             ${raw(ui.agentNote('This is not a total. It excludes the service charge, which we have not confirmed here yet.'))}
           </div>
+        </section>`) : ''}
+
+        ${disputes.length ? raw(html`
+        <section class="vow-section vow-stack vow-stack--4">
+          ${raw(disputes.map((g) => ui.dispute(g)).join(''))}
         </section>`) : ''}
 
         <section class="vow-section">
@@ -3065,8 +3209,12 @@ window.VowOS = window.VowOS || {};
     const evidenceCells = options.map((p, i) => {
       const facts = V.trust.resolveAll(p.facts).filter((f) => !f.superseded);
       const gaps = facts.filter((f) => f.state !== 'confirmed');
+      const disputes = V.trust.disputes(p.facts);
       return cell(html`
         <p class="vow-meta">${V.capitalize(V.numberWord(facts.length - gaps.length))} of ${raw(V.numberWord(facts.length))} facts verified with the place itself.</p>
+        ${disputes.length ? raw(html`<p class="vow-meta" style="color:var(--vow-color-alert);font-weight:600">
+          ${V.capitalize(V.numberWord(disputes.length))} ${raw(disputes.length === 1 ? 'thing two sources disagree about' : 'things two sources disagree about')}.
+        </p>`) : ''}
         ${raw(ui.drawer('ev-' + p.id, `${gaps.length} we are not sure about`,
           html`<div class="vow-stack vow-stack--4">${raw(gaps.map((f) => ui.factRow(f)).join(''))}</div>`,
           V.state.drawers['ev-' + p.id]))}`, i);
@@ -3575,8 +3723,8 @@ window.VowOS = window.VowOS || {};
         <section class="vow-section">
           ${raw(ui.sectionHead('Agent notes and partner notes'))}
           <div class="vow-stack vow-stack--5">
-            ${raw(ui.agentNote('I have sent the five venue inquiries you approved.'))}
-            ${raw(ui.agentNote('This email was not sent. No venue received it.', 'correction'))}
+            ${raw(ui.agentNote('I have sent the five inquiries you approved.'))}
+            ${raw(ui.agentNote('This email was not sent. No place received it.', 'correction'))}
             ${raw(ui.partnerNote('maya', 'Ready to review the two places.', { suffix: 'said' }))}
           </div>
         </section>
@@ -3587,7 +3735,7 @@ window.VowOS = window.VowOS || {};
     const samples = {
       confirmed: { label: 'Capacity', value: '140 seated', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
       reported: { label: 'Service charge', value: '22 percent', state: 'reported', source: 'a venue directory', category: 'pricing' },
-      inferred: { label: 'Service charge', value: 5900, state: 'inferred', basis: 'three comparable Hudson venues', category: 'pricing' },
+      inferred: { label: 'Service charge', value: 5900, state: 'inferred', basis: 'three comparable places in Hudson', category: 'pricing' },
       unknown: { label: 'Outside catering', value: null, state: 'unknown', category: 'policy', pending: 'I asked on August 9.' },
     };
     return V.trust.resolve(samples[state]);
@@ -4021,11 +4169,11 @@ window.VowOS = window.VowOS || {};
     },
 
     'answer-question': function () {
-      toast('Answered. That takes one unknown out of the comparison.');
+      toast('Answered. That is one less thing we have to guess at.');
     },
 
     'skip-question': function () {
-      toast('Skipped. I will stop asking, and I will say it is unknown rather than guess.');
+      toast('Skipped. I will stop asking, and I will say we have not confirmed it rather than guess.');
     },
 
     /* Narrow screens compare one place at a time. Switching focus never

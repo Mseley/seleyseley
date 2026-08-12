@@ -422,11 +422,11 @@
     },
 
     'answer-question': function () {
-      toast('Answered. That takes one unknown out of the comparison.');
+      toast('Answered. That is one less thing we have to guess at.');
     },
 
     'skip-question': function () {
-      toast('Skipped. I will stop asking, and I will say it is unknown rather than guess.');
+      toast('Skipped. I will stop asking, and I will say we have not confirmed it rather than guess.');
     },
 
     /* Narrow screens compare one place at a time. Switching focus never

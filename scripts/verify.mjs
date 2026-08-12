@@ -170,7 +170,7 @@ check('money and irreversible commitments are refused at every level and every s
 });
 
 check('the financial refusal says so in plain language', () => {
-  const r = V.delegation.evaluate('approve-venue', { level: 'standing', scopes: ALL_SCOPES.slice() });
+  const r = V.delegation.evaluate('approve-place', { level: 'standing', scopes: ALL_SCOPES.slice() });
   assert(/comes back to you both/.test(r.reason), `unclear reason: "${r.reason}"`);
   assert(/whatever your settings say/.test(r.reason), 'it should say the setting cannot override this');
 });
@@ -290,6 +290,69 @@ check('the shortlist stays a shortlist', () => {
   return `${D.places.length} places`;
 });
 
+/* ============================================ 2b. CONTESTED CLAIMS ==== */
+
+describe('Contested claims (Masterplan section 3.3)');
+
+const orchardFacts = V.byId(D.places, 'orchard-house').facts;
+
+check('two live sources describing the same claim are contested', () => {
+  const disputes = V.trust.disputes(orchardFacts);
+  equal(disputes.length, 1, 'the service charge should be the one contested claim');
+  equal(disputes[0].sides.length, 2, 'both sides should be present');
+  return disputes[0].label;
+});
+
+check('a contested claim refuses to produce a single value', () => {
+  const resolved = V.trust.resolveAll(orchardFacts);
+  for (const f of resolved.filter((x) => x.contested)) {
+    equal(V.trust.displayValue(f), 'Sources disagree',
+      'the ordinary value path must not surface one side of a disagreement');
+  }
+});
+
+check('each side stays readable through the disputes path only', () => {
+  const d = V.trust.disputes(orchardFacts)[0];
+  const values = d.sides.map((s) => V.trust.sourceValue(s));
+  assert(values[0] !== values[1], 'the two sides should actually differ');
+  assert(values.every((v) => v && v !== 'Sources disagree'), 'each side must remain legible in context');
+  return values.join('  vs  ');
+});
+
+check('a contested claim states what the disagreement is worth', () => {
+  const d = V.trust.disputes(orchardFacts)[0];
+  assert(typeof d.spread === 'number' && d.spread > 0,
+    'a dispute nobody has sized is easy to leave unresolved');
+  assert(typeof d.resolvedBy === 'string' && d.resolvedBy.length > 0,
+    'a dispute with no stated route to resolution is just a shrug');
+  return `${d.spread} apart`;
+});
+
+check('a contested fact never counts as something the product knows', () => {
+  const summary = V.trust.summarize(orchardFacts);
+  const contested = summary.facts.filter((f) => f.contested);
+  assert(contested.every((f) => f.state !== 'confirmed'),
+    'a contested claim must never resolve to Confirmed');
+});
+
+check('agreeing sources are not treated as a dispute', () => {
+  const agreeing = V.trust.disputes([
+    { id: 'a', label: 'Curfew', value: '1:00 a.m.', state: 'reported', source: 'one listing', claim: 'curfew', category: 'policy' },
+  ]);
+  equal(agreeing.length, 0, 'a single source is not a disagreement');
+});
+
+check('superseding one side of a dispute ends the dispute', () => {
+  const settled = V.trust.disputes([
+    { id: 'a', label: 'Fee', value: '$100', state: 'reported', source: 'a listing', claim: 'fee', category: 'pricing' },
+    { id: 'b', label: 'Fee', value: '$200', state: 'reported', source: 'another listing', claim: 'fee', category: 'pricing' },
+    { id: 'c', label: 'Fee', value: '$150', state: 'confirmed', source: 'the place', asOf: '2026-08-10', claim: 'fee', category: 'pricing',
+      supersedes: 'a' },
+  ]);
+  equal(settled.length, 1, 'the remaining two live sources still disagree');
+  equal(settled[0].sides.length, 2, 'the superseded side should have dropped out');
+});
+
 /* ============================================ 3b. CORRECTIONS ========= */
 
 describe('Corrections as a state transition (Masterplan section 4.5)');
@@ -364,14 +427,34 @@ check('every superseding fact declares a remedy and a bound', () => {
 
 describe('Editorial rules (UI Plan section 15)');
 
-/* Comments are the author talking to the next engineer, not product copy, so
-   they are stripped before the copy rules are applied. */
-function stripComments(source) {
-  return source.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, ' ');
+/* Product copy is what a user can read. Comments are the author talking to the
+   next engineer, and inline styles, class names, and wiring attributes are
+   presentation. All of them are stripped before the copy rules apply, so a CSS
+   keyword like `auto` in a grid template is never mistaken for a word the
+   glossary bans. */
+function extractCopy(source) {
+  const stripped = source
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/^\s*\/\/.*$/gm, ' ')
+    .replace(/style\s*=\s*"[^"]*"/g, ' ')
+    .replace(/class\s*=\s*"[^"]*"/g, ' ')
+    /* Console output is a diagnostic for engineers, never user-facing. */
+    .replace(/console\.\w+\([\s\S]*?\);/g, ' ');
+
+  /* Only string and template literals can reach a user, and only the ones that
+     read as prose. Requiring two consecutive words excludes every CSS keyword,
+     JS value, and identifier that happens to collide with an English word:
+     `behavior: 'auto'` is not copy, "the auto-renewing hold" would be. */
+  const literals = stripped.match(/`[\s\S]*?`|'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"/g) || [];
+
+  return literals
+    .map((lit) => lit.slice(1, -1).replace(/\$\{[\s\S]*?\}/g, ' '))
+    .filter((text) => /[A-Za-z]{2,}\s+[A-Za-z]{2,}/.test(text))
+    .join('\n');
 }
 
 const copyFiles = readdirSync(JS).filter((f) => f.endsWith('.js'));
-const copy = copyFiles.map((f) => ({ file: f, text: stripComments(readFileSync(join(JS, f), 'utf8')) }));
+const copy = copyFiles.map((f) => ({ file: f, text: extractCopy(readFileSync(join(JS, f), 'utf8')) }));
 
 check('no em dashes in product copy', () => {
   for (const { file, text } of copy) {
@@ -395,18 +478,61 @@ check('no placeholder leakage', () => {
   }
 });
 
-check('one approved term per concept: a time is proposed, held, or confirmed', () => {
-  for (const { file, text } of copy) {
-    const hit = text.match(/\breservations?\b/i);
-    assert(!hit, `${file} uses "${hit && hit[0]}" where the glossary says "hold"`);
-  }
+/* The glossary is the source, not this file. Adding a row to docs/glossary.md
+   adds a check; nobody has to remember to mirror it here. */
+const GLOSSARY = join(ROOT, 'docs', 'glossary.md');
+
+function glossaryRules() {
+  const rows = readFileSync(GLOSSARY, 'utf8')
+    .split('\n')
+    .filter((l) => l.startsWith('| ') && l.split('|').length >= 5)
+    .map((l) => l.split('|').slice(1, -1).map((c) => c.trim()));
+
+  return rows
+    .filter((cells) => /\*\*/.test(cells[1]))
+    .map((cells) => ({
+      concept: cells[0],
+      approved: cells[1].replace(/\*\*/g, ''),
+      banned: cells[2]
+        .split(',')
+        .map((t) => t.replace(/\(.*?\)/g, '').trim())
+        .filter((t) => t && t.toLowerCase() !== 'none'),
+    }))
+    .filter((rule) => rule.banned.length);
+}
+
+/* Encoded so they are applied consistently, not judged at review time. */
+const ALLOWED = [
+  /venue\s+director(y|ies)/i,          // a third party's own category name
+  /nothing is booked/i,                 // naming what has not happened
+  /until they answer/i,
+];
+
+check('the glossary is enforced, not merely written', () => {
+  const rules = glossaryRules();
+  assert(rules.length >= 5, `only ${rules.length} enforceable rows parsed from the glossary`);
+  return `${rules.length} rules, ${rules.reduce((n, r) => n + r.banned.length, 0)} banned terms`;
 });
 
-check('the interface never defaults to bride, groom, husband, or wife', () => {
+check('product copy uses one approved term per concept', () => {
+  const rules = glossaryRules();
   for (const { file, text } of copy) {
-    const hit = text.match(/\b(bride|groom|husband|wife)\b/i);
-    assert(!hit, `${file} uses gendered default "${hit && hit[0]}", against UI Plan 13`);
+    for (const rule of rules) {
+      for (const term of rule.banned) {
+        const pattern = new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}s?\\b`, 'gi');
+        let match;
+        while ((match = pattern.exec(text)) !== null) {
+          const around = text.slice(Math.max(0, match.index - 60), match.index + 60);
+          if (ALLOWED.some((ok) => ok.test(around))) continue;
+          throw new Error(
+            `${file} uses "${match[0]}" for ${rule.concept}. The glossary approves "${rule.approved}".\n` +
+            `        context: ...${around.replace(/\s+/g, ' ').trim()}...`
+          );
+        }
+      }
+    }
   }
+  return `${copyFiles.length} files clean`;
 });
 
 /* ===================================== 5. DESIGN SYSTEM ENFORCEMENT === */

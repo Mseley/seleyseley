@@ -18,7 +18,7 @@
       id: 'confirmed',
       name: 'Confirmed',
       icon: 'check',
-      definition: 'Sourced directly from the venue, vendor, or an official document, with a timestamp.',
+      definition: 'Sourced directly from the place, the vendor, or an official document, with a timestamp.',
     },
     reported: {
       id: 'reported',
@@ -126,7 +126,7 @@
       case 'inferred':
         return fact.basis
           ? `Our estimate based on ${fact.basis}.`
-          : 'Our estimate, not stated by the venue.';
+          : 'Our estimate, not stated by the place.';
       case 'unknown':
       default:
         return fact.pending
@@ -139,6 +139,11 @@
      Unknown never renders a figure, because a figure implies a source. */
   function displayValue(resolved) {
     if (!resolved) return 'Not confirmed';
+    /* A contested claim has no single value, so the ordinary value path
+       refuses to produce one. Each side's figure is reachable only through
+       sourceValue(), which the disputes component uses, so a screen cannot
+       accidentally render one side of a disagreement as the answer. */
+    if (resolved.contested) return 'Sources disagree';
     if (resolved.state === 'unknown') return 'Not confirmed';
     if (resolved.value === null || resolved.value === undefined) return 'Not confirmed';
     if (resolved.state === 'inferred' && typeof resolved.value === 'number') {
@@ -157,6 +162,27 @@
     const dead = Object.create(null);
     for (const f of facts || []) if (f && f.supersedes) dead[f.supersedes] = true;
     return dead;
+  }
+
+  /* Supersession assumes the newer fact wins. A contested claim has no winner:
+     two live sources describe the same thing and disagree, and neither is the
+     primary source. The product's job is to refuse to resolve it. Averaging
+     them, picking the pessimistic one, or quietly showing the most recent are
+     all ways of inventing a fact nobody stated. */
+  function contestedClaims(facts) {
+    const dead = supersededIds(facts);
+    const byClaim = Object.create(null);
+    for (const f of facts || []) {
+      if (!f || !f.claim || dead[f.id]) continue;
+      (byClaim[f.claim] = byClaim[f.claim] || []).push(f.id);
+    }
+    const contested = Object.create(null);
+    for (const claim of Object.keys(byClaim)) {
+      if (byClaim[claim].length > 1) {
+        for (const id of byClaim[claim]) contested[id] = claim;
+      }
+    }
+    return contested;
   }
 
   /* Masterplan 4.5. A correction is not a paragraph somebody wrote. It is what
@@ -210,17 +236,51 @@
     CERTAINTY,
     resolve,
     displayValue,
+    /* One side of a dispute, formatted. Only the disputes component may use
+       this, because outside that context a single side is a misrepresentation. */
+    sourceValue: function (resolved) {
+      if (!resolved) return 'Not confirmed';
+      return typeof resolved.value === 'number' ? V.fmtMoney(resolved.value) : String(resolved.value);
+    },
     corrections,
     /* Resolves a list together, so each fact knows whether a later one has
        replaced it. A superseded fact stays in the record, because the history
        is what makes the correction checkable, but it never renders as current. */
     resolveAll: function (facts, now) {
       const dead = supersededIds(facts);
+      const contested = contestedClaims(facts);
       return (facts || []).map((f) => {
         const r = resolve(f, now);
-        if (r) r.superseded = Boolean(dead[r.id]);
+        if (r) {
+          r.superseded = Boolean(dead[r.id]);
+          r.contested = Boolean(contested[r.id]);
+        }
         return r;
       }).filter(Boolean);
+    },
+
+    /* Groups the live facts that disagree, so a screen can present the
+       disagreement itself rather than one side of it. */
+    disputes: function (facts, now) {
+      const resolved = V.trust.resolveAll(facts, now);
+      const groups = Object.create(null);
+      for (const f of resolved) {
+        if (!f.contested) continue;
+        (groups[f.claim] = groups[f.claim] || []).push(f);
+      }
+      return Object.keys(groups).map((claim) => {
+        const sides = groups[claim];
+        return {
+          claim,
+          label: sides[0].label,
+          subject: sides[0].subject || sides[0].label.toLowerCase(),
+          sides,
+          /* What the disagreement is worth, when it can be stated in money.
+             A dispute nobody can size is easy to leave unresolved. */
+          spread: sides[0].spread || null,
+          resolvedBy: sides[0].resolvedBy || null,
+        };
+      });
     },
     /* Used by the budget: totals must declare what they exclude. A total built
        over any Unknown is never presented as a total. */
@@ -312,7 +372,7 @@
       label: 'Place a hold on a date',
       external: true, financial: true, reversible: false, scope: null,
     },
-    'approve-venue': {
+    'approve-place': {
       label: 'Commit to a place',
       external: true, financial: true, reversible: false, scope: null,
     },

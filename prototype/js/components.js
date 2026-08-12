@@ -57,6 +57,32 @@
     </div>`;
   };
 
+  /* A disagreement between sources, presented as a disagreement. Both sides
+     get equal visual weight, neither is marked as likelier, and the size of
+     the gap is stated when it can be, because a dispute nobody has sized is
+     easy to leave unresolved. UI Plan 2.5: trust is visible, not buried. */
+  ui.dispute = function (group) {
+    const sides = group.sides.map((side) => html`<div class="vow-dispute__side">
+      <p class="vow-dispute__value">${V.trust.sourceValue(side)}</p>
+      ${raw(ui.evidence(side))}
+    </div>`).join('');
+
+    return html`<section class="vow-dispute vow-stack vow-stack--4">
+      <div class="vow-stack vow-stack--2">
+        <div class="vow-row" style="gap:var(--vow-space-2)">
+          ${raw(V.icon('alert', { size: 17 }))}
+          <h3 class="vow-section-title" style="font-size:17px">Two sources disagree about ${group.label.toLowerCase()}</h3>
+        </div>
+        ${group.spread ? raw(html`<p class="vow-meta">The difference is about ${V.fmtMoney(group.spread)}, so it is worth settling before you decide.</p>`) : ''}
+      </div>
+      <div class="vow-dispute__sides">${raw(sides)}</div>
+      ${raw(ui.agentNote(
+        'Neither of these came from the place itself, so I am not putting either number in your comparison. ' +
+        (group.resolvedBy ? `This gets settled by ${group.resolvedBy}` : 'I have asked the place to settle it.')
+      ))}
+    </section>`;
+  };
+
   /* Reveals expand in place rather than opening a modal, preserving reading
      position (11.4). */
   ui.drawer = function (id, label, body, open) {

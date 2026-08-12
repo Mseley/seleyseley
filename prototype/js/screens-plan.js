@@ -78,8 +78,12 @@
     const evidenceCells = options.map((p, i) => {
       const facts = V.trust.resolveAll(p.facts).filter((f) => !f.superseded);
       const gaps = facts.filter((f) => f.state !== 'confirmed');
+      const disputes = V.trust.disputes(p.facts);
       return cell(html`
         <p class="vow-meta">${V.capitalize(V.numberWord(facts.length - gaps.length))} of ${raw(V.numberWord(facts.length))} facts verified with the place itself.</p>
+        ${disputes.length ? raw(html`<p class="vow-meta" style="color:var(--vow-color-alert);font-weight:600">
+          ${V.capitalize(V.numberWord(disputes.length))} ${raw(disputes.length === 1 ? 'thing two sources disagree about' : 'things two sources disagree about')}.
+        </p>`) : ''}
         ${raw(ui.drawer('ev-' + p.id, `${gaps.length} we are not sure about`,
           html`<div class="vow-stack vow-stack--4">${raw(gaps.map((f) => ui.factRow(f)).join(''))}</div>`,
           V.state.drawers['ev-' + p.id]))}`, i);
@@ -588,8 +592,8 @@
         <section class="vow-section">
           ${raw(ui.sectionHead('Agent notes and partner notes'))}
           <div class="vow-stack vow-stack--5">
-            ${raw(ui.agentNote('I have sent the five venue inquiries you approved.'))}
-            ${raw(ui.agentNote('This email was not sent. No venue received it.', 'correction'))}
+            ${raw(ui.agentNote('I have sent the five inquiries you approved.'))}
+            ${raw(ui.agentNote('This email was not sent. No place received it.', 'correction'))}
             ${raw(ui.partnerNote('maya', 'Ready to review the two places.', { suffix: 'said' }))}
           </div>
         </section>
@@ -600,7 +604,7 @@
     const samples = {
       confirmed: { label: 'Capacity', value: '140 seated', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
       reported: { label: 'Service charge', value: '22 percent', state: 'reported', source: 'a venue directory', category: 'pricing' },
-      inferred: { label: 'Service charge', value: 5900, state: 'inferred', basis: 'three comparable Hudson venues', category: 'pricing' },
+      inferred: { label: 'Service charge', value: 5900, state: 'inferred', basis: 'three comparable places in Hudson', category: 'pricing' },
       unknown: { label: 'Outside catering', value: null, state: 'unknown', category: 'policy', pending: 'I asked on August 9.' },
     };
     return V.trust.resolve(samples[state]);

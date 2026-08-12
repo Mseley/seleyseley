@@ -390,6 +390,40 @@ a { color: inherit; }
   to { opacity: 1; transform: none; }
 }
 
+/* ------------------------------------------------------- contested claims */
+
+/* Both sides carry identical weight. Nothing here may hint that one source is
+   likelier than the other, because the product does not know that. */
+.vow-dispute {
+  padding: var(--vow-space-5);
+  border: 1px solid var(--vow-color-hairline);
+  border-left: 2px solid var(--vow-color-alert);
+  border-radius: var(--vow-radius-card);
+  background: var(--vow-color-porcelain);
+}
+
+.vow-dispute__sides {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--vow-space-4);
+}
+
+.vow-dispute__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vow-space-2);
+  padding: var(--vow-space-4);
+  background: var(--vow-color-paper);
+  border: 1px solid var(--vow-color-hairline);
+  border-radius: var(--vow-radius-input);
+}
+
+.vow-dispute__value {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: var(--vow-line-height-title);
+}
+
 /* ------------------------------------------------------ 11.2 / agent note */
 
 .vow-agent-note {

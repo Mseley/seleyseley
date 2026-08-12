@@ -313,8 +313,12 @@
 
     /* Superseded facts stay in the record but never render as current. */
     const facts = V.trust.resolveAll(place.facts).filter((f) => !f.superseded);
-    const known = facts.filter((f) => f.state === 'confirmed');
-    const unsure = facts.filter((f) => f.state !== 'confirmed');
+    const disputes = V.trust.disputes(place.facts);
+    const known = facts.filter((f) => f.state === 'confirmed' && !f.contested);
+    /* Contested facts are lifted out of the ordinary list. Left in it, each
+       side would read as one more thing we are unsure about, which hides that
+       they are unsure about the same thing in opposite directions. */
+    const unsure = facts.filter((f) => f.state !== 'confirmed' && !f.contested);
     const fee = facts.find((f) => f.category === 'pricing' && typeof f.value === 'number');
     const remaining = fee ? V.data.budget.comfort - fee.value : null;
 
@@ -363,6 +367,11 @@
             </p>
             ${raw(ui.agentNote('This is not a total. It excludes the service charge, which we have not confirmed here yet.'))}
           </div>
+        </section>`) : ''}
+
+        ${disputes.length ? raw(html`
+        <section class="vow-section vow-stack vow-stack--4">
+          ${raw(disputes.map((g) => ui.dispute(g)).join(''))}
         </section>`) : ''}
 
         <section class="vow-section">

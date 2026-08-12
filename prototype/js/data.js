@@ -43,7 +43,7 @@
         'The dinner is served at one long table under the trees, which is the closest thing we have found to the evening you described.',
         'Music can run until 1 a.m., which is the latest curfew of anywhere in your range.',
       ],
-      realityCheck: 'It is the most expensive place on your list, and the service charge is not confirmed yet.',
+      realityCheck: 'It is the most expensive place on your list, and two sources disagree about the service charge by about 6,300 dollars.',
       facts: [
         { id: 'oh-fee', label: 'Site fee', value: 34200, state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'pricing' },
         { id: 'oh-cap', label: 'Seated capacity', value: '140 seated', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
@@ -51,7 +51,22 @@
         { id: 'oh-date', label: 'Your date', value: 'Saturday, June 12, 2027 is open', state: 'confirmed', source: 'The Orchard House', asOf: '2026-07-20', category: 'availability' },
         { id: 'oh-rain', label: 'Rain plan', value: 'The restored barn seats all 140', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
         { id: 'oh-access', label: 'Accessibility', value: 'Step-free ceremony lawn, one accessible restroom', state: 'confirmed', source: 'The Orchard House', asOf: '2026-08-04', category: 'capability' },
-        { id: 'oh-service', label: 'Service charge', value: '22 percent', state: 'reported', source: 'a Hudson Valley venue directory', category: 'pricing' },
+        /* A contested claim. Two live sources, neither of them the place
+           itself, describing the same thing and disagreeing by an amount that
+           changes the decision. The product presents the disagreement rather
+           than resolving it. */
+        {
+          id: 'oh-service', label: 'Service charge', value: '22 percent on top of food and drink',
+          state: 'reported', source: 'a Hudson Valley venue directory', asOf: '2026-08-03', category: 'pricing',
+          claim: 'oh-service-charge', subject: 'the service charge at The Orchard House',
+          spread: 6292,
+          resolvedBy: 'The Orchard House confirming it in writing. I asked on August 9.',
+        },
+        {
+          id: 'oh-service-brochure', label: 'Service charge', value: 'Included in the site fee',
+          state: 'reported', source: 'their own 2026 wedding brochure', asOf: '2026-08-04', category: 'pricing',
+          claim: 'oh-service-charge',
+        },
         { id: 'oh-catering', label: 'Outside catering', value: null, state: 'unknown', category: 'policy', pending: 'I asked on August 9 and expect an answer this week.' },
       ],
       hold: { until: '2026-08-14T17:00', what: 'Saturday, June 12, 2027' },
@@ -86,7 +101,7 @@
         },
         {
           id: 'm98-service', label: 'Service charge', value: 5900, state: 'inferred',
-          basis: 'three comparable Hudson venues', asOf: '2026-08-07', category: 'pricing',
+          basis: 'three comparable places in Hudson', asOf: '2026-08-07', category: 'pricing',
           supersedes: 'm98-service-directory',
           supersededBecause: 'their proposal arrived on August 7 and does not state a service charge at all',
           remedy: 'taken that figure out of your comparison and asked Maison 98 to confirm the real one',
